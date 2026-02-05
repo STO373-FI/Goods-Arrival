@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STO373 Goods Arrival Plan Search</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     
@@ -95,7 +96,12 @@
         .input-wrapper { display: flex; gap: 10px; height: 50px; }
         input[type="text"] { flex-grow: 1; padding: 0 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
         input[type="text"]:focus { outline: none; border-color: var(--ikea-blue); border-width: 2px; }
-        .btn-search { background-color: var(--ikea-blue); color: white; border: none; padding: 0 30px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 1rem; }
+        
+        .btn-search { background-color: var(--ikea-blue); color: white; border: none; padding: 0 25px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 1rem; white-space: nowrap; }
+        
+        /* 바코드 버튼 스타일 */
+        .btn-scan { background-color: #333; color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;}
+        
         .helper-text { margin-top: 15px; font-size: 0.85rem; color: #777; line-height: 1.6; }
         .helper-text strong { color: var(--ikea-blue); }
 
@@ -144,7 +150,7 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 4px solid #ccc; /* 미정 상태 기본 */
+            border-left: 4px solid #ccc; 
         }
         .schedule-item.fixed-date { border-left-color: var(--ikea-blue); }
         .schedule-date { font-size: 1.1rem; font-weight: 700; color: #333; }
@@ -154,7 +160,44 @@
 
         .date-tbd { background-color: #fff4f4; color: #d63031; font-weight: bold; padding: 4px 8px; border-radius: 4px; display:inline-block;}
 
-        /* --- 푸터 --- */
+        /* --- 바코드 스캐너 모달 --- */
+        #scanner-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #interactive {
+            width: 90%;
+            max-width: 600px;
+            height: auto;
+            overflow: hidden;
+            border-radius: 10px;
+            border: 2px solid var(--ikea-yellow);
+            background: black;
+            position: relative;
+        }
+        /* video 태그가 꽉 차도록 */
+        #interactive video { width: 100%; height: auto; }
+        
+        /* 닫기 버튼 */
+        .btn-close-scan {
+            margin-top: 20px;
+            background: white;
+            color: black;
+            padding: 10px 30px;
+            border-radius: 30px;
+            border: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        /* 푸터 */
         footer { background-color: #eef0f3; text-align: center; padding: 15px 0; color: #888; font-size: 0.75rem; border-top: 1px solid #e0e0e0; line-height: 1.4; }
         footer strong { display: block; color: #555; font-size: 0.85rem; margin-bottom: 2px; }
         #loading { display: none; margin-top: 20px; color: var(--ikea-blue); }
@@ -163,26 +206,31 @@
            📱 반응형 (Mobile) 스타일 
            ========================================= */
         @media (max-width: 768px) {
-            /* 1. 헤더 수정: 세로 정렬, 텍스트 중앙 */
             header { flex-direction: column; height: auto; padding: 15px; gap: 10px; text-align: center; }
             .header-left a { justify-content: center; font-size: 1.2rem; }
-            .header-right { text-align: center; font-size: 0.8rem; }
-
+            
             .main-content { padding: 30px 15px; }
             .search-card { padding: 20px; }
             
-            /* 2. 대시보드 수정: 폰트 사이즈 줄임 (한 줄 유지) */
             .dashboard { gap: 10px; }
             .dash-card { padding: 15px 5px; }
-            .dash-card h3 { font-size: 1.3rem; } /* 날짜가 안 짤리게 크기 조절 */
+            .dash-card h3 { font-size: 1.3rem; }
             
-            /* 3. 테이블 뷰 숨기고 모바일 뷰 보이기 */
-            .pc-table-view { display: none; }
+            /* [중요] 모바일에서 테이블 완전 삭제 */
+            .pc-table-view { display: none !important; }
             .mobile-result-view { display: block; }
         }
     </style>
 </head>
 <body>
+
+    <div id="scanner-container">
+        <div style="color:white; margin-bottom:10px; text-align:center;">
+            <i class="fas fa-barcode"></i> 바코드를 사각형 안에 비춰주세요
+        </div>
+        <div id="interactive" class="viewport"></div>
+        <button class="btn-close-scan" onclick="stopScanner()">닫기</button>
+    </div>
 
     <header>
         <div class="header-left">
@@ -192,8 +240,8 @@
             </a>
         </div>
         <div class="header-right">
-            Ver 1.3 Mobile Layout<br>
-            Responsive Design Applied
+            Ver 1.4 Smart Scan<br>
+            Mobile UX Optimized
         </div>
     </header>
 
@@ -204,12 +252,17 @@
                 <div class="search-title"><i class="fas fa-search"></i> 검색 (제품 번호 8자리)</div>
                 <div class="data-status"><i class="fas fa-check-circle"></i> 데이터 연결됨</div>
             </div>
+            
             <div class="input-wrapper">
                 <input type="text" id="itemInput" placeholder="예: 80518273" maxlength="8">
+                <button class="btn-scan" onclick="startScanner()" title="바코드 스캔">
+                    <i class="fas fa-camera"></i>
+                </button>
                 <button class="btn-search" onclick="performSearch()">검색</button>
             </div>
+            
             <div class="helper-text">
-                <i class="fas fa-lightbulb" style="color: var(--ikea-yellow);"></i> <strong>Tip:</strong> 짧은 번호는 자동으로 8자리로 변환됩니다.
+                <i class="fas fa-lightbulb" style="color: var(--ikea-yellow);"></i> <strong>Tip:</strong> 카메라 버튼을 눌러 제품의 바코드를 스캔해보세요. (이케아 제품 바코드 지원)
             </div>
             <div id="loading" style="text-align: center;">
                 <i class="fas fa-spinner fa-spin fa-2x"></i><br>데이터 검색 중...
@@ -255,11 +308,8 @@
             </div>
 
             <div class="mobile-result-view">
-                <div id="mobileProductSummary" class="product-summary-card">
-                    </div>
-                
-                <div id="mobileScheduleList" class="schedule-list">
-                    </div>
+                <div id="mobileProductSummary" class="product-summary-card"></div>
+                <div id="mobileScheduleList" class="schedule-list"></div>
             </div>
 
         </div>
@@ -295,10 +345,74 @@
             }
         };
 
+        // 엔터키 트리거
         document.getElementById('itemInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') performSearch();
         });
 
+        // ------------------------------------------
+        // 바코드 스캔 로직 (QuaggaJS)
+        // ------------------------------------------
+        function startScanner() {
+            const modal = document.getElementById('scanner-container');
+            modal.style.display = 'flex';
+
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#interactive'),
+                    constraints: {
+                        facingMode: "environment" // 후면 카메라 우선
+                    }
+                },
+                decoder: {
+                    // IKEA 바코드는 주로 Code 128 또는 EAN을 사용
+                    readers: ["code_128_reader", "ean_reader"] 
+                }
+            }, function(err) {
+                if (err) {
+                    console.log(err);
+                    alert("카메라를 시작할 수 없습니다. (HTTPS 환경인지 확인해주세요)");
+                    modal.style.display = 'none';
+                    return;
+                }
+                console.log("Initialization finished. Ready to start");
+                Quagga.start();
+            });
+
+            Quagga.onDetected(function(data) {
+                const code = data.codeResult.code;
+                console.log("Barcode detected: " + code);
+
+                // 간단한 정제: 숫자만 추출
+                const numericCode = code.replace(/[^0-9]/g, '');
+
+                // 8자리 이상인 경우 처리
+                if (numericCode.length >= 8) {
+                    // 스캔 성공음 (선택사항)
+                    // navigator.vibrate(200); 
+
+                    // 입력창에 값 넣기 (이케아 번호는 8자리, 긴 바코드라면 뒷부분이나 포함된 8자리를 찾아야 할 수도 있음)
+                    // 여기서는 전체를 넣고 8자리 패딩 로직에 맡김, 혹은 사용자가 수정하게 둠
+                    // 보통 이케아 바코드는 '70505841' 처럼 숫자 그대로 들어옴
+                    
+                    document.getElementById('itemInput').value = numericCode;
+                    
+                    stopScanner(); // 스캔 종료
+                    performSearch(); // 자동 검색 실행
+                }
+            });
+        }
+
+        function stopScanner() {
+            Quagga.stop();
+            document.getElementById('scanner-container').style.display = 'none';
+        }
+
+        // ------------------------------------------
+        // 기존 로직
+        // ------------------------------------------
         function parseExcelDate(value) {
             if (!value) return "-";
             if (typeof value === 'number') {
@@ -322,8 +436,17 @@
             const inputRaw = document.getElementById('itemInput').value.trim();
             if (!inputRaw) { alert("제품번호를 입력해주세요."); return; }
 
-            const searchItemNo = inputRaw.padStart(8, '0');
+            // 입력값이 8자리보다 길면 (바코드 등), 앞/뒤 자르거나 그대로 사용
+            // 여기서는 8자리 미만일 때만 패딩하고, 길면 그대로 둠 (사용자 확인)
+            let searchItemNo = inputRaw;
+            if (inputRaw.length < 8) {
+                searchItemNo = inputRaw.padStart(8, '0');
+            }
             
+            // 만약 바코드가 길게 찍혔을 경우 (예: EAN 13자리) 이케아 코드는 보통 포함되어 있음.
+            // 일단 정확한 매칭을 위해 8자리로 잘라서 검색 시도해볼 수도 있음.
+            // 여기서는 사용자가 입력한 값 그대로 검색하되, 못 찾으면 경고.
+
             document.getElementById('loading').style.display = 'block';
             document.getElementById('resultSection').style.display = 'none';
 
@@ -335,10 +458,23 @@
         }
 
         function searchExcel(targetItemNo) {
+            // 바코드로 인해 입력값이 8자리가 아닐 수도 있으므로, 포함 검색? 아니면 정확 검색?
+            // 정확성을 위해 targetItemNo가 엑셀의 E열에 포함되어 있는지 확인하는 유연함 추가
+            
             const groupedMap = new Map();
             rawData.forEach(row => {
-                let itemNo = String(row['E'] || "").trim();
-                if (itemNo === targetItemNo) {
+                let itemNo = String(row['E'] || "").trim(); // 엑셀의 제품번호
+
+                // 비교 로직:
+                // 1. 정확히 일치하거나
+                // 2. 입력값이(바코드) 엑셀번호를 포함하거나 (바코드 > 제품번호)
+                // 3. 엑셀번호가 입력값을 포함하거나 (제품번호 > 입력값 - 이건 드묾)
+                
+                let isMatch = false;
+                if (itemNo === targetItemNo) isMatch = true;
+                else if (targetItemNo.length > 8 && targetItemNo.includes(itemNo) && itemNo.length === 8) isMatch = true;
+
+                if (isMatch) {
                     let container = String(row['B'] || "").trim();
                     let itemName = row['C'] || "";
                     let hfb = row['F'] || "";
@@ -378,7 +514,6 @@
             const statusBar = document.getElementById('statusBar');
             const pcTbody = document.getElementById('pcResultBody');
             
-            // 모바일용 컨테이너
             const mobileProductSummary = document.getElementById('mobileProductSummary');
             const mobileScheduleList = document.getElementById('mobileScheduleList');
 
@@ -391,17 +526,15 @@
                 statusBar.textContent = `${results.length}개의 배송 계획을 찾았습니다!`;
                 statusBar.className = 'status-msg status-success';
                 document.querySelector('.dashboard').style.display = 'flex';
-                document.querySelector('.pc-table-view').style.display = 'block'; // CSS 미디어쿼리로 모바일에선 숨겨짐
+                // PC 테이블은 CSS에서 모바일일 때 display:none !important 처리됨
             } else {
                 statusBar.textContent = '검색 결과가 존재하지 않습니다.';
                 statusBar.className = 'status-msg status-fail';
                 document.querySelector('.dashboard').style.display = 'none';
-                document.querySelector('.pc-table-view').style.display = 'none';
-                document.querySelector('.mobile-result-view').style.display = 'none';
                 return;
             }
 
-            // --- 통계 계산 ---
+            // --- 통계 ---
             document.getElementById('totalResults').innerText = results.length;
             const today = new Date(); today.setHours(0,0,0,0);
             const futureDeliveries = results.filter(r => r.plannedDateObj && r.plannedDateObj >= today);
@@ -417,16 +550,14 @@
                 document.getElementById('nextDeliveryDate').innerText = "-";
             }
 
-            // --- 데이터 정렬 ---
+            // --- 정렬 ---
             results.sort((a, b) => {
                 if (a.plannedDateStr === "미정") return 1;
                 if (b.plannedDateStr === "미정") return -1;
                 return a.plannedDateObj - b.plannedDateObj;
             });
 
-            // ==========================================
-            // 1. [PC] 테이블 렌더링
-            // ==========================================
+            // 1. PC 테이블
             results.forEach(row => {
                 const tr = document.createElement('tr');
                 let dateHtml = row.plannedDateStr === "미정" ? `<span class="date-tbd">미정</span>` : row.plannedDateStr;
@@ -438,11 +569,7 @@
                 pcTbody.appendChild(tr);
             });
 
-            // ==========================================
-            // 2. [Mobile] 렌더링 (분리형)
-            // ==========================================
-            
-            // 2-1. 공통 정보 (첫 번째 행 기준) - 카드 하나만 생성
+            // 2. 모바일 뷰
             const common = results[0]; 
             mobileProductSummary.innerHTML = `
                 <div class="summary-row"><span class="label">Item No</span> <span class="value" style="font-size:1.2rem; color:var(--ikea-blue);">${common.itemNo}</span></div>
@@ -452,7 +579,6 @@
                 <div class="summary-row"><span class="label">EDS</span> <span class="value">${parseExcelDate(common.edsRaw)}</span></div>
             `;
 
-            // 2-2. 배송 리스트 (날짜, 수량, 컨테이너만 반복)
             results.forEach(row => {
                 const isFixed = row.plannedDateStr !== "미정";
                 const borderClass = isFixed ? "fixed-date" : "";
