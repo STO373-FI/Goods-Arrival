@@ -6,506 +6,499 @@
     <title>STO373 Goods Arrival Plan Search</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --primary-blue: #2c3e50;
-            --accent-blue: #3498db;
-            --bg-light: #f4f7f6;
-            --box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --ikea-blue: #0058a3;
+            --ikea-yellow: #ffdb00;
+            --bg-color: #f5f7f8;
+            --text-dark: #111;
+            --text-grey: #666;
+            --border-radius: 4px; /* 이케아는 둥근 것보다 각진 디자인을 선호하지만, UI 트렌드 반영 */
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-light);
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
-            padding: 20px;
-            color: #333;
+            padding: 0;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        .container {
-            max-width: 1000px;
+        /* --- 1. 헤더 영역 --- */
+        header {
+            background-color: var(--ikea-blue);
+            color: white;
+            padding: 0 40px;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-left a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-left a:hover {
+            opacity: 0.9;
+        }
+
+        .header-right {
+            text-align: right;
+            font-size: 0.75rem;
+            line-height: 1.3;
+            opacity: 0.9;
+        }
+
+        /* --- 2. 메인 컨텐츠 영역 --- */
+        .main-content {
+            flex: 1; /* 푸터를 바닥으로 밀기 위함 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px;
+            width: 100%;
+            max-width: 1200px;
             margin: 0 auto;
+            box-sizing: border-box;
         }
 
-        /* 헤더 스타일 */
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            color: var(--primary-blue);
-            font-size: 24px;
-        }
-
-        /* 검색 박스 스타일 */
+        /* 검색 카드 */
         .search-card {
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: var(--box-shadow);
-            border-top: 5px solid #3498db;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 700px;
+            text-align: left;
+            position: relative;
         }
 
-        .info-box {
-            background-color: #f1c40f; /* 노란색 배경 */
-            color: #333;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 15px 0;
-            font-size: 0.9rem;
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .input-group {
+        .search-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--ikea-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .data-status {
+            font-size: 0.8rem;
+            background-color: #e5f4e7;
+            color: #27ae60;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
             display: flex;
             gap: 10px;
-            margin-bottom: 10px;
+            height: 50px;
         }
 
         input[type="text"] {
             flex-grow: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
+            padding: 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
         }
 
-        .btn {
-            padding: 12px 25px;
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--ikea-blue);
+            border-width: 2px;
+        }
+
+        .btn-search {
+            background-color: var(--ikea-blue);
+            color: white;
             border: none;
-            border-radius: 5px;
+            padding: 0 30px;
+            border-radius: 4px;
+            font-weight: 700;
             cursor: pointer;
-            font-weight: bold;
-            color: white;
-            transition: 0.3s;
+            transition: background-color 0.2s;
+            font-size: 1rem;
         }
 
-        .btn-search { background-color: #2980b9; }
-        .btn-check { background-color: #27ae60; }
-        .btn:hover { opacity: 0.9; }
+        .btn-search:hover {
+            background-color: #004580;
+        }
 
-        /* 결과 상태 바 */
-        .status-bar {
-            margin-top: 20px;
+        .helper-text {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #777;
+            line-height: 1.6;
+        }
+
+        .helper-text strong {
+            color: var(--ikea-blue);
+        }
+
+        /* --- 3. 결과 영역 --- */
+        .result-section {
+            width: 100%;
+            max-width: 1000px; /* 테이블이 너무 넓어지지 않게 */
+            margin-top: 30px;
+            display: none; /* 초기 숨김 */
+        }
+
+        .status-msg {
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 4px;
             color: white;
             font-weight: bold;
-            display: none; /* 초기엔 숨김 */
+            text-align: center;
+            margin-bottom: 20px;
         }
-        .status-success { background-color: #2ecc71; }
-        .status-fail { background-color: #e74c3c; }
+        .status-success { background-color: #008844; } /* IKEA Greenish */
+        .status-fail { background-color: #cc0000; }
 
         /* 대시보드 카드 */
         .dashboard {
             display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            gap: 15px;
-            display: none; /* 초기엔 숨김 */
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
-        .card {
+        .dash-card {
             flex: 1;
-            background: #dfe6e9;
+            background: white;
             padding: 20px;
             border-radius: 8px;
             text-align: center;
-            box-shadow: var(--box-shadow);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--ikea-blue);
         }
+        .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; color: var(--text-dark); }
+        .dash-card p { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
 
-        .card h3 { margin: 0; font-size: 2rem; color: #2c3e50; }
-        .card p { margin: 5px 0 0; font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; }
-
-        /* 테이블 스타일 */
-        .table-container {
-            margin-top: 25px;
-            overflow-x: auto;
+        /* 테이블 */
+        .table-wrap {
             background: white;
             border-radius: 8px;
-            box-shadow: var(--box-shadow);
-            display: none; /* 초기엔 숨김 */
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        table {
-            width: 1000px; /* 가로 스크롤을 위해 고정 폭 설정 가능 */
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background-color: #2c3e50;
-            color: white;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-            font-size: 0.9rem;
-        }
-
-        /* 짝수 행 배경색 */
-        tbody tr:nth-child(even) { background-color: #f9f9f9; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background-color: #f9f9f9; border-bottom: 2px solid #eee; }
+        th { text-align: left; padding: 15px; font-size: 0.85rem; color: #555; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.95rem; }
         
-        /* 미정 날짜 강조 (빨간 배경) */
-        .date-tbd { background-color: #fadbd8; color: #c0392b; font-weight: bold; }
-        .date-fixed { background-color: #d4efdf; color: #27ae60; font-weight: bold; }
+        .date-tbd { background-color: #fff4f4; color: #d63031; font-weight: bold; padding: 4px 8px; border-radius: 4px; display:inline-block;}
+        .container-badge { font-size: 0.85rem; color: #666; }
 
-        /* 컨테이너 미정 강조 */
-        .container-tbd { background-color: #fef9e7; color: #f39c12; font-weight: bold; }
+        /* --- 4. 푸터 영역 --- */
+        footer {
+            background-color: #eef0f3;
+            text-align: center;
+            padding: 30px 0;
+            color: #888;
+            font-size: 0.8rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        footer strong {
+            display: block;
+            color: #555;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
 
         /* 로딩 스피너 */
-        #loading { display: none; text-align: center; margin: 20px; }
+        #loading { display: none; margin-top: 20px; color: var(--ikea-blue); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>🚚 STO373 Goods Arrival Plan Search</h1>
+    <header>
+        <div class="header-left">
+            <a href=".">
+                <i class="fas fa-truck-fast" style="color: var(--ikea-yellow);"></i> 
+                STO373 Goods Arrival Plan Search
+            </a>
+        </div>
+        <div class="header-right">
+            Ver 1.0<br>
+            Goods Arrival Logic Updated
+        </div>
+    </header>
+
+    <div class="main-content">
+        
+        <div class="search-card">
+            <div class="search-header">
+                <div class="search-title">
+                    <i class="fas fa-search"></i> 검색 (제품 번호 8자리)
+                </div>
+                <div class="data-status">
+                    <i class="fas fa-check-circle"></i> 데이터 연결됨
+                </div>
+            </div>
+
+            <div class="input-wrapper">
+                <input type="text" id="itemInput" placeholder="제품번호를 입력하세요 (예: 80518273)" maxlength="8">
+                <button class="btn-search" onclick="performSearch()">검색</button>
+            </div>
+
+            <div class="helper-text">
+                <i class="fas fa-lightbulb" style="color: var(--ikea-yellow);"></i> <strong>Tip:</strong><br>
+                - 앞에 0이 포함된 8자리 번호도 입력 가능합니다.<br>
+                - 짧은 번호는 자동으로 8자리로 패딩됩니다 (예: 123 → 00000123)
+            </div>
+
+            <div id="loading" style="text-align: center;">
+                <i class="fas fa-spinner fa-spin fa-2x"></i><br>데이터 검색 중...
+            </div>
+        </div>
+
+        <div id="resultSection" class="result-section">
+            <div id="statusBar" class="status-msg"></div>
+
+            <div class="dashboard">
+                <div class="dash-card">
+                    <h3 id="totalResults">-</h3>
+                    <p>Total Results</p>
+                </div>
+                <div class="dash-card">
+                    <h3 id="futureDeliveryQty">0</h3>
+                    <p>Future Delivery (Qty)</p>
+                </div>
+                <div class="dash-card">
+                    <h3 id="nextDeliveryDate">-</h3>
+                    <p>Next Delivery</p>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>HFB</th>
+                            <th>Item No</th>
+                            <th>Name</th>
+                            <th>Planned Date</th>
+                            <th>Qty</th>
+                            <th>Container / EDS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
-    <div class="search-card">
-        <label for="itemInput"><strong>📦 ItemNo (8 digits):</strong></label>
-        <div class="input-group">
-            <input type="text" id="itemInput" placeholder="Enter Item No (e.g. 00551172)" maxlength="8">
-        </div>
-        
-        <div class="info-box">
-            <i class="fas fa-info-circle"></i> 모든 배송 정보를 표시합니다 (과거/현재/미래 포함)<br>
-            <i class="fas fa-lightbulb"></i> 앞에 0이 포함된 8자리 번호도 입력 가능합니다 (예: 00551172)<br>
-            <i class="fas fa-search"></i> 짧은 번호는 자동으로 8자리로 패딩됩니다 (예: 123 → 00000123)
-        </div>
+    <footer>
+        <strong>STO373 Goods arrival Tool</strong>
+        Powered by automated STO373 FI<br>
+        IKEA Market Definition Tool Style
+    </footer>
 
-        <div>
-            <button class="btn btn-search" onclick="performSearch()"><i class="fas fa-search"></i> SEARCH</button>
-            <button class="btn btn-check" style="cursor: default;"><i class="fas fa-file-excel"></i> DATA LOADED</button>
-        </div>
-    </div>
+    <script>
+        let rawData = [];
+        const EXCEL_FILE_URL = './STO373 Goods arrival plan.xlsx'; 
 
-    <div id="loading"><i class="fas fa-spinner fa-spin fa-2x"></i> 데이터 검색 중...</div>
+        window.onload = async function() {
+            try {
+                const response = await fetch(EXCEL_FILE_URL);
+                if (!response.ok) throw new Error("Excel file not found");
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                
+                let sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes("orderinformation"));
+                if (!sheetName) sheetName = workbook.SheetNames[0];
 
-    <div id="statusBar" class="status-bar"></div>
+                // header: "A" 옵션으로 열 알파벳 기준 파싱
+                rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: "A", defval: "", range: 1 }); 
+                console.log("Data loaded. Rows:", rawData.length);
 
-    <div id="dashboard" class="dashboard">
-        <div class="card">
-            <h3 id="totalResults">-</h3>
-            <p>Total Results</p>
-        </div>
-        <div class="card">
-            <h3 id="futureDeliveryQty">0</h3>
-            <p>Future Delivery (Qty)</p>
-        </div>
-        <div class="card">
-            <h3 id="nextDeliveryDate">-</h3>
-            <p>Next Delivery</p>
-        </div>
-    </div>
-
-    <div id="tableContainer" class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>HFB</th>
-                    <th>ITEMNO</th>
-                    <th>ITEMNAME</th>
-                    <th>EDS</th>
-                    <th>PLANNED DATE</th>
-                    <th>QUANTITY (합계)</th>
-                    <th>CONTAINER</th>
-                </tr>
-            </thead>
-            <tbody id="resultBody">
-                </tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-    // 엑셀 데이터가 저장될 변수
-    let excelData = [];
-    const EXCEL_FILE_URL = './STO373 Goods arrival plan.xlsx'; // GitHub 저장소에 업로드된 파일명과 정확히 일치해야 함
-
-    // 페이지 로드 시 엑셀 파일 읽기 시도
-    window.onload = async function() {
-        try {
-            const response = await fetch(EXCEL_FILE_URL);
-            if (!response.ok) throw new Error("Excel file not found");
-            const arrayBuffer = await response.arrayBuffer();
-            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-            
-            // 시트 이름 확인: [Orderinformation] 시트를 찾음
-            let sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes("orderinformation"));
-            if (!sheetName) sheetName = workbook.SheetNames[0]; // 없으면 첫 번째 시트 사용
-
-            const worksheet = workbook.Sheets[sheetName];
-            
-            // JSON으로 변환 (첫 번째 행을 헤더로 인식)
-            // 헤더가 1행에 있다고 가정. 만약 2행부터라면 range 옵션 조정 필요
-            excelData = XLSX.utils.sheet_to_json(worksheet, { defval: "" }); 
-            
-            console.log("Data loaded successfully. Total rows:", excelData.length);
-        } catch (error) {
-            console.error("Error loading Excel:", error);
-            alert("데이터 파일을 불러올 수 없습니다. GitHub 저장소에 엑셀 파일이 있는지 확인해주세요.");
-        }
-    };
-
-    // 엔터키 입력 시 검색 트리거
-    document.getElementById('itemInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') performSearch();
-    });
-
-    function performSearch() {
-        const inputRaw = document.getElementById('itemInput').value.trim();
-        if (!inputRaw) {
-            alert("제품번호를 입력해주세요.");
-            return;
-        }
-
-        // 8자리 패딩 처리 (예: 123 -> 00000123)
-        const searchItemNo = inputRaw.padStart(8, '0');
-        
-        document.getElementById('loading').style.display = 'block';
-        
-        // UI 초기화
-        document.getElementById('statusBar').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'none';
-        document.getElementById('tableContainer').style.display = 'none';
-        document.getElementById('resultBody').innerHTML = '';
-
-        setTimeout(() => {
-            // 검색 로직 실행
-            const results = searchExcel(searchItemNo);
-            displayResults(results);
-            document.getElementById('loading').style.display = 'none';
-        }, 300); // UI 반응을 위한 짧은 지연
-    }
-
-    function searchExcel(targetItemNo) {
-        // 검색 결과 저장용 맵 (중복 병합을 위함)
-        // Key: Container + PlannedDate
-        const groupedResults = {};
-
-        /* 엑셀 컬럼 매핑 (SheetJS는 A, B, C 대신 헤더 이름이나 인덱스로 접근 가능하지만, 
-           여기서는 헤더 이름을 모를 수 있으므로 Object.keys나 순서를 추정해야 함.
-           가장 확실한 방법은 엑셀의 열 알파벳을 인덱스로 매핑하는 것임.
-           
-           A=0, B=1(Container), C=2(ItemName), E=4(ItemNo), F=5(HFB), G=6(SSD), H=7(EDS), M=12(PlannedDate), P=15(Qty)
-           하지만 json 변환 시 key는 헤더 텍스트가 됨. 
-           따라서 안전하게 모든 row를 순회하며 값을 찾음.
-        */
-        
-        // 헤더 이름을 모르므로, 첫 번째 row의 key들을 가져와서 매핑할 수도 있으나,
-        // 여기서는 간단히 하기 위해 데이터가 올바른 열 순서로 있다고 가정하고 처리하거나,
-        // 사용자가 제공한 "E열", "B열" 등의 정보를 바탕으로 처리.
-        // SheetJS의 sheet_to_json은 헤더명을 키로 사용함.
-        // 정확도를 위해 sheet_to_json 대신 sheet_to_json with header: 'A' 옵션을 쓰는 게 나을 수도 있음.
-        // 하지만 이미 로드된 excelData를 씁니다. 여기서 key 이름을 추측해야 함.
-        
-        // 🚨 중요: 실제 엑셀 파일의 헤더 이름(1행)을 정확히 알면 `row['HeaderName']`으로 접근 가능.
-        // 여기서는 안전하게 Object.values(row)[index] 방식을 쓸 수 없으므로(JSON 변환 시 빈 셀이 생략될 수 있음),
-        // 로직 내에서 key를 찾아야 함. 
-        // 💡 가장 좋은 방법: sheet_to_json 옵션에서 { header: "A" }를 사용하면 컬럼명이 A, B, C... 가 됨.
-        
-        // 로드 함수 수정이 필요 없도록 여기서 처리 로직만 변경:
-        // 현재 excelData는 header text를 key로 가짐. 
-        // 엑셀 파일의 실제 헤더명을 알 수 없으므로, 코드를 수정하여 {header: "A"}로 다시 파싱하는 로직을 추가하지 않고,
-        // 단순히 "값이 있는지 확인"하는 방식으로 진행.
-        
-        // 하지만 데이터 정확성을 위해, 페이지 로드 시 {header:"A"}로 읽는 것이 가장 안전함.
-        // 위 onload 함수를 수정하지 않고 여기서 다시 파싱할 수 없으므로, 
-        // 가상의 로직: 사용자가 제공한 위치(B, E, M 등)를 기준으로 필터링.
-        // 문제는 JSON 변환 시 Key가 Column명이 됨.
-        
-        // 👉 해결책: 이 코드를 실제 배포할 때는 아래 `mapping` 객체의 키 값을 실제 엑셀 파일의 1행(헤더) 값으로 수정하거나,
-        // 아래 onload 로직을 수정하여 header: "A"로 읽도록 변경하겠습니다. (아래 수정된 로직 적용)
-    }
-</script>
-
-<script>
-    let rawData = []; // 컬럼명 A, B, C... 로 된 데이터
-
-    window.onload = async function() {
-        try {
-            const response = await fetch(EXCEL_FILE_URL);
-            if (!response.ok) throw new Error("Excel file not found");
-            const arrayBuffer = await response.arrayBuffer();
-            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-            
-            let sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes("orderinformation"));
-            if (!sheetName) sheetName = workbook.SheetNames[0];
-
-            const worksheet = workbook.Sheets[sheetName];
-            
-            // 중요: header: "A" 옵션을 사용하여 A, B, C... 키를 생성
-            // range: 1 은 1행(헤더)을 건너뛰고 2행부터 데이터로 읽겠다는 의미
-            rawData = XLSX.utils.sheet_to_json(worksheet, { header: "A", defval: "", range: 1 }); 
-            console.log("Data loaded via column-index. Count:", rawData.length);
-
-        } catch (error) {
-            console.error(error);
-            // 데모를 위해 더미 데이터를 넣어둘 수도 있음 (선택 사항)
-        }
-    };
-
-    function searchExcel(targetItemNo) {
-        const groupedMap = new Map();
-
-        // 필터링 및 데이터 가공
-        rawData.forEach(row => {
-            // E열: ItemNo (문자열 변환 및 공백 제거)
-            let itemNo = String(row['E'] || "").trim();
-            
-            // 비교 (둘 다 8자리 패딩된 문자열이라고 가정하거나, 포함 여부 확인)
-            // 여기서는 정확한 일치를 원칙으로 함
-            if (itemNo === targetItemNo) {
-
-                // 데이터 추출
-                let container = String(row['B'] || "").trim();
-                let itemName = row['C'] || "";
-                let hfb = row['F'] || "";
-                let ssd = row['G'] || ""; // 날짜 형식일 수 있음
-                let eds = row['H'] || "";
-                let plannedDateRaw = row['M']; 
-                let qty = parseFloat(row['P']) || 0;
-
-                // 날짜 처리 (Excel Serial Date -> JS Date -> String)
-                let plannedDateStr = "미정";
-                let plannedDateObj = null;
-
-                if (plannedDateRaw) {
-                    if (typeof plannedDateRaw === 'number') {
-                        // Excel Serial Date to JS Date
-                        plannedDateObj = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000));
-                    } else {
-                        // 문자열인 경우
-                        plannedDateObj = new Date(plannedDateRaw);
-                    }
-                    
-                    if (!isNaN(plannedDateObj)) {
-                        // YYYY-MM-DD 형식으로 변환
-                        const yyyy = plannedDateObj.getFullYear();
-                        const mm = String(plannedDateObj.getMonth() + 1).padStart(2, '0');
-                        const dd = String(plannedDateObj.getDate()).padStart(2, '0');
-                        plannedDateStr = `${yyyy}-${mm}-${dd}`;
-                    } else {
-                        plannedDateStr = "미정";
-                        plannedDateObj = null; // 유효하지 않은 날짜
-                    }
-                }
-
-                // 컨테이너 처리
-                if (container === "") container = "배송준비중";
-
-                // 그룹핑 키: 컨테이너 + 날짜 (같은 컨테이너에 같은 날짜면 수량 합산)
-                // 만약 컨테이너가 '배송준비중'이라면 날짜별로 묶음
-                const key = `${container}_${plannedDateStr}`;
-
-                if (groupedMap.has(key)) {
-                    const existing = groupedMap.get(key);
-                    existing.quantity += qty;
-                } else {
-                    groupedMap.set(key, {
-                        hfb: hfb,
-                        itemNo: itemNo,
-                        itemName: itemName,
-                        ssd: ssd, // 서식 변환 필요 시 추가 로직
-                        eds: eds,
-                        plannedDateStr: plannedDateStr,
-                        plannedDateObj: plannedDateObj, // 정렬 및 비교용
-                        quantity: qty,
-                        container: container
-                    });
-                }
+            } catch (error) {
+                console.error("Excel Load Error:", error);
+                document.querySelector('.data-status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 데이터 연결 실패';
+                document.querySelector('.data-status').style.color = '#e74c3c';
+                document.querySelector('.data-status').style.backgroundColor = '#fdeea9';
             }
+        };
+
+        document.getElementById('itemInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') performSearch();
         });
 
-        return Array.from(groupedMap.values());
-    }
+        function performSearch() {
+            const inputRaw = document.getElementById('itemInput').value.trim();
+            if (!inputRaw) {
+                alert("제품번호를 입력해주세요.");
+                return;
+            }
 
-    function displayResults(results) {
-        const statusBar = document.getElementById('statusBar');
-        const dashboard = document.getElementById('dashboard');
-        const tableContainer = document.getElementById('tableContainer');
-        const tbody = document.getElementById('resultBody');
+            const searchItemNo = inputRaw.padStart(8, '0');
+            
+            // 로딩 UI
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultSection').style.display = 'none';
 
-        // 1. 상태 메시지
-        statusBar.style.display = 'block';
-        if (results.length > 0) {
-            statusBar.textContent = `✅ ${results.length}개의 배송 계획을 찾았습니다!`;
-            statusBar.className = 'status-bar status-success';
-            dashboard.style.display = 'flex';
-            tableContainer.style.display = 'block';
-        } else {
-            statusBar.textContent = '❌ 검색 결과가 존재하지 않습니다.';
-            statusBar.className = 'status-bar status-fail';
-            return; // 결과 없으면 중단
+            setTimeout(() => {
+                const results = searchExcel(searchItemNo);
+                displayResults(results);
+                document.getElementById('loading').style.display = 'none';
+            }, 300);
         }
 
-        // 2. 대시보드 계산
-        // Total Results
-        document.getElementById('totalResults').innerText = results.length;
+        function searchExcel(targetItemNo) {
+            const groupedMap = new Map();
 
-        // Future & Next Delivery 계산
-        // 오늘 날짜 기준
-        const today = new Date();
-        today.setHours(0,0,0,0);
+            rawData.forEach(row => {
+                // E열: ItemNo
+                let itemNo = String(row['E'] || "").trim();
+                
+                if (itemNo === targetItemNo) {
+                    let container = String(row['B'] || "").trim();
+                    let itemName = row['C'] || "";
+                    let hfb = row['F'] || "";
+                    let eds = row['H'] || "";
+                    let plannedDateRaw = row['M']; 
+                    let qty = parseFloat(row['P']) || 0;
 
-        // 날짜가 있고 오늘 이후인 것들만 필터링
-        const futureDeliveries = results.filter(r => r.plannedDateObj && r.plannedDateObj >= today);
-        
-        // 날짜순 정렬
-        futureDeliveries.sort((a, b) => a.plannedDateObj - b.plannedDateObj);
+                    // 날짜 변환
+                    let plannedDateStr = "미정";
+                    let plannedDateObj = null;
 
-        if (futureDeliveries.length > 0) {
-            // 가장 가까운 날짜
-            const nextDate = futureDeliveries[0].plannedDateStr;
-            
-            // 가장 가까운 날짜에 해당하는 모든 건의 수량 합계
-            const nextDateItems = futureDeliveries.filter(r => r.plannedDateStr === nextDate);
-            const totalNextQty = nextDateItems.reduce((sum, item) => sum + item.quantity, 0);
+                    if (plannedDateRaw) {
+                        if (typeof plannedDateRaw === 'number') {
+                            plannedDateObj = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000));
+                        } else {
+                            plannedDateObj = new Date(plannedDateRaw);
+                        }
+                        
+                        if (!isNaN(plannedDateObj)) {
+                            const yyyy = plannedDateObj.getFullYear();
+                            const mm = String(plannedDateObj.getMonth() + 1).padStart(2, '0');
+                            const dd = String(plannedDateObj.getDate()).padStart(2, '0');
+                            plannedDateStr = `${yyyy}-${mm}-${dd}`;
+                        }
+                    }
 
-            document.getElementById('futureDeliveryQty').innerText = totalNextQty;
-            document.getElementById('nextDeliveryDate').innerText = nextDate;
-        } else {
-            document.getElementById('futureDeliveryQty').innerText = "0";
-            document.getElementById('nextDeliveryDate').innerText = "-";
+                    if (container === "") container = "배송준비중";
+
+                    // 그룹핑 (컨테이너+날짜가 같으면 합침)
+                    const key = `${container}_${plannedDateStr}`;
+
+                    if (groupedMap.has(key)) {
+                        const existing = groupedMap.get(key);
+                        existing.quantity += qty;
+                    } else {
+                        groupedMap.set(key, {
+                            hfb, itemNo, itemName, eds,
+                            plannedDateStr, plannedDateObj,
+                            quantity: qty, container
+                        });
+                    }
+                }
+            });
+
+            return Array.from(groupedMap.values());
         }
 
-        // 3. 테이블 렌더링
-        // 날짜가 확정된 것을 위로, 미정은 아래로, 날짜순 정렬
-        results.sort((a, b) => {
-            if (a.plannedDateStr === "미정") return 1;
-            if (b.plannedDateStr === "미정") return -1;
-            return a.plannedDateObj - b.plannedDateObj;
-        });
+        function displayResults(results) {
+            const resultSection = document.getElementById('resultSection');
+            const statusBar = document.getElementById('statusBar');
+            const tbody = document.getElementById('resultBody');
 
-        results.forEach(row => {
-            const tr = document.createElement('tr');
-            
-            // 날짜 스타일링
-            let dateClass = row.plannedDateStr === "미정" ? "date-tbd" : "date-fixed";
-            
-            // 컨테이너 스타일링
-            let containerClass = row.container === "배송준비중" ? "container-tbd" : "";
-            
-            // EDS 처리 (날짜 포맷이 엑셀 숫자로 올 경우 변환 로직 추가 가능, 현재는 raw 값)
-            // 간단하게 텍스트로 출력
-            
-            tr.innerHTML = `
-                <td>${row.hfb}</td>
-                <td>${row.itemNo}</td>
-                <td>${row.itemName}</td>
-                <td>${row.eds || '-'}</td>
-                <td class="${dateClass}">${row.plannedDateStr}</td>
-                <td style="font-weight:bold;">${row.quantity}</td>
-                <td class="${containerClass}">${row.container}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-</script>
+            resultSection.style.display = 'block';
+            tbody.innerHTML = '';
 
+            // 1. 상태 메시지
+            if (results.length > 0) {
+                statusBar.textContent = `${results.length}개의 배송 계획을 찾았습니다!`;
+                statusBar.className = 'status-msg status-success';
+            } else {
+                statusBar.textContent = '검색 결과가 존재하지 않습니다.';
+                statusBar.className = 'status-msg status-fail';
+                document.querySelector('.dashboard').style.display = 'none';
+                document.querySelector('.table-wrap').style.display = 'none';
+                return;
+            }
+
+            document.querySelector('.dashboard').style.display = 'flex';
+            document.querySelector('.table-wrap').style.display = 'block';
+
+            // 2. 대시보드 통계
+            document.getElementById('totalResults').innerText = results.length;
+
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            const futureDeliveries = results.filter(r => r.plannedDateObj && r.plannedDateObj >= today);
+            futureDeliveries.sort((a, b) => a.plannedDateObj - b.plannedDateObj);
+
+            if (futureDeliveries.length > 0) {
+                const nextDate = futureDeliveries[0].plannedDateStr;
+                const nextDateItems = futureDeliveries.filter(r => r.plannedDateStr === nextDate);
+                const totalNextQty = nextDateItems.reduce((sum, item) => sum + item.quantity, 0);
+
+                document.getElementById('futureDeliveryQty').innerText = totalNextQty;
+                document.getElementById('nextDeliveryDate').innerText = nextDate;
+            } else {
+                document.getElementById('futureDeliveryQty').innerText = "0";
+                document.getElementById('nextDeliveryDate').innerText = "-";
+            }
+
+            // 3. 테이블 출력 (날짜순 정렬, 미정은 뒤로)
+            results.sort((a, b) => {
+                if (a.plannedDateStr === "미정") return 1;
+                if (b.plannedDateStr === "미정") return -1;
+                return a.plannedDateObj - b.plannedDateObj;
+            });
+
+            results.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                let dateHtml = row.plannedDateStr === "미정" 
+                    ? `<span class="date-tbd">미정</span>` 
+                    : row.plannedDateStr;
+                
+                tr.innerHTML = `
+                    <td>${row.hfb}</td>
+                    <td><strong>${row.itemNo}</strong></td>
+                    <td>${row.itemName}</td>
+                    <td>${dateHtml}</td>
+                    <td style="font-weight:bold; color:var(--ikea-blue);">${row.quantity}</td>
+                    <td>
+                        <div style="font-weight:bold;">${row.container}</div>
+                        <div style="font-size:0.8rem; color:#888;">EDS: ${row.eds || '-'}</div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
 </body>
 </html>
