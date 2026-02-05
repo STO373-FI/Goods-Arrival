@@ -177,7 +177,7 @@
                 STO373 Goods Arrival Plan Search
             </a>
         </div>
-        <div class="header-right">Ver 1.7.1 Hotfix<br>Bilingual Support</div>
+        <div class="header-right">Ver 1.8 Data Logic Fix<br>Bilingual Support</div>
     </header>
 
     <div class="main-content">
@@ -357,19 +357,29 @@
         // ==========================================
         function parseExcelDate(value) {
             if (!value) return "-";
+            
+            // 숫자형 날짜 (Excel Serial or YYYYMMDD)
             if (typeof value === 'number') {
-                if (value > 19000000) { 
+                if (value > 19000000) { // YYYYMMDD
                     const str = String(value);
                     return `${str.substring(0, 4)}-${str.substring(4, 6)}-${str.substring(6, 8)}`;
                 }
+                // Excel Serial Date
                 const dateObj = new Date(Math.round((value - 25569) * 86400 * 1000));
                 if (!isNaN(dateObj)) {
+                    // [중요] 1900년 이하는 더미 데이터로 간주하고 "-" 리턴
+                    if (dateObj.getFullYear() <= 1900) return "-";
                     return dateObj.toISOString().split('T')[0];
                 }
             } 
-            if (typeof value === 'string' && /^\d{8}$/.test(value.trim())) {
-                const str = value.trim();
-                return `${str.substring(0, 4)}-${str.substring(4, 6)}-${str.substring(6, 8)}`;
+            
+            // 문자열 (20220101 or 1900-01-00)
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (/^\d{8}$/.test(trimmed)) {
+                    return `${trimmed.substring(0, 4)}-${trimmed.substring(4, 6)}-${trimmed.substring(6, 8)}`;
+                }
+                if (trimmed.startsWith("1900")) return "-"; // 1900년 시작 문자열 무시
             }
             return value;
         }
@@ -397,7 +407,14 @@
         function searchExcel(targetItemNo) {
             const groupedMap = new Map();
             rawData.forEach(row => {
-                let itemNo = String(row['E'] || "").trim();
+                // [FIX] 데이터 보정: 숫자형이거나 짧은 문자열일 경우 8자리 패딩
+                let rawE = row['E'];
+                let itemNo = String(rawE || "").trim();
+                
+                // 만약 숫자로만 구성되어 있고 8자리 미만이라면 0 패딩 (예: 508956 -> 00508956)
+                if (/^\d+$/.test(itemNo) && itemNo.length < 8) {
+                    itemNo = itemNo.padStart(8, '0');
+                }
                 
                 let isMatch = false;
                 if (itemNo === targetItemNo) isMatch = true;
@@ -415,14 +432,24 @@
                     let plannedDateStr = "미정";
                     let plannedDateObj = null;
 
+                    // Planned Date 로직 개선
                     if (plannedDateRaw) {
                         if (typeof plannedDateRaw === 'number' && plannedDateRaw < 100000) {
-                            plannedDateObj = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000));
-                            if (!isNaN(plannedDateObj)) plannedDateStr = plannedDateObj.toISOString().split('T')[0];
+                            const tempDate = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000));
+                            if (!isNaN(tempDate)) {
+                                // 1900년 이하는 미정으로 처리
+                                if (tempDate.getFullYear() > 1900) {
+                                    plannedDateObj = tempDate;
+                                    plannedDateStr = tempDate.toISOString().split('T')[0];
+                                }
+                            }
                         } else if (typeof plannedDateRaw === 'string') {
-                            plannedDateStr = plannedDateRaw; 
-                            const parsed = new Date(plannedDateRaw);
-                            if (!isNaN(parsed)) plannedDateObj = parsed;
+                            // "1900-01-00" 같은 문자열 체크
+                            if (!plannedDateRaw.startsWith("1900")) {
+                                plannedDateStr = plannedDateRaw; 
+                                const parsed = new Date(plannedDateRaw);
+                                if (!isNaN(parsed)) plannedDateObj = parsed;
+                            }
                         }
                     }
                     if (container === "") container = "배송준비중";
@@ -451,7 +478,6 @@
             mobileProductSummary.innerHTML = '';
             mobileScheduleList.innerHTML = '';
 
-            // [FIX] 여기서 백틱(`)을 사용하여 줄바꿈 문자열을 안전하게 처리
             if (results.length > 0) {
                 statusBar.innerHTML = `${results.length}개의 배송 계획을 찾았습니다! 
                     <div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">Found ${results.length} arrival plans!</div>`;
@@ -477,6 +503,7 @@
                 document.getElementById('futureDeliveryQty').innerText = totalNextQty;
                 document.getElementById('nextDeliveryDate').innerText = nextDate;
             } else {
+                // 미래 날짜가 없으면 가장 최근 예정일이라도 표시하거나, "미정" 처리
                 document.getElementById('futureDeliveryQty').innerText = "0";
                 document.getElementById('nextDeliveryDate').innerText = "-";
             }
