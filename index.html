@@ -177,7 +177,7 @@
                 STO373 Goods Arrival Plan Search
             </a>
         </div>
-        <div class="header-right">Ver 1.7 Global UX<br>Bilingual Support</div>
+        <div class="header-right">Ver 1.7.1 Hotfix<br>Bilingual Support</div>
     </header>
 
     <div class="main-content">
@@ -287,9 +287,10 @@
                 console.log("Data loaded. Rows:", rawData.length);
             } catch (error) {
                 console.error("Excel Load Error:", error);
-                document.querySelector('.data-status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 연결 실패 <div style="font-size:0.7em; opacity:0.8;">Connection Failed</div>';
-                document.querySelector('.data-status').style.color = '#e74c3c';
-                document.querySelector('.data-status').style.backgroundColor = '#fdeea9';
+                const statusDiv = document.querySelector('.data-status');
+                statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 연결 실패 <div style="font-size:0.7em; opacity:0.8;">Connection Failed</div>`;
+                statusDiv.style.color = '#e74c3c';
+                statusDiv.style.backgroundColor = '#fdeea9';
             }
         };
 
@@ -450,14 +451,15 @@
             mobileProductSummary.innerHTML = '';
             mobileScheduleList.innerHTML = '';
 
+            // [FIX] 여기서 백틱(`)을 사용하여 줄바꿈 문자열을 안전하게 처리
             if (results.length > 0) {
                 statusBar.innerHTML = `${results.length}개의 배송 계획을 찾았습니다! 
                     <div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">Found ${results.length} arrival plans!</div>`;
                 statusBar.className = 'status-msg status-success';
                 document.querySelector('.dashboard').style.display = 'flex';
             } else {
-                statusBar.innerHTML = '검색 결과가 존재하지 않습니다. 
-                    <div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">No results found.</div>';
+                statusBar.innerHTML = `검색 결과가 존재하지 않습니다. 
+                    <div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">No results found.</div>`;
                 statusBar.className = 'status-msg status-fail';
                 document.querySelector('.dashboard').style.display = 'none';
                 return;
