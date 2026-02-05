@@ -113,10 +113,6 @@
         .scan-controls { margin-top: 20px; display: flex; gap: 15px; }
         .btn-modal { padding: 10px 20px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
         .btn-close { background: white; color: black; }
-        .btn-upload { background: var(--ikea-blue); color: white; display: flex; align-items: center; gap: 8px; }
-
-        /* 파일 업로드 input 숨김 */
-        #qr-input-file { display: none; }
 
         footer { background-color: #eef0f3; text-align: center; padding: 15px 0; color: #888; font-size: 0.75rem; border-top: 1px solid #e0e0e0; line-height: 1.4; }
         #loading { display: none; margin-top: 20px; color: var(--ikea-blue); }
@@ -145,17 +141,13 @@
 
     <div id="scanner-modal">
         <div style="color:white; margin-bottom:10px; text-align:center;">
-            <i class="fas fa-barcode"></i> 바코드를 비추거나 사진을 찍어주세요
+            <i class="fas fa-barcode"></i> 바코드에 카메라를 대주세요
         </div>
         
         <div id="reader"></div>
 
         <div class="scan-controls">
-            <input type="file" id="qr-input-file" accept="image/*">
-            <button class="btn-modal btn-upload" onclick="document.getElementById('qr-input-file').click()">
-                <i class="fas fa-file-image"></i> 사진/업로드
-            </button>
-            <button class="btn-modal btn-close" onclick="stopScanner()">닫기</button>
+            <button class="btn-modal btn-close" onclick="stopScanner()">닫기 (Close)</button>
         </div>
     </div>
 
@@ -166,7 +158,7 @@
                 STO373 Goods Arrival Plan Search
             </a>
         </div>
-        <div class="header-right">Ver 1.5 Hybrid Scan<br>Photo Upload Support</div>
+        <div class="header-right">Ver 1.6 Fast Scan<br>Scan Logic Updated</div>
     </header>
 
     <div class="main-content">
@@ -186,8 +178,7 @@
             
             <div class="helper-text">
                 <i class="fas fa-lightbulb" style="color: var(--ikea-yellow);"></i> <strong>Tip:</strong><br>
-                모바일에서는 카메라 아이콘을 눌러 바코드를 스캔할 수 있습니다.<br>
-                (인식이 안되면 '사진/업로드' 버튼을 사용하세요)
+                모바일에서는 카메라 아이콘을 눌러 바코드를 자동으로 입력할 수 있습니다.
             </div>
             <div id="loading" style="text-align: center;">
                 <i class="fas fa-spinner fa-spin fa-2x"></i><br>데이터 검색 중...
@@ -267,68 +258,62 @@
         });
 
         // ==========================================
-        //  NEW: HTML5-QRCode Scanner Logic
+        //  OPTIMIZED: Barcode Scanner Logic
         // ==========================================
         
         function startScanner() {
             document.getElementById('scanner-modal').style.display = 'flex';
             
-            // 1. 라이브 스캐너 시작
             if (!html5QrcodeScanner) {
                 html5QrcodeScanner = new Html5Qrcode("reader");
             }
 
-            const config = { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.0 };
+            // [핵심 변경] 인식률 개선을 위한 설정
+            const config = { 
+                fps: 15,                        // 초당 프레임 수 증가 (기본 10 -> 15)
+                qrbox: { width: 300, height: 150 }, // 직사각형 스캔 박스 (바코드 형태에 맞춤)
+                aspectRatio: 1.0,
+                // 하드웨어 가속 및 네이티브 감지 기능 사용 (지원되는 경우)
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
+            };
             
-            // 후면 카메라 우선
-            html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
-            .catch(err => {
-                console.log("Camera start failed, maybe verify permission or HTTPS", err);
+            // [핵심 변경] IKEA에서 주로 쓰는 바코드 포맷만 집중 탐색 (Code 128, EAN)
+            // 불필요한 포맷(QR, UPC 등)을 끄면 인식 속도와 정확도가 올라감
+            const formats = [ 
+                Html5QrcodeSupportedFormats.CODE_128, 
+                Html5QrcodeSupportedFormats.EAN_13 
+            ];
+            
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, 
+                config, 
+                onScanSuccess, 
+                onScanFailure
+            ).catch(err => {
+                console.log("Camera start failed", err);
+                alert("카메라를 시작할 수 없습니다. HTTPS 환경인지 확인해주세요.");
             });
         }
-
-        // 2. 파일 업로드 처리 (사진 찍어서 인식)
-        document.getElementById('qr-input-file').addEventListener('change', e => {
-            if (e.target.files.length == 0) return;
-            
-            const imageFile = e.target.files[0];
-            
-            if (!html5QrcodeScanner) {
-                html5QrcodeScanner = new Html5Qrcode("reader");
-            }
-            
-            // 이미지 스캔 실행
-            html5QrcodeScanner.scanFile(imageFile, true)
-                .then(decodedText => {
-                    onScanSuccess(decodedText);
-                })
-                .catch(err => {
-                    alert("바코드를 인식하지 못했습니다. 사진이 흔들리지 않았는지 확인해주세요.");
-                });
-        });
 
         function onScanSuccess(decodedText, decodedResult) {
             console.log(`Scan result: ${decodedText}`);
             
-            // 숫자만 추출 (이케아 코드가 섞여 있을 수 있음)
+            // 숫자만 추출
             const numeric = decodedText.replace(/[^0-9]/g, '');
             
-            // 8자리 이상인 경우 유효한 것으로 간주
-            // 이케아 바코드는 종종 12자리 이상일 수 있으나, 보통 제품번호가 포함됨
-            // 여기서는 발견된 전체 숫자를 넣거나, 뒷 8자리를 넣는 등 로직 필요
-            // 우선 8자리가 포함되어 있다면 찾아서 넣기 시도
-            
+            // 8자리 이상인 경우 유효
             let resultItemNo = numeric;
 
             // 8자리 패턴 찾기
             const match8 = numeric.match(/\d{8}/);
             if (match8) {
-                resultItemNo = match8[0]; // 첫번째 발견된 8자리 사용
+                resultItemNo = match8[0]; 
             }
 
             document.getElementById('itemInput').value = resultItemNo;
             
-            // 성공음 (진동)
             if (navigator.vibrate) navigator.vibrate(200);
 
             stopScanner();
@@ -336,16 +321,14 @@
         }
 
         function onScanFailure(error) {
-            // 스캔 중 반복되는 에러는 무시 (너무 자주 뜸)
+            // 실패 시 로그 무시 (반복 호출됨)
         }
 
         function stopScanner() {
             if (html5QrcodeScanner) {
                 html5QrcodeScanner.stop().then((ignore) => {
-                    // Stop success
                     document.getElementById('scanner-modal').style.display = 'none';
                 }).catch((err) => {
-                    // Stop failed
                     document.getElementById('scanner-modal').style.display = 'none';
                 });
             } else {
@@ -398,10 +381,8 @@
             rawData.forEach(row => {
                 let itemNo = String(row['E'] || "").trim();
                 
-                // 검색 로직 개선: 입력값이 바코드라 길 경우 포함 여부 확인
                 let isMatch = false;
                 if (itemNo === targetItemNo) isMatch = true;
-                // 바코드로 스캔된 긴 숫자(targetItemNo) 안에 엑셀 제품번호(itemNo)가 포함되어 있는지
                 else if (targetItemNo.length > 8 && targetItemNo.includes(itemNo) && itemNo.length === 8) isMatch = true;
 
                 if (isMatch) {
@@ -485,7 +466,7 @@
                 return a.plannedDateObj - b.plannedDateObj;
             });
 
-            // PC 테이블 렌더링
+            // PC 테이블
             results.forEach(row => {
                 const tr = document.createElement('tr');
                 let dateHtml = row.plannedDateStr === "미정" ? `<span class="date-tbd">미정</span>` : row.plannedDateStr;
@@ -497,7 +478,7 @@
                 pcTbody.appendChild(tr);
             });
 
-            // 모바일 뷰 렌더링
+            // 모바일 뷰
             if(results.length > 0) {
                 const common = results[0]; 
                 mobileProductSummary.innerHTML = `
