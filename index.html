@@ -67,7 +67,7 @@
             align-items: center;
             padding: 60px 20px;
             width: 100%;
-            max-width: 1400px; /* 테이블이 넓어져서 폭을 넓힘 */
+            max-width: 1400px;
             margin: 0 auto;
             box-sizing: border-box;
         }
@@ -200,7 +200,7 @@
         .table-wrap {
             background: white;
             border-radius: 8px;
-            overflow-x: auto; /* 가로 스크롤 허용 */
+            overflow-x: auto;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
@@ -211,11 +211,11 @@
         
         .date-tbd { background-color: #fff4f4; color: #d63031; font-weight: bold; padding: 4px 8px; border-radius: 4px; display:inline-block;}
         
-        /* --- 4. 푸터 영역 (수정됨) --- */
+        /* --- 4. 푸터 영역 --- */
         footer {
             background-color: #eef0f3;
             text-align: center;
-            padding: 15px 0; /* 높이 줄임 */
+            padding: 15px 0;
             color: #888;
             font-size: 0.75rem;
             border-top: 1px solid #e0e0e0;
@@ -243,8 +243,8 @@
             </a>
         </div>
         <div class="header-right">
-            Ver 1.1<br>
-            Updated Column Layout
+            Ver 1.2<br>
+            Date Format Fix
         </div>
     </header>
 
@@ -350,12 +350,22 @@
             if (e.key === 'Enter') performSearch();
         });
 
-        // 날짜 변환 헬퍼 함수
+        // [중요 수정됨] 날짜 변환 로직 개선
         function parseExcelDate(value) {
             if (!value) return "-";
             
-            // 숫자인 경우 (Excel Serial Date)
+            // 1. 숫자인 경우
             if (typeof value === 'number') {
+                // Case A: 20190401 처럼 8자리 숫자인 경우 (YYYYMMDD) -> YYYY-MM-DD 변환
+                if (value > 19000000) { 
+                    const str = String(value);
+                    const yyyy = str.substring(0, 4);
+                    const mm = str.substring(4, 6);
+                    const dd = str.substring(6, 8);
+                    return `${yyyy}-${mm}-${dd}`;
+                }
+                
+                // Case B: 엑셀 날짜 코드 (예: 44562) -> JS 날짜 변환
                 const dateObj = new Date(Math.round((value - 25569) * 86400 * 1000));
                 if (!isNaN(dateObj)) {
                     const yyyy = dateObj.getFullYear();
@@ -364,7 +374,17 @@
                     return `${yyyy}-${mm}-${dd}`;
                 }
             } 
-            // 문자열인 경우 그대로 리턴 (혹은 날짜 형식인지 체크 가능)
+            
+            // 2. 문자열인데 "20190401" 처럼 들어온 경우
+            if (typeof value === 'string' && /^\d{8}$/.test(value.trim())) {
+                const str = value.trim();
+                const yyyy = str.substring(0, 4);
+                const mm = str.substring(4, 6);
+                const dd = str.substring(6, 8);
+                return `${yyyy}-${mm}-${dd}`;
+            }
+
+            // 그 외 (이미 텍스트 형식이거나 "-" 등)는 그대로 리턴
             return value;
         }
 
@@ -391,43 +411,41 @@
             const groupedMap = new Map();
 
             rawData.forEach(row => {
-                // E열: ItemNo
                 let itemNo = String(row['E'] || "").trim();
                 
                 if (itemNo === targetItemNo) {
                     let container = String(row['B'] || "").trim();
                     let itemName = row['C'] || "";
                     let hfb = row['F'] || "";
-                    
-                    // G열: SSD, H열: EDS
                     let ssdRaw = row['G']; 
                     let edsRaw = row['H'];
-                    
                     let plannedDateRaw = row['M']; 
                     let qty = parseFloat(row['P']) || 0;
 
-                    // Planned Date 변환 (정렬 및 대시보드 계산용)
                     let plannedDateStr = "미정";
                     let plannedDateObj = null;
 
                     if (plannedDateRaw) {
-                        if (typeof plannedDateRaw === 'number') {
+                        // Planned Date는 보통 엑셀 날짜 코드이거나 "미정" 텍스트
+                        if (typeof plannedDateRaw === 'number' && plannedDateRaw < 100000) {
                             plannedDateObj = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000));
-                        } else {
-                            plannedDateObj = new Date(plannedDateRaw);
-                        }
-                        
-                        if (!isNaN(plannedDateObj)) {
-                            const yyyy = plannedDateObj.getFullYear();
-                            const mm = String(plannedDateObj.getMonth() + 1).padStart(2, '0');
-                            const dd = String(plannedDateObj.getDate()).padStart(2, '0');
-                            plannedDateStr = `${yyyy}-${mm}-${dd}`;
+                            if (!isNaN(plannedDateObj)) {
+                                const yyyy = plannedDateObj.getFullYear();
+                                const mm = String(plannedDateObj.getMonth() + 1).padStart(2, '0');
+                                const dd = String(plannedDateObj.getDate()).padStart(2, '0');
+                                plannedDateStr = `${yyyy}-${mm}-${dd}`;
+                            }
+                        } else if (typeof plannedDateRaw === 'string') {
+                            // 문자열 날짜 처리
+                            plannedDateStr = plannedDateRaw; 
+                            // 정렬을 위해 Date 객체 시도
+                            const parsed = new Date(plannedDateRaw);
+                            if (!isNaN(parsed)) plannedDateObj = parsed;
                         }
                     }
 
                     if (container === "") container = "배송준비중";
 
-                    // 그룹핑 (컨테이너+날짜가 같으면 합침)
                     const key = `${container}_${plannedDateStr}`;
 
                     if (groupedMap.has(key)) {
@@ -436,7 +454,7 @@
                     } else {
                         groupedMap.set(key, {
                             hfb, itemNo, itemName, 
-                            ssdRaw, edsRaw, // 원본 데이터 저장 (화면 표시 시 포맷팅)
+                            ssdRaw, edsRaw, 
                             plannedDateStr, plannedDateObj,
                             quantity: qty, container
                         });
@@ -469,7 +487,6 @@
             document.querySelector('.dashboard').style.display = 'flex';
             document.querySelector('.table-wrap').style.display = 'block';
 
-            // 통계
             document.getElementById('totalResults').innerText = results.length;
 
             const today = new Date();
@@ -490,7 +507,6 @@
                 document.getElementById('nextDeliveryDate').innerText = "-";
             }
 
-            // 테이블 출력 (날짜순 정렬)
             results.sort((a, b) => {
                 if (a.plannedDateStr === "미정") return 1;
                 if (b.plannedDateStr === "미정") return -1;
@@ -504,7 +520,7 @@
                     ? `<span class="date-tbd">미정</span>` 
                     : row.plannedDateStr;
                 
-                // SSD, EDS 포맷팅
+                // SSD, EDS 값 포맷팅 적용
                 let ssdStr = parseExcelDate(row.ssdRaw);
                 let edsStr = parseExcelDate(row.edsRaw);
 
