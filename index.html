@@ -9,6 +9,7 @@
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -19,13 +20,23 @@
         }
 
         body {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Roboto', sans-serif;
             background-color: var(--bg-color);
             margin: 0; padding: 0;
             color: var(--text-dark);
             display: flex; flex-direction: column;
             min-height: 100vh;
         }
+
+        /* --- 유틸리티 클래스 (영문 표기용) --- */
+        .en-sub { font-size: 0.75em; color: #777; font-weight: 300; margin-left: 6px; font-family: 'Roboto', sans-serif; }
+        .en-block { display: block; font-size: 0.85em; color: #888; margin-top: 3px; font-weight: 300; font-family: 'Roboto', sans-serif; }
+        .en-btn { font-size: 0.75em; display: block; font-weight: 300; opacity: 0.9; margin-top: -2px; }
+        .en-white { color: rgba(255,255,255,0.85); }
+        
+        /* PC/Mobile 텍스트 제어 */
+        .pc-only-text { display: block; }
+        .mobile-only-text { display: none; }
 
         /* --- 헤더 --- */
         header {
@@ -52,13 +63,14 @@
             text-align: left; position: relative;
         }
         .search-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .search-title { font-size: 1.2rem; font-weight: 600; color: var(--ikea-blue); display: flex; align-items: center; gap: 8px; }
-        .data-status { font-size: 0.8rem; background-color: #e5f4e7; color: #27ae60; padding: 5px 10px; border-radius: 4px; font-weight: 500; }
+        .search-title { font-size: 1.2rem; font-weight: 600; color: var(--ikea-blue); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+        
+        .data-status { font-size: 0.8rem; background-color: #e5f4e7; color: #27ae60; padding: 5px 10px; border-radius: 4px; font-weight: 500; text-align: right; }
 
         .input-wrapper { display: flex; gap: 10px; height: 50px; }
         input[type="text"] { flex-grow: 1; padding: 0 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
         
-        .btn-search { background-color: var(--ikea-blue); color: white; border: none; padding: 0 25px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 1rem; white-space: nowrap; }
+        .btn-search { background-color: var(--ikea-blue); color: white; border: none; padding: 0 25px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 1rem; white-space: nowrap; line-height: 1.2; }
         
         /* 바코드 버튼 (기본 숨김 - PC에서 안 보이게) */
         .btn-scan-trigger { 
@@ -71,7 +83,7 @@
 
         /* --- 결과 영역 --- */
         .result-section { width: 100%; margin-top: 30px; display: none; }
-        .status-msg { padding: 15px; border-radius: 4px; color: white; font-weight: bold; text-align: center; margin-bottom: 20px; max-width: 700px; margin-left: auto; margin-right: auto; }
+        .status-msg { padding: 15px; border-radius: 4px; color: white; font-weight: bold; text-align: center; margin-bottom: 20px; max-width: 700px; margin-left: auto; margin-right: auto; line-height: 1.4; }
         .status-success { background-color: #008844; } 
         .status-fail { background-color: #cc0000; }
 
@@ -132,8 +144,12 @@
             .dash-card { padding: 15px 5px; }
             .dash-card h3 { font-size: 1.3rem; }
             
-            .pc-table-view { display: none !important; } /* 테이블 삭제 */
+            .pc-table-view { display: none !important; }
             .mobile-result-view { display: block; }
+
+            /* 텍스트 토글 */
+            .pc-only-text { display: none; }
+            .mobile-only-text { display: block; }
         }
     </style>
 </head>
@@ -142,12 +158,15 @@
     <div id="scanner-modal">
         <div style="color:white; margin-bottom:10px; text-align:center;">
             <i class="fas fa-barcode"></i> 바코드에 카메라를 대주세요
+            <div class="en-block en-white">Point camera at barcode</div>
         </div>
         
         <div id="reader"></div>
 
         <div class="scan-controls">
-            <button class="btn-modal btn-close" onclick="stopScanner()">닫기 (Close)</button>
+            <button class="btn-modal btn-close" onclick="stopScanner()">
+                닫기 <span style="font-size:0.8em; color:#666;">(Close)</span>
+            </button>
         </div>
     </div>
 
@@ -158,30 +177,51 @@
                 STO373 Goods Arrival Plan Search
             </a>
         </div>
-        <div class="header-right">Ver 1.6 Fast Scan<br>Scan Logic Updated</div>
+        <div class="header-right">Ver 1.7 Global UX<br>Bilingual Support</div>
     </header>
 
     <div class="main-content">
         <div class="search-card">
             <div class="search-header">
-                <div class="search-title"><i class="fas fa-search"></i> 검색 (제품 번호 8자리)</div>
-                <div class="data-status"><i class="fas fa-check-circle"></i> 데이터 연결됨</div>
+                <div class="search-title">
+                    <i class="fas fa-search"></i> 검색 (제품 번호 8자리)
+                    <span class="en-sub">Search (Item No 8 digits)</span>
+                </div>
+                <div class="data-status">
+                    <i class="fas fa-check-circle"></i> 데이터 연결됨
+                    <div style="font-size:0.7em; color:#27ae60; opacity:0.8; font-weight:300;">Data Connected</div>
+                </div>
             </div>
             
             <div class="input-wrapper">
-                <input type="text" id="itemInput" placeholder="예: 80518273" maxlength="8">
+                <input type="text" id="itemInput" placeholder="예: 80518273 (e.g.)" maxlength="8">
                 <button class="btn-scan-trigger" onclick="startScanner()" title="바코드 스캔">
                     <i class="fas fa-camera"></i>
                 </button>
-                <button class="btn-search" onclick="performSearch()">검색</button>
+                <button class="btn-search" onclick="performSearch()">
+                    검색
+                    <span class="en-btn">Search</span>
+                </button>
             </div>
             
             <div class="helper-text">
-                <i class="fas fa-lightbulb" style="color: var(--ikea-yellow);"></i> <strong>Tip:</strong><br>
-                모바일에서는 카메라 아이콘을 눌러 바코드를 자동으로 입력할 수 있습니다.
+                <i class="fas fa-lightbulb" style="color: var(--ikea-yellow);"></i> <strong>Tip:</strong>
+                
+                <div class="pc-only-text">
+                    8자리 숫자를 입력 후 검색을 눌러주세요.
+                    <div class="en-block">Please enter 8-digit number and press search.</div>
+                </div>
+
+                <div class="mobile-only-text">
+                    모바일에서는 카메라 아이콘을 눌러 바코드를 자동으로 입력할 수 있습니다.
+                    <div class="en-block">On mobile, tap the camera icon to scan barcode automatically.</div>
+                </div>
             </div>
+            
             <div id="loading" style="text-align: center;">
-                <i class="fas fa-spinner fa-spin fa-2x"></i><br>데이터 검색 중...
+                <i class="fas fa-spinner fa-spin fa-2x"></i><br>
+                데이터 검색 중...
+                <div class="en-block" style="color:var(--ikea-blue);">Searching data...</div>
             </div>
         </div>
 
@@ -247,7 +287,7 @@
                 console.log("Data loaded. Rows:", rawData.length);
             } catch (error) {
                 console.error("Excel Load Error:", error);
-                document.querySelector('.data-status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 연결 실패';
+                document.querySelector('.data-status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 연결 실패 <div style="font-size:0.7em; opacity:0.8;">Connection Failed</div>';
                 document.querySelector('.data-status').style.color = '#e74c3c';
                 document.querySelector('.data-status').style.backgroundColor = '#fdeea9';
             }
@@ -258,9 +298,8 @@
         });
 
         // ==========================================
-        //  OPTIMIZED: Barcode Scanner Logic
+        //  Scanner Logic
         // ==========================================
-        
         function startScanner() {
             document.getElementById('scanner-modal').style.display = 'flex';
             
@@ -268,61 +307,36 @@
                 html5QrcodeScanner = new Html5Qrcode("reader");
             }
 
-            // [핵심 변경] 인식률 개선을 위한 설정
             const config = { 
-                fps: 15,                        // 초당 프레임 수 증가 (기본 10 -> 15)
-                qrbox: { width: 300, height: 150 }, // 직사각형 스캔 박스 (바코드 형태에 맞춤)
+                fps: 15, 
+                qrbox: { width: 300, height: 150 },
                 aspectRatio: 1.0,
-                // 하드웨어 가속 및 네이티브 감지 기능 사용 (지원되는 경우)
-                experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: true
-                }
+                experimentalFeatures: { useBarCodeDetectorIfSupported: true }
             };
             
-            // [핵심 변경] IKEA에서 주로 쓰는 바코드 포맷만 집중 탐색 (Code 128, EAN)
-            // 불필요한 포맷(QR, UPC 등)을 끄면 인식 속도와 정확도가 올라감
-            const formats = [ 
-                Html5QrcodeSupportedFormats.CODE_128, 
-                Html5QrcodeSupportedFormats.EAN_13 
-            ];
+            const formats = [ Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_13 ];
             
             html5QrcodeScanner.start(
-                { facingMode: "environment" }, 
-                config, 
-                onScanSuccess, 
-                onScanFailure
+                { facingMode: "environment" }, config, onScanSuccess, onScanFailure
             ).catch(err => {
                 console.log("Camera start failed", err);
-                alert("카메라를 시작할 수 없습니다. HTTPS 환경인지 확인해주세요.");
+                alert("카메라를 시작할 수 없습니다. HTTPS 환경인지 확인해주세요.\nCannot start camera. Please check HTTPS.");
             });
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            console.log(`Scan result: ${decodedText}`);
-            
-            // 숫자만 추출
             const numeric = decodedText.replace(/[^0-9]/g, '');
-            
-            // 8자리 이상인 경우 유효
             let resultItemNo = numeric;
-
-            // 8자리 패턴 찾기
             const match8 = numeric.match(/\d{8}/);
-            if (match8) {
-                resultItemNo = match8[0]; 
-            }
+            if (match8) resultItemNo = match8[0]; 
 
             document.getElementById('itemInput').value = resultItemNo;
-            
             if (navigator.vibrate) navigator.vibrate(200);
-
             stopScanner();
             performSearch();
         }
 
-        function onScanFailure(error) {
-            // 실패 시 로그 무시 (반복 호출됨)
-        }
+        function onScanFailure(error) {}
 
         function stopScanner() {
             if (html5QrcodeScanner) {
@@ -338,7 +352,7 @@
 
 
         // ==========================================
-        //  Existing Search Logic
+        //  Search & Display Logic
         // ==========================================
         function parseExcelDate(value) {
             if (!value) return "-";
@@ -361,7 +375,10 @@
 
         function performSearch() {
             const inputRaw = document.getElementById('itemInput').value.trim();
-            if (!inputRaw) { alert("제품번호를 입력해주세요."); return; }
+            if (!inputRaw) { 
+                alert("제품번호를 입력해주세요.\nPlease enter Item No."); 
+                return; 
+            }
 
             let searchItemNo = inputRaw;
             if (inputRaw.length < 8) searchItemNo = inputRaw.padStart(8, '0');
@@ -434,11 +451,13 @@
             mobileScheduleList.innerHTML = '';
 
             if (results.length > 0) {
-                statusBar.textContent = `${results.length}개의 배송 계획을 찾았습니다!`;
+                statusBar.innerHTML = `${results.length}개의 배송 계획을 찾았습니다! 
+                    <div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">Found ${results.length} arrival plans!</div>`;
                 statusBar.className = 'status-msg status-success';
                 document.querySelector('.dashboard').style.display = 'flex';
             } else {
-                statusBar.textContent = '검색 결과가 존재하지 않습니다.';
+                statusBar.innerHTML = '검색 결과가 존재하지 않습니다. 
+                    <div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">No results found.</div>';
                 statusBar.className = 'status-msg status-fail';
                 document.querySelector('.dashboard').style.display = 'none';
                 return;
