@@ -158,7 +158,7 @@
             </a>
         </div>
         <div class="header-right">
-            Ver 2.2 D-Day Included<br>
+            Ver 2.1 Future Only<br>
             Bilingual Support
             <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">
                 data update : -
@@ -375,7 +375,7 @@
 
         function searchExcel(targetCleanInput) {
             const groupedMap = new Map();
-            // [중요] 오늘 날짜 계산 (시분초 초기화하여 순수 날짜만 비교)
+            // 오늘 날짜 계산 (시분초 초기화)
             const today = new Date();
             today.setHours(0,0,0,0);
             
@@ -412,8 +412,6 @@
                             if (!isNaN(tempDate)) {
                                 if (tempDate.getFullYear() > 1900) {
                                     plannedDateObj = tempDate;
-                                    // [중요] 시분초 초기화 (D-day 비교 정확성을 위함)
-                                    plannedDateObj.setHours(0,0,0,0);
                                     plannedDateStr = tempDate.toISOString().split('T')[0];
                                 }
                             }
@@ -421,18 +419,14 @@
                             if (!plannedDateRaw.startsWith("1900")) {
                                 plannedDateStr = plannedDateRaw; 
                                 const parsed = new Date(plannedDateRaw);
-                                if (!isNaN(parsed)) {
-                                    plannedDateObj = parsed;
-                                    plannedDateObj.setHours(0,0,0,0);
-                                }
+                                if (!isNaN(parsed)) plannedDateObj = parsed;
                             }
                         }
                     }
 
-                    // [수정된 로직] 날짜가 존재하고(미정 아님), 오늘보다 작으면(어제 이전) 스킵
-                    // plannedDateObj == today (오늘)이면 스킵되지 않음
+                    // [NEW] 과거 날짜 필터링 (미정은 허용, 날짜가 있고 오늘보다 작으면 스킵)
                     if (plannedDateObj && plannedDateObj < today) {
-                        return; // 과거 데이터 제외
+                        return; // forEach의 다음 루프로 넘어감
                     }
 
                     if (containerStr === "") containerStr = "배송준비중";
@@ -485,13 +479,16 @@
 
             document.getElementById('totalResults').innerText = results.length;
             
+            // 날짜순 정렬 (미정은 뒤로)
             results.sort((a, b) => {
                 if (a.plannedDateStr === "미정") return 1;
                 if (b.plannedDateStr === "미정") return -1;
                 return (a.plannedDateObj || new Date(9999,0,1)) - (b.plannedDateObj || new Date(9999,0,1));
             });
 
+            // 미래 수량 계산 (이제 results 자체가 이미 미래만 있음)
             if (results.length > 0) {
+                // 가장 빠른 날짜 (정렬했으므로 0번째가 가장 빠름, 미정이면 없는 것)
                 const first = results[0];
                 if (first.plannedDateStr !== "미정") {
                     const nextDate = first.plannedDateStr;
