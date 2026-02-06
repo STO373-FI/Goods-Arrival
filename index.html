@@ -158,7 +158,7 @@
             </a>
         </div>
         <div class="header-right">
-            Ver 2.0 Strong Match<br>
+            Ver 2.2 D-Day Included<br>
             Bilingual Support
             <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">
                 data update : -
@@ -332,7 +332,7 @@
             }
         }
 
-        // --- 검색 로직 (강력한 매칭) ---
+        // --- 검색 로직 ---
         function parseExcelDate(value) {
             if (!value) return "-";
             if (typeof value === 'number') {
@@ -348,12 +348,10 @@
             } 
             if (typeof value === 'string') {
                 const trimmed = value.trim();
-                // 날짜가 텍스트로 들어있는 경우 (예: 2026-02-13 or 20260213)
                 if (/^\d{8}$/.test(trimmed)) {
                     return `${trimmed.substring(0, 4)}-${trimmed.substring(4, 6)}-${trimmed.substring(6, 8)}`;
                 }
                 if (trimmed.startsWith("1900")) return "-";
-                // 이미 YYYY-MM-DD 형태면 그대로
                 if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
             }
             return value;
@@ -365,13 +363,9 @@
                 alert("제품번호를 입력해주세요.\nPlease enter Item No."); 
                 return; 
             }
-
-            // 입력값 정규화 (숫자만 추출)
             const cleanInput = inputRaw.replace(/[^0-9]/g, '');
-
             document.getElementById('loading').style.display = 'block';
             document.getElementById('resultSection').style.display = 'none';
-
             setTimeout(() => {
                 const results = searchExcel(cleanInput);
                 displayResults(results);
@@ -381,24 +375,20 @@
 
         function searchExcel(targetCleanInput) {
             const groupedMap = new Map();
+            // [중요] 오늘 날짜 계산 (시분초 초기화하여 순수 날짜만 비교)
+            const today = new Date();
+            today.setHours(0,0,0,0);
             
             rawData.forEach(row => {
-                // E열: ItemNo, B열: Container
                 let rawE = row['E'];
                 let rawB = row['B'];
-                
                 let itemNoStr = String(rawE || "").trim();
                 let containerStr = String(rawB || "").trim();
                 
-                // 엑셀 값도 숫자만 남기고 정규화
                 let cleanItemNo = itemNoStr.replace(/[^0-9]/g, '');
-                let cleanContainer = containerStr.replace(/[^a-zA-Z0-9]/g, ''); // 컨테이너는 알파벳 포함
+                let cleanContainer = containerStr.replace(/[^a-zA-Z0-9]/g, ''); 
 
-                // [매칭 로직 2.0]
-                // 1. 제품번호(Clean)가 입력값(Clean)을 포함하거나, 입력값이 제품번호를 포함하는 경우
-                // 2. 입력값이 컨테이너 번호와 일치하는 경우 (비상용)
                 let isMatch = false;
-
                 if (cleanItemNo && (cleanItemNo.includes(targetCleanInput) || targetCleanInput.includes(cleanItemNo))) {
                     isMatch = true;
                 } else if (cleanContainer && cleanContainer.toLowerCase().includes(targetCleanInput.toLowerCase())) {
@@ -416,13 +406,14 @@
                     let plannedDateStr = "미정";
                     let plannedDateObj = null;
 
-                    // 날짜 파싱 강화
                     if (plannedDateRaw) {
                         if (typeof plannedDateRaw === 'number' && plannedDateRaw < 100000) {
                             const tempDate = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000));
                             if (!isNaN(tempDate)) {
                                 if (tempDate.getFullYear() > 1900) {
                                     plannedDateObj = tempDate;
+                                    // [중요] 시분초 초기화 (D-day 비교 정확성을 위함)
+                                    plannedDateObj.setHours(0,0,0,0);
                                     plannedDateStr = tempDate.toISOString().split('T')[0];
                                 }
                             }
@@ -430,13 +421,22 @@
                             if (!plannedDateRaw.startsWith("1900")) {
                                 plannedDateStr = plannedDateRaw; 
                                 const parsed = new Date(plannedDateRaw);
-                                if (!isNaN(parsed)) plannedDateObj = parsed;
+                                if (!isNaN(parsed)) {
+                                    plannedDateObj = parsed;
+                                    plannedDateObj.setHours(0,0,0,0);
+                                }
                             }
                         }
                     }
+
+                    // [수정된 로직] 날짜가 존재하고(미정 아님), 오늘보다 작으면(어제 이전) 스킵
+                    // plannedDateObj == today (오늘)이면 스킵되지 않음
+                    if (plannedDateObj && plannedDateObj < today) {
+                        return; // 과거 데이터 제외
+                    }
+
                     if (containerStr === "") containerStr = "배송준비중";
 
-                    // 그룹핑 키
                     const key = `${containerStr}_${plannedDateStr}`;
                     
                     if (groupedMap.has(key)) {
@@ -444,7 +444,7 @@
                     } else {
                         groupedMap.set(key, { 
                             hfb, 
-                            itemNo: itemNoStr, // 원본 포맷 유지해서 보여줌
+                            itemNo: itemNoStr, 
                             itemName, 
                             ssdRaw, 
                             edsRaw, 
@@ -476,16 +476,14 @@
                 statusBar.className = 'status-msg status-success';
                 document.querySelector('.dashboard').style.display = 'flex';
             } else {
-                statusBar.innerHTML = `검색 결과가 존재하지 않습니다. 
-                    <div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">No results found.</div>`;
+                statusBar.innerHTML = `검색 결과가 존재하지 않습니다.<br><span style="font-size:0.8em">(과거 날짜는 표시되지 않습니다)</span>
+                    <div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">No results found (Past dates excluded).</div>`;
                 statusBar.className = 'status-msg status-fail';
                 document.querySelector('.dashboard').style.display = 'none';
                 return;
             }
 
-            // 통계 및 정렬
             document.getElementById('totalResults').innerText = results.length;
-            const today = new Date(); today.setHours(0,0,0,0);
             
             results.sort((a, b) => {
                 if (a.plannedDateStr === "미정") return 1;
@@ -493,20 +491,22 @@
                 return (a.plannedDateObj || new Date(9999,0,1)) - (b.plannedDateObj || new Date(9999,0,1));
             });
 
-            // 미래 날짜 계산
-            const futureDeliveries = results.filter(r => r.plannedDateObj && r.plannedDateObj >= today);
-            
-            if (futureDeliveries.length > 0) {
-                const nextDate = futureDeliveries[0].plannedDateStr;
-                const totalNextQty = futureDeliveries.filter(r => r.plannedDateStr === nextDate).reduce((sum, item) => sum + item.quantity, 0);
-                document.getElementById('futureDeliveryQty').innerText = totalNextQty;
-                document.getElementById('nextDeliveryDate').innerText = nextDate;
+            if (results.length > 0) {
+                const first = results[0];
+                if (first.plannedDateStr !== "미정") {
+                    const nextDate = first.plannedDateStr;
+                    const totalNextQty = results.filter(r => r.plannedDateStr === nextDate).reduce((sum, item) => sum + item.quantity, 0);
+                    document.getElementById('futureDeliveryQty').innerText = totalNextQty;
+                    document.getElementById('nextDeliveryDate').innerText = nextDate;
+                } else {
+                    document.getElementById('futureDeliveryQty').innerText = "0";
+                    document.getElementById('nextDeliveryDate').innerText = "-";
+                }
             } else {
                 document.getElementById('futureDeliveryQty').innerText = "0";
                 document.getElementById('nextDeliveryDate').innerText = "-";
             }
 
-            // PC 렌더링
             results.forEach(row => {
                 const tr = document.createElement('tr');
                 let dateHtml = row.plannedDateStr === "미정" ? `<span class="date-tbd">미정</span>` : row.plannedDateStr;
@@ -518,7 +518,6 @@
                 pcTbody.appendChild(tr);
             });
 
-            // 모바일 렌더링
             if(results.length > 0) {
                 const common = results[0]; 
                 mobileProductSummary.innerHTML = `
