@@ -28,13 +28,11 @@
             min-height: 100vh;
         }
 
-        /* --- 유틸리티 클래스 (영문 표기용) --- */
+        /* --- 유틸리티 클래스 --- */
         .en-sub { font-size: 0.75em; color: #777; font-weight: 300; margin-left: 6px; font-family: 'Roboto', sans-serif; }
         .en-block { display: block; font-size: 0.85em; color: #888; margin-top: 3px; font-weight: 300; font-family: 'Roboto', sans-serif; }
         .en-btn { font-size: 0.75em; display: block; font-weight: 300; opacity: 0.9; margin-top: -2px; }
         .en-white { color: rgba(255,255,255,0.85); }
-        
-        /* PC/Mobile 텍스트 제어 */
         .pc-only-text { display: block; }
         .mobile-only-text { display: none; }
 
@@ -43,7 +41,7 @@
             background-color: var(--ikea-blue);
             color: white;
             padding: 0 40px;
-            height: 80px; /* 날짜 추가로 높이 약간 증가 */
+            height: 80px;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
@@ -56,7 +54,6 @@
             padding: 60px 20px; width: 100%; max-width: 1400px; margin: 0 auto; box-sizing: border-box;
         }
 
-        /* 검색 카드 */
         .search-card {
             background: white; padding: 40px; border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 700px;
@@ -72,10 +69,8 @@
         
         .btn-search { background-color: var(--ikea-blue); color: white; border: none; padding: 0 25px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 1rem; white-space: nowrap; line-height: 1.2; }
         
-        /* 바코드 버튼 (기본 숨김 - PC에서 안 보이게) */
         .btn-scan-trigger { 
-            display: none; /* PC에서는 기본적으로 숨김 */
-            background-color: #333; color: white; border: none; padding: 0 15px; border-radius: 4px; 
+            display: none; background-color: #333; color: white; border: none; padding: 0 15px; border-radius: 4px; 
             cursor: pointer; font-size: 1.2rem; align-items: center; justify-content: center;
         }
 
@@ -92,7 +87,6 @@
         .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; color: var(--text-dark); white-space: nowrap; }
         .dash-card p { font-size: 0.8rem; color: #888; text-transform: uppercase; margin: 0; }
 
-        /* PC용 테이블 */
         .pc-table-view { display: block; }
         .table-wrap { background: white; border-radius: 8px; overflow-x: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
@@ -100,7 +94,6 @@
         th { text-align: left; padding: 15px; font-size: 0.8rem; color: #555; text-transform: uppercase; white-space: nowrap;}
         td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.9rem; vertical-align: middle; }
 
-        /* 모바일용 뷰 */
         .mobile-result-view { display: none; width: 100%; max-width: 600px; margin: 0 auto; }
         .product-summary-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid var(--ikea-yellow); }
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; border-bottom: 1px dashed #eee; padding-bottom: 8px;}
@@ -113,15 +106,12 @@
         .schedule-container { font-size: 0.75rem; color: #777; margin-top: 2px; text-align: right; }
         .date-tbd { background-color: #fff4f4; color: #d63031; font-weight: bold; padding: 4px 8px; border-radius: 4px; display:inline-block;}
 
-        /* --- 스캐너 모달 --- */
         #scanner-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 9999;
             display: none; flex-direction: column; align-items: center; justify-content: center;
         }
-        
         #reader { width: 100%; max-width: 500px; background: black; border-radius: 8px; overflow: hidden; }
-        
         .scan-controls { margin-top: 20px; display: flex; gap: 15px; }
         .btn-modal { padding: 10px 20px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
         .btn-close { background: white; color: black; }
@@ -129,25 +119,17 @@
         footer { background-color: #eef0f3; text-align: center; padding: 15px 0; color: #888; font-size: 0.75rem; border-top: 1px solid #e0e0e0; line-height: 1.4; }
         #loading { display: none; margin-top: 20px; color: var(--ikea-blue); }
 
-        /* =========================================
-           📱 반응형 (Mobile) 스타일 
-           ========================================= */
         @media (max-width: 768px) {
             header { flex-direction: column; height: auto; padding: 15px; gap: 10px; text-align: center; }
             .header-left a { justify-content: center; font-size: 1.2rem; }
-            
             .main-content { padding: 30px 15px; }
             .search-card { padding: 20px; }
-            .btn-scan-trigger { display: flex; } /* 모바일에서만 스캔 버튼 보임 */
-            
+            .btn-scan-trigger { display: flex; }
             .dashboard { gap: 10px; }
             .dash-card { padding: 15px 5px; }
             .dash-card h3 { font-size: 1.3rem; }
-            
             .pc-table-view { display: none !important; }
             .mobile-result-view { display: block; }
-
-            /* 텍스트 토글 */
             .pc-only-text { display: none; }
             .mobile-only-text { display: block; }
         }
@@ -160,9 +142,7 @@
             <i class="fas fa-barcode"></i> 바코드에 카메라를 대주세요
             <div class="en-block en-white">Point camera at barcode</div>
         </div>
-        
         <div id="reader"></div>
-
         <div class="scan-controls">
             <button class="btn-modal btn-close" onclick="stopScanner()">
                 닫기 <span style="font-size:0.8em; color:#666;">(Close)</span>
@@ -178,7 +158,7 @@
             </a>
         </div>
         <div class="header-right">
-            Ver 1.9 Auto Date<br>
+            Ver 2.0 Strong Match<br>
             Bilingual Support
             <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">
                 data update : -
@@ -200,7 +180,7 @@
             </div>
             
             <div class="input-wrapper">
-                <input type="text" id="itemInput" placeholder="예: 80518273 (e.g.)" maxlength="8">
+                <input type="text" id="itemInput" placeholder="예: 80518273 (e.g.)" maxlength="11">
                 <button class="btn-scan-trigger" onclick="startScanner()" title="바코드 스캔">
                     <i class="fas fa-camera"></i>
                 </button>
@@ -281,10 +261,7 @@
 
         window.onload = async function() {
             try {
-                // Fetch 요청 시 헤더 정보도 함께 확인
                 const response = await fetch(EXCEL_FILE_URL);
-                
-                // 1. 헤더에서 Last-Modified 정보 가져와서 표시하기
                 const lastModified = response.headers.get('Last-Modified');
                 if (lastModified) {
                     const dateObj = new Date(lastModified);
@@ -316,29 +293,15 @@
             if (e.key === 'Enter') performSearch();
         });
 
-        // ==========================================
-        //  Scanner Logic
-        // ==========================================
+        // --- 스캐너 로직 ---
         function startScanner() {
             document.getElementById('scanner-modal').style.display = 'flex';
-            
             if (!html5QrcodeScanner) {
                 html5QrcodeScanner = new Html5Qrcode("reader");
             }
-
-            const config = { 
-                fps: 15, 
-                qrbox: { width: 300, height: 150 },
-                aspectRatio: 1.0,
-                experimentalFeatures: { useBarCodeDetectorIfSupported: true }
-            };
-            
-            const formats = [ Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_13 ];
-            
-            html5QrcodeScanner.start(
-                { facingMode: "environment" }, config, onScanSuccess, onScanFailure
-            ).catch(err => {
-                console.log("Camera start failed", err);
+            const config = { fps: 15, qrbox: { width: 300, height: 150 }, aspectRatio: 1.0, experimentalFeatures: { useBarCodeDetectorIfSupported: true } };
+            html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+            .catch(err => {
                 alert("카메라를 시작할 수 없습니다. HTTPS 환경인지 확인해주세요.\nCannot start camera. Please check HTTPS.");
             });
         }
@@ -369,13 +332,9 @@
             }
         }
 
-
-        // ==========================================
-        //  Search & Display Logic
-        // ==========================================
+        // --- 검색 로직 (강력한 매칭) ---
         function parseExcelDate(value) {
             if (!value) return "-";
-            
             if (typeof value === 'number') {
                 if (value > 19000000) { 
                     const str = String(value);
@@ -387,13 +346,15 @@
                     return dateObj.toISOString().split('T')[0];
                 }
             } 
-            
             if (typeof value === 'string') {
                 const trimmed = value.trim();
+                // 날짜가 텍스트로 들어있는 경우 (예: 2026-02-13 or 20260213)
                 if (/^\d{8}$/.test(trimmed)) {
                     return `${trimmed.substring(0, 4)}-${trimmed.substring(4, 6)}-${trimmed.substring(6, 8)}`;
                 }
                 if (trimmed.startsWith("1900")) return "-";
+                // 이미 YYYY-MM-DD 형태면 그대로
+                if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
             }
             return value;
         }
@@ -405,35 +366,46 @@
                 return; 
             }
 
-            let searchItemNo = inputRaw;
-            if (inputRaw.length < 8) searchItemNo = inputRaw.padStart(8, '0');
+            // 입력값 정규화 (숫자만 추출)
+            const cleanInput = inputRaw.replace(/[^0-9]/g, '');
 
             document.getElementById('loading').style.display = 'block';
             document.getElementById('resultSection').style.display = 'none';
 
             setTimeout(() => {
-                const results = searchExcel(searchItemNo);
+                const results = searchExcel(cleanInput);
                 displayResults(results);
                 document.getElementById('loading').style.display = 'none';
             }, 300);
         }
 
-        function searchExcel(targetItemNo) {
+        function searchExcel(targetCleanInput) {
             const groupedMap = new Map();
+            
             rawData.forEach(row => {
+                // E열: ItemNo, B열: Container
                 let rawE = row['E'];
-                let itemNo = String(rawE || "").trim();
+                let rawB = row['B'];
                 
-                if (/^\d+$/.test(itemNo) && itemNo.length < 8) {
-                    itemNo = itemNo.padStart(8, '0');
-                }
+                let itemNoStr = String(rawE || "").trim();
+                let containerStr = String(rawB || "").trim();
                 
+                // 엑셀 값도 숫자만 남기고 정규화
+                let cleanItemNo = itemNoStr.replace(/[^0-9]/g, '');
+                let cleanContainer = containerStr.replace(/[^a-zA-Z0-9]/g, ''); // 컨테이너는 알파벳 포함
+
+                // [매칭 로직 2.0]
+                // 1. 제품번호(Clean)가 입력값(Clean)을 포함하거나, 입력값이 제품번호를 포함하는 경우
+                // 2. 입력값이 컨테이너 번호와 일치하는 경우 (비상용)
                 let isMatch = false;
-                if (itemNo === targetItemNo) isMatch = true;
-                else if (targetItemNo.length > 8 && targetItemNo.includes(itemNo) && itemNo.length === 8) isMatch = true;
+
+                if (cleanItemNo && (cleanItemNo.includes(targetCleanInput) || targetCleanInput.includes(cleanItemNo))) {
+                    isMatch = true;
+                } else if (cleanContainer && cleanContainer.toLowerCase().includes(targetCleanInput.toLowerCase())) {
+                    isMatch = true;
+                }
 
                 if (isMatch) {
-                    let container = String(row['B'] || "").trim();
                     let itemName = row['C'] || "";
                     let hfb = row['F'] || "";
                     let ssdRaw = row['G']; 
@@ -444,6 +416,7 @@
                     let plannedDateStr = "미정";
                     let plannedDateObj = null;
 
+                    // 날짜 파싱 강화
                     if (plannedDateRaw) {
                         if (typeof plannedDateRaw === 'number' && plannedDateRaw < 100000) {
                             const tempDate = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000));
@@ -461,13 +434,25 @@
                             }
                         }
                     }
-                    if (container === "") container = "배송준비중";
+                    if (containerStr === "") containerStr = "배송준비중";
 
-                    const key = `${container}_${plannedDateStr}`;
+                    // 그룹핑 키
+                    const key = `${containerStr}_${plannedDateStr}`;
+                    
                     if (groupedMap.has(key)) {
                         groupedMap.get(key).quantity += qty;
                     } else {
-                        groupedMap.set(key, { hfb, itemNo, itemName, ssdRaw, edsRaw, plannedDateStr, plannedDateObj, quantity: qty, container });
+                        groupedMap.set(key, { 
+                            hfb, 
+                            itemNo: itemNoStr, // 원본 포맷 유지해서 보여줌
+                            itemName, 
+                            ssdRaw, 
+                            edsRaw, 
+                            plannedDateStr, 
+                            plannedDateObj, 
+                            quantity: qty, 
+                            container: containerStr 
+                        });
                     }
                 }
             });
@@ -475,14 +460,12 @@
         }
 
         function displayResults(results) {
-            const resultSection = document.getElementById('resultSection');
             const statusBar = document.getElementById('statusBar');
             const pcTbody = document.getElementById('pcResultBody');
-            
             const mobileProductSummary = document.getElementById('mobileProductSummary');
             const mobileScheduleList = document.getElementById('mobileScheduleList');
 
-            resultSection.style.display = 'block';
+            document.getElementById('resultSection').style.display = 'block';
             pcTbody.innerHTML = '';
             mobileProductSummary.innerHTML = '';
             mobileScheduleList.innerHTML = '';
@@ -500,12 +483,19 @@
                 return;
             }
 
-            // 통계
+            // 통계 및 정렬
             document.getElementById('totalResults').innerText = results.length;
             const today = new Date(); today.setHours(0,0,0,0);
-            const futureDeliveries = results.filter(r => r.plannedDateObj && r.plannedDateObj >= today);
-            futureDeliveries.sort((a, b) => a.plannedDateObj - b.plannedDateObj);
+            
+            results.sort((a, b) => {
+                if (a.plannedDateStr === "미정") return 1;
+                if (b.plannedDateStr === "미정") return -1;
+                return (a.plannedDateObj || new Date(9999,0,1)) - (b.plannedDateObj || new Date(9999,0,1));
+            });
 
+            // 미래 날짜 계산
+            const futureDeliveries = results.filter(r => r.plannedDateObj && r.plannedDateObj >= today);
+            
             if (futureDeliveries.length > 0) {
                 const nextDate = futureDeliveries[0].plannedDateStr;
                 const totalNextQty = futureDeliveries.filter(r => r.plannedDateStr === nextDate).reduce((sum, item) => sum + item.quantity, 0);
@@ -516,13 +506,7 @@
                 document.getElementById('nextDeliveryDate').innerText = "-";
             }
 
-            results.sort((a, b) => {
-                if (a.plannedDateStr === "미정") return 1;
-                if (b.plannedDateStr === "미정") return -1;
-                return a.plannedDateObj - b.plannedDateObj;
-            });
-
-            // PC 테이블
+            // PC 렌더링
             results.forEach(row => {
                 const tr = document.createElement('tr');
                 let dateHtml = row.plannedDateStr === "미정" ? `<span class="date-tbd">미정</span>` : row.plannedDateStr;
@@ -534,7 +518,7 @@
                 pcTbody.appendChild(tr);
             });
 
-            // 모바일 뷰
+            // 모바일 렌더링
             if(results.length > 0) {
                 const common = results[0]; 
                 mobileProductSummary.innerHTML = `
