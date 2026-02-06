@@ -43,7 +43,7 @@
             background-color: var(--ikea-blue);
             color: white;
             padding: 0 40px;
-            height: 70px;
+            height: 80px; /* 날짜 추가로 높이 약간 증가 */
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
@@ -177,7 +177,13 @@
                 STO373 Goods Arrival Plan Search
             </a>
         </div>
-        <div class="header-right">Ver 1.8 Data Logic Fix<br>Bilingual Support</div>
+        <div class="header-right">
+            Ver 1.9 Auto Date<br>
+            Bilingual Support
+            <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">
+                data update : -
+            </div>
+        </div>
     </header>
 
     <div class="main-content">
@@ -275,7 +281,19 @@
 
         window.onload = async function() {
             try {
+                // Fetch 요청 시 헤더 정보도 함께 확인
                 const response = await fetch(EXCEL_FILE_URL);
+                
+                // 1. 헤더에서 Last-Modified 정보 가져와서 표시하기
+                const lastModified = response.headers.get('Last-Modified');
+                if (lastModified) {
+                    const dateObj = new Date(lastModified);
+                    const yyyy = dateObj.getFullYear();
+                    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const dd = String(dateObj.getDate()).padStart(2, '0');
+                    document.getElementById('data-update-date').innerText = `data update : ${yyyy}-${mm}-${dd}`;
+                }
+
                 if (!response.ok) throw new Error("Excel file not found");
                 const arrayBuffer = await response.arrayBuffer();
                 const workbook = XLSX.read(arrayBuffer, { type: 'array' });
@@ -358,28 +376,24 @@
         function parseExcelDate(value) {
             if (!value) return "-";
             
-            // 숫자형 날짜 (Excel Serial or YYYYMMDD)
             if (typeof value === 'number') {
-                if (value > 19000000) { // YYYYMMDD
+                if (value > 19000000) { 
                     const str = String(value);
                     return `${str.substring(0, 4)}-${str.substring(4, 6)}-${str.substring(6, 8)}`;
                 }
-                // Excel Serial Date
                 const dateObj = new Date(Math.round((value - 25569) * 86400 * 1000));
                 if (!isNaN(dateObj)) {
-                    // [중요] 1900년 이하는 더미 데이터로 간주하고 "-" 리턴
                     if (dateObj.getFullYear() <= 1900) return "-";
                     return dateObj.toISOString().split('T')[0];
                 }
             } 
             
-            // 문자열 (20220101 or 1900-01-00)
             if (typeof value === 'string') {
                 const trimmed = value.trim();
                 if (/^\d{8}$/.test(trimmed)) {
                     return `${trimmed.substring(0, 4)}-${trimmed.substring(4, 6)}-${trimmed.substring(6, 8)}`;
                 }
-                if (trimmed.startsWith("1900")) return "-"; // 1900년 시작 문자열 무시
+                if (trimmed.startsWith("1900")) return "-";
             }
             return value;
         }
@@ -407,11 +421,9 @@
         function searchExcel(targetItemNo) {
             const groupedMap = new Map();
             rawData.forEach(row => {
-                // [FIX] 데이터 보정: 숫자형이거나 짧은 문자열일 경우 8자리 패딩
                 let rawE = row['E'];
                 let itemNo = String(rawE || "").trim();
                 
-                // 만약 숫자로만 구성되어 있고 8자리 미만이라면 0 패딩 (예: 508956 -> 00508956)
                 if (/^\d+$/.test(itemNo) && itemNo.length < 8) {
                     itemNo = itemNo.padStart(8, '0');
                 }
@@ -432,19 +444,16 @@
                     let plannedDateStr = "미정";
                     let plannedDateObj = null;
 
-                    // Planned Date 로직 개선
                     if (plannedDateRaw) {
                         if (typeof plannedDateRaw === 'number' && plannedDateRaw < 100000) {
                             const tempDate = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000));
                             if (!isNaN(tempDate)) {
-                                // 1900년 이하는 미정으로 처리
                                 if (tempDate.getFullYear() > 1900) {
                                     plannedDateObj = tempDate;
                                     plannedDateStr = tempDate.toISOString().split('T')[0];
                                 }
                             }
                         } else if (typeof plannedDateRaw === 'string') {
-                            // "1900-01-00" 같은 문자열 체크
                             if (!plannedDateRaw.startsWith("1900")) {
                                 plannedDateStr = plannedDateRaw; 
                                 const parsed = new Date(plannedDateRaw);
@@ -503,7 +512,6 @@
                 document.getElementById('futureDeliveryQty').innerText = totalNextQty;
                 document.getElementById('nextDeliveryDate').innerText = nextDate;
             } else {
-                // 미래 날짜가 없으면 가장 최근 예정일이라도 표시하거나, "미정" 처리
                 document.getElementById('futureDeliveryQty').innerText = "0";
                 document.getElementById('nextDeliveryDate').innerText = "-";
             }
