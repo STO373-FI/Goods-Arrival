@@ -9,7 +9,7 @@
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -17,6 +17,7 @@
             --ikea-yellow: #ffdb00;
             --bg-color: #f5f7f8;
             --text-dark: #111;
+            --sidebar-width: 250px;
         }
 
         body {
@@ -24,19 +25,66 @@
             background-color: var(--bg-color);
             margin: 0; padding: 0;
             color: var(--text-dark);
-            display: flex; flex-direction: column;
+            display: flex; 
             min-height: 100vh;
         }
 
-        /* --- 유틸리티 클래스 --- */
-        .en-sub { font-size: 0.75em; color: #777; font-weight: 300; margin-left: 6px; font-family: 'Roboto', sans-serif; }
-        .en-block { display: block; font-size: 0.85em; color: #888; margin-top: 3px; font-weight: 300; font-family: 'Roboto', sans-serif; }
-        .en-btn { font-size: 0.75em; display: block; font-weight: 300; opacity: 0.9; margin-top: -2px; }
-        .en-white { color: rgba(255,255,255,0.85); }
-        .pc-only-text { display: block; }
-        .mobile-only-text { display: none; }
+        /* --- 레이아웃 (사이드바 + 메인) --- */
+        .app-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
 
-        /* --- 헤더 --- */
+        /* 사이드바 스타일 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #95a5a6; /* 회색 배경 (요청 이미지 참조) */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100%;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background-color: #7f8c8d;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-item:hover { background-color: rgba(255,255,255,0.1); }
+        
+        .nav-item.active {
+            background-color: var(--ikea-blue); /* 선택된 탭 파란색 */
+            color: var(--ikea-yellow);
+            font-weight: bold;
+            border-left: 5px solid var(--ikea-yellow);
+        }
+
+        .nav-sub { font-size: 0.8rem; opacity: 0.7; display: block; font-weight: 300; }
+
+        /* 메인 컨텐츠 영역 */
+        .content-area {
+            flex: 1;
+            margin-left: var(--sidebar-width); /* 사이드바 공간 확보 */
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        /* --- 공통 헤더 --- */
         header {
             background-color: var(--ikea-blue);
             color: white;
@@ -46,104 +94,95 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
-        .header-left {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-        }
+        .header-left { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
+        .header-left .main-title { color: white; text-decoration: none; font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 10px; transition: opacity 0.2s; }
+        .header-left .main-title:hover { opacity: 0.8; text-decoration: underline; }
 
-        /* [수정됨] 메인 타이틀 호버 효과 추가 */
-        .header-left .main-title { 
-            color: white; 
-            text-decoration: none; 
-            font-size: 1.4rem; 
-            font-weight: 700; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            transition: opacity 0.2s; /* 부드러운 전환 */
-        }
-        
-        /* 마우스 올렸을 때 효과 */
-        .header-left .main-title:hover {
-            opacity: 0.8; /* 약간 투명하게 (음영 효과) */
-            text-decoration: underline; /* 밑줄 */
-        }
-
-        /* 링크 그룹 */
-        .link-group {
-            display: flex;
-            gap: 20px;
-            margin-top: 5px;
-            margin-left: 38px;
-            flex-wrap: wrap;
-        }
-
-        .header-sub-link {
-            color: var(--ikea-yellow);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem; 
-            font-family: 'Roboto', sans-serif;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: opacity 0.2s;
-        }
-        .header-sub-link:hover {
-            opacity: 0.8;
-            text-decoration: underline;
-        }
-
+        .link-group { display: flex; gap: 20px; margin-top: 5px; margin-left: 38px; flex-wrap: wrap; }
+        .header-sub-link { color: var(--ikea-yellow); text-decoration: none; font-weight: 500; font-size: 0.95rem; font-family: 'Roboto', sans-serif; display: flex; align-items: center; gap: 5px; transition: opacity 0.2s; }
+        .header-sub-link:hover { opacity: 0.8; text-decoration: underline; }
         .header-right { text-align: right; font-size: 0.75rem; line-height: 1.3; opacity: 0.9; }
 
-        /* --- 메인 컨텐츠 --- */
-        .main-content {
-            flex: 1; display: flex; flex-direction: column; align-items: center;
-            padding: 60px 20px; width: 100%; max-width: 1400px; margin: 0 auto; box-sizing: border-box;
-        }
+        /* --- 탭 내용 영역 --- */
+        .tab-content { display: none; padding: 20px; width: 100%; box-sizing: border-box; }
+        .tab-content.active { display: flex; flex-direction: column; align-items: center; }
 
-        .search-card {
-            background: white; padding: 40px; border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 700px;
-            text-align: left; position: relative;
-        }
+        /* === [Tab 1] Article Search Styles (기존 Ver 2.8) === */
+        .search-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 700px; text-align: left; position: relative; }
         .search-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .search-title { font-size: 1.2rem; font-weight: 600; color: var(--ikea-blue); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-        
         .data-status { font-size: 0.8rem; background-color: #e5f4e7; color: #27ae60; padding: 5px 10px; border-radius: 4px; font-weight: 500; text-align: right; }
-
         .input-wrapper { display: flex; gap: 10px; height: 50px; }
         input[type="text"] { flex-grow: 1; padding: 0 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-        
         .btn-search { background-color: var(--ikea-blue); color: white; border: none; padding: 0 25px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 1rem; white-space: nowrap; line-height: 1.2; }
-        
-        .btn-scan-trigger { 
-            display: none; background-color: #333; color: white; border: none; padding: 0 15px; border-radius: 4px; 
-            cursor: pointer; font-size: 1.2rem; align-items: center; justify-content: center;
-        }
-
+        .btn-scan-trigger { display: none; background-color: #333; color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-size: 1.2rem; align-items: center; justify-content: center; }
         .helper-text { margin-top: 15px; font-size: 0.85rem; color: #777; line-height: 1.6; }
-
-        /* --- 결과 영역 --- */
         .result-section { width: 100%; margin-top: 30px; display: none; }
         .status-msg { padding: 15px; border-radius: 4px; color: white; font-weight: bold; text-align: center; margin-bottom: 20px; max-width: 700px; margin-left: auto; margin-right: auto; line-height: 1.4; }
-        .status-success { background-color: #008844; } 
-        .status-fail { background-color: #cc0000; }
-
+        .status-success { background-color: #008844; } .status-fail { background-color: #cc0000; }
         .dashboard { display: flex; gap: 20px; margin-bottom: 30px; max-width: 1000px; margin-left: auto; margin-right: auto; }
         .dash-card { flex: 1; background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--ikea-blue); }
         .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; color: var(--text-dark); white-space: nowrap; }
         .dash-card p { font-size: 0.8rem; color: #888; text-transform: uppercase; margin: 0; }
+        
+        /* === [Tab 2] Goods Arrival Styles (New) === */
+        .pivot-container {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto; /* 가로 스크롤 */
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
 
-        .pc-table-view { display: block; }
+        .pivot-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px; /* 테이블 최소 너비 */
+        }
+
+        .pivot-table thead th {
+            background-color: #f1f2f6;
+            color: #333;
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-size: 0.85rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .pivot-table tbody td {
+            padding: 8px 10px;
+            border: 1px solid #eee;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .pivot-table tbody tr:hover { background-color: #f9f9f9; }
+
+        /* 필터 입력창 스타일 */
+        .filter-input {
+            width: 90%;
+            padding: 4px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        /* 날짜 컬럼 스타일 */
+        .date-col { background-color: #fff; min-width: 80px; font-weight: bold; color: var(--ikea-blue); }
+        .qty-cell { font-weight: bold; color: var(--ikea-blue); }
+
+        /* Common Table Styles */
         .table-wrap { background: white; border-radius: 8px; overflow-x: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        thead { background-color: #f9f9f9; border-bottom: 2px solid #eee; }
-        th { text-align: left; padding: 15px; font-size: 0.8rem; color: #555; text-transform: uppercase; white-space: nowrap;}
-        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.9rem; vertical-align: middle; }
-
+        table { width: 100%; border-collapse: collapse; }
+        
+        /* Mobile Cards */
         .mobile-result-view { display: none; width: 100%; max-width: 600px; margin: 0 auto; }
         .product-summary-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid var(--ikea-yellow); }
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; border-bottom: 1px dashed #eee; padding-bottom: 8px;}
@@ -154,41 +193,216 @@
         .schedule-date { font-size: 1.1rem; font-weight: 700; color: #333; }
         .schedule-qty { font-size: 1.2rem; font-weight: 800; color: var(--ikea-blue); text-align: right; }
         .schedule-container { font-size: 0.75rem; color: #777; margin-top: 2px; text-align: right; }
-        .date-tbd { background-color: #fff4f4; color: #d63031; font-weight: bold; padding: 4px 8px; border-radius: 4px; display:inline-block;}
 
-        #scanner-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 9999;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-        }
+        /* 유틸리티 */
+        .en-sub { font-size: 0.75em; color: #777; font-weight: 300; margin-left: 6px; font-family: 'Roboto', sans-serif; }
+        .en-block { display: block; font-size: 0.85em; color: #888; margin-top: 3px; font-weight: 300; font-family: 'Roboto', sans-serif; }
+        .en-btn { font-size: 0.75em; display: block; font-weight: 300; opacity: 0.9; margin-top: -2px; }
+        .en-white { color: rgba(255,255,255,0.85); }
+        .pc-only-text { display: block; }
+        .mobile-only-text { display: none; }
+
+        #scanner-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
         #reader { width: 100%; max-width: 500px; background: black; border-radius: 8px; overflow: hidden; }
         .scan-controls { margin-top: 20px; display: flex; gap: 15px; }
         .btn-modal { padding: 10px 20px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
         .btn-close { background: white; color: black; }
-
-        footer { background-color: #eef0f3; text-align: center; padding: 15px 0; color: #888; font-size: 0.75rem; border-top: 1px solid #e0e0e0; line-height: 1.4; }
+        footer { background-color: #eef0f3; text-align: center; padding: 15px 0; color: #888; font-size: 0.75rem; border-top: 1px solid #e0e0e0; line-height: 1.4; width:100%; }
         #loading { display: none; margin-top: 20px; color: var(--ikea-blue); }
 
+        /* --- 반응형 (Mobile) --- */
         @media (max-width: 768px) {
+            .app-container { flex-direction: column; }
+            
+            /* 모바일에서 사이드바를 상단 탭으로 변경 */
+            .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; justify-content: space-between; align-items: center; padding: 0; }
+            .sidebar-header { display: none; }
+            .nav-item { flex: 1; text-align: center; font-size: 0.9rem; padding: 15px 5px; border-bottom: none; border-right: 1px solid rgba(255,255,255,0.1); }
+            .nav-item.active { border-left: none; border-bottom: 4px solid var(--ikea-yellow); }
+            
+            .content-area { margin-left: 0; width: 100%; }
+            
             header { flex-direction: column; height: auto; padding: 15px; gap: 10px; text-align: center; }
             .header-left { align-items: center; }
             .header-left .main-title { justify-content: center; font-size: 1.2rem; }
             .link-group { margin-left: 0; gap: 15px; justify-content: center; flex-wrap: wrap; }
             
-            .main-content { padding: 30px 15px; }
+            .main-content { padding: 20px 10px; }
             .search-card { padding: 20px; }
             .btn-scan-trigger { display: flex; }
             .dashboard { gap: 10px; }
             .dash-card { padding: 15px 5px; }
             .dash-card h3 { font-size: 1.3rem; }
-            .pc-table-view { display: none !important; }
-            .mobile-result-view { display: block; }
+            
+            /* Tab 1 Mobile View */
+            #tab-search .pc-table-view { display: none !important; }
+            #tab-search .mobile-result-view { display: block; }
+            
+            /* Tab 2 Mobile View: 컬럼 숨김 */
+            .col-hide-mobile { display: none; } /* Name, Activity 숨김 */
+            .pivot-table { min-width: auto; } /* 가로 스크롤 유지하되 폭 조정 */
+            .pivot-table th, .pivot-table td { padding: 5px; font-size: 0.75rem; }
+            .filter-input { width: 100%; font-size: 0.7rem; }
+
             .pc-only-text { display: none; }
             .mobile-only-text { display: block; }
         }
     </style>
 </head>
 <body>
+
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                STO373 Tool
+            </div>
+            <div class="nav-item active" onclick="switchTab('search')" id="nav-search">
+                Article Search
+                <span class="nav-sub">제품 검색</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('arrival')" id="nav-arrival">
+                Goods Arrival
+                <span class="nav-sub">상품 도착 현황</span>
+            </div>
+        </nav>
+
+        <div class="content-area">
+            <header>
+                <div class="header-left">
+                    <a href="." class="main-title">
+                        <i class="fas fa-truck-fast" style="color: var(--ikea-yellow);"></i> 
+                        STO373 Goods Arrival Plan Search
+                    </a>
+                    
+                    <div class="link-group">
+                        <a href="https://coworker.ingka.com/kr/ko/v1/" target="_blank" class="header-sub-link">
+                            SäljaPro <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
+                        </a>
+                        <a href="https://www.ikea.com/kr/ko/" target="_blank" class="header-sub-link">
+                            IKEA Home <i class="fas fa-home" style="font-size: 0.8em;"></i>
+                        </a>
+                        <a href="https://mhs-373.ikea.com/gateway/" target="_blank" class="header-sub-link">
+                            MHS <i class="fas fa-warehouse" style="font-size: 0.8em;"></i>
+                        </a>
+                        <a href="https://piafacts.ikea.net/kr/en" target="_blank" class="header-sub-link">
+                            PIA Facts <i class="fas fa-info-circle" style="font-size: 0.8em;"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="header-right">
+                    Ver 3.0 New Tab Added<br>
+                    Goods Arrival View
+                    <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">
+                        data update : -
+                    </div>
+                </div>
+            </header>
+
+            <div id="tab-search" class="main-content tab-content active">
+                <div class="search-card">
+                    <div class="search-header">
+                        <div class="search-title">
+                            <i class="fas fa-search"></i> 검색 (제품 번호 8자리)
+                            <span class="en-sub">Search (Item No 8 digits)</span>
+                        </div>
+                        <div class="data-status">
+                            <i class="fas fa-check-circle"></i> 데이터 연결됨
+                            <div style="font-size:0.7em; color:#27ae60; opacity:0.8; font-weight:300;">Data Connected</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <input type="text" id="itemInput" placeholder="예: 80518273 (e.g.)" maxlength="11">
+                        <button class="btn-scan-trigger" onclick="startScanner()" title="바코드 스캔">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <button class="btn-search" onclick="performSearch()">
+                            검색
+                            <span class="en-btn">Search</span>
+                        </button>
+                    </div>
+                    
+                    <div class="helper-text">
+                        <i class="fas fa-lightbulb" style="color: var(--ikea-yellow);"></i> <strong>Tip:</strong>
+                        <div class="pc-only-text">
+                            8자리 숫자를 입력 후 검색을 눌러주세요.
+                            <div class="en-block">Please enter 8-digit number and press search.</div>
+                        </div>
+                        <div class="mobile-only-text">
+                            모바일에서는 카메라 아이콘을 눌러 바코드를 자동으로 입력할 수 있습니다.
+                            <div class="en-block">On mobile, tap the camera icon to scan barcode automatically.</div>
+                        </div>
+                    </div>
+                    
+                    <div id="loading" style="text-align: center;">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i><br>
+                        데이터 검색 중...
+                        <div class="en-block" style="color:var(--ikea-blue);">Searching data...</div>
+                    </div>
+                </div>
+
+                <div id="resultSection" class="result-section">
+                    <div id="statusBar" class="status-msg"></div>
+
+                    <div class="dashboard">
+                        <div class="dash-card">
+                            <h3 id="totalResults">-</h3>
+                            <p>Total Results</p>
+                        </div>
+                        <div class="dash-card">
+                            <h3 id="futureDeliveryQty">0</h3>
+                            <p>Future Qty</p>
+                        </div>
+                        <div class="dash-card">
+                            <h3 id="nextDeliveryDate">-</h3>
+                            <p>Next Delivery</p>
+                        </div>
+                    </div>
+
+                    <div class="pc-table-view">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>HFB</th><th>ITEM NO</th><th>ITEM NAME</th><th>SSD</th><th>EDS</th><th>PLANNED DATE</th><th>QTY</th><th>CONTAINER</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pcResultBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mobile-result-view">
+                        <div id="mobileProductSummary" class="product-summary-card"></div>
+                        <div id="mobileScheduleList" class="schedule-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-arrival" class="main-content tab-content">
+                <div class="pivot-container">
+                    <h2 style="color:var(--ikea-blue); margin-top:0;">
+                        <i class="fas fa-calendar-alt"></i> Goods Arrival Overview
+                        <span class="en-sub" style="font-size:0.6em; display:block; margin-left:0; margin-top:5px;">오늘부터 미래의 도착 예정 물량을 보여줍니다. (필터링 가능)</span>
+                    </h2>
+                    
+                    <div style="overflow-x:auto;">
+                        <table class="pivot-table" id="pivotTable">
+                            <thead id="pivotHead">
+                                </thead>
+                            <tbody id="pivotBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <footer>
+                <strong>STO373 Goods arrival Tool</strong>
+                Powered by automated STO373 FI
+            </footer>
+        </div>
+    </div>
 
     <div id="scanner-modal">
         <div style="color:white; margin-bottom:10px; text-align:center;">
@@ -197,141 +411,36 @@
         </div>
         <div id="reader"></div>
         <div class="scan-controls">
-            <button class="btn-modal btn-close" onclick="stopScanner()">
-                닫기 <span style="font-size:0.8em; color:#666;">(Close)</span>
-            </button>
+            <button class="btn-modal btn-close" onclick="stopScanner()">닫기</button>
         </div>
     </div>
-
-    <header>
-        <div class="header-left">
-            <a href="." class="main-title">
-                <i class="fas fa-truck-fast" style="color: var(--ikea-yellow);"></i> 
-                STO373 Goods Arrival Plan Search
-            </a>
-            
-            <div class="link-group">
-                <a href="https://coworker.ingka.com/kr/ko/v1/" target="_blank" class="header-sub-link">
-                    SäljaPro <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
-                </a>
-                <a href="https://www.ikea.com/kr/ko/" target="_blank" class="header-sub-link">
-                    IKEA Home <i class="fas fa-home" style="font-size: 0.8em;"></i>
-                </a>
-                <a href="https://mhs-373.ikea.com/gateway/" target="_blank" class="header-sub-link">
-                    MHS <i class="fas fa-warehouse" style="font-size: 0.8em;"></i>
-                </a>
-                <a href="https://piafacts.ikea.net/kr/en" target="_blank" class="header-sub-link">
-                    PIA Facts <i class="fas fa-info-circle" style="font-size: 0.8em;"></i>
-                </a>
-            </div>
-        </div>
-        <div class="header-right">
-            Ver 2.8 UI Update<br>
-            Bilingual Support
-            <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">
-                data update : -
-            </div>
-        </div>
-    </header>
-
-    <div class="main-content">
-        <div class="search-card">
-            <div class="search-header">
-                <div class="search-title">
-                    <i class="fas fa-search"></i> 검색 (제품 번호 8자리)
-                    <span class="en-sub">Search (Item No 8 digits)</span>
-                </div>
-                <div class="data-status">
-                    <i class="fas fa-check-circle"></i> 데이터 연결됨
-                    <div style="font-size:0.7em; color:#27ae60; opacity:0.8; font-weight:300;">Data Connected</div>
-                </div>
-            </div>
-            
-            <div class="input-wrapper">
-                <input type="text" id="itemInput" placeholder="예: 80518273 (e.g.)" maxlength="11">
-                <button class="btn-scan-trigger" onclick="startScanner()" title="바코드 스캔">
-                    <i class="fas fa-camera"></i>
-                </button>
-                <button class="btn-search" onclick="performSearch()">
-                    검색
-                    <span class="en-btn">Search</span>
-                </button>
-            </div>
-            
-            <div class="helper-text">
-                <i class="fas fa-lightbulb" style="color: var(--ikea-yellow);"></i> <strong>Tip:</strong>
-                
-                <div class="pc-only-text">
-                    8자리 숫자를 입력 후 검색을 눌러주세요.
-                    <div class="en-block">Please enter 8-digit number and press search.</div>
-                </div>
-
-                <div class="mobile-only-text">
-                    모바일에서는 카메라 아이콘을 눌러 바코드를 자동으로 입력할 수 있습니다.
-                    <div class="en-block">On mobile, tap the camera icon to scan barcode automatically.</div>
-                </div>
-            </div>
-            
-            <div id="loading" style="text-align: center;">
-                <i class="fas fa-spinner fa-spin fa-2x"></i><br>
-                데이터 검색 중...
-                <div class="en-block" style="color:var(--ikea-blue);">Searching data...</div>
-            </div>
-        </div>
-
-        <div id="resultSection" class="result-section">
-            <div id="statusBar" class="status-msg"></div>
-
-            <div class="dashboard">
-                <div class="dash-card">
-                    <h3 id="totalResults">-</h3>
-                    <p>Total Results</p>
-                </div>
-                <div class="dash-card">
-                    <h3 id="futureDeliveryQty">0</h3>
-                    <p>Future Qty</p>
-                </div>
-                <div class="dash-card">
-                    <h3 id="nextDeliveryDate">-</h3>
-                    <p>Next Delivery</p>
-                </div>
-            </div>
-
-            <div class="pc-table-view">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>HFB</th><th>ITEM NO</th><th>ITEM NAME</th><th>SSD</th><th>EDS</th><th>PLANNED DATE</th><th>QTY</th><th>CONTAINER</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pcResultBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="mobile-result-view">
-                <div id="mobileProductSummary" class="product-summary-card"></div>
-                <div id="mobileScheduleList" class="schedule-list"></div>
-            </div>
-        </div>
-    </div>
-
-    <footer>
-        <strong>STO373 Goods arrival Tool</strong>
-        Powered by automated STO373 FI
-    </footer>
 
     <script>
         let rawData = [];
         let html5QrcodeScanner = null;
         const EXCEL_FILE_URL = './STO373 Goods arrival plan.xlsx'; 
 
+        // 탭 전환 함수
+        function switchTab(tabName) {
+            // 1. 모든 탭 숨기기
+            document.getElementById('tab-search').classList.remove('active');
+            document.getElementById('tab-arrival').classList.remove('active');
+            document.getElementById('nav-search').classList.remove('active');
+            document.getElementById('nav-arrival').classList.remove('active');
+
+            // 2. 선택된 탭 활성화
+            document.getElementById('tab-' + tabName).classList.add('active');
+            document.getElementById('nav-' + tabName).classList.add('active');
+
+            // 3. Arrival 탭 선택 시 데이터 렌더링 (최초 1회 또는 매번)
+            if (tabName === 'arrival') {
+                renderPivotTable(rawData);
+            }
+        }
+
         window.onload = async function() {
             try {
-                // [Cache Fix] URL 뒤에 타임스탬프를 붙여서 항상 최신 파일 로드
                 const uniqueUrl = EXCEL_FILE_URL + "?t=" + new Date().getTime();
-                
                 const response = await fetch(uniqueUrl);
                 const lastModified = response.headers.get('Last-Modified');
                 if (lastModified) {
@@ -354,56 +463,21 @@
             } catch (error) {
                 console.error("Excel Load Error:", error);
                 const statusDiv = document.querySelector('.data-status');
-                statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 연결 실패 <div style="font-size:0.7em; opacity:0.8;">Connection Failed</div>`;
-                statusDiv.style.color = '#e74c3c';
-                statusDiv.style.backgroundColor = '#fdeea9';
+                if(statusDiv) {
+                    statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 연결 실패`;
+                    statusDiv.style.color = '#e74c3c';
+                    statusDiv.style.backgroundColor = '#fdeea9';
+                }
             }
         };
 
+        // ==========================================
+        //  [TAB 1] Article Search Logic (Ver 2.8)
+        // ==========================================
         document.getElementById('itemInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') performSearch();
         });
 
-        // --- 스캐너 로직 ---
-        function startScanner() {
-            document.getElementById('scanner-modal').style.display = 'flex';
-            if (!html5QrcodeScanner) {
-                html5QrcodeScanner = new Html5Qrcode("reader");
-            }
-            const config = { fps: 15, qrbox: { width: 300, height: 150 }, aspectRatio: 1.0, experimentalFeatures: { useBarCodeDetectorIfSupported: true } };
-            html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
-            .catch(err => {
-                alert("카메라를 시작할 수 없습니다. HTTPS 환경인지 확인해주세요.\nCannot start camera. Please check HTTPS.");
-            });
-        }
-
-        function onScanSuccess(decodedText, decodedResult) {
-            const numeric = decodedText.replace(/[^0-9]/g, '');
-            let resultItemNo = numeric;
-            const match8 = numeric.match(/\d{8}/);
-            if (match8) resultItemNo = match8[0]; 
-
-            document.getElementById('itemInput').value = resultItemNo;
-            if (navigator.vibrate) navigator.vibrate(200);
-            stopScanner();
-            performSearch();
-        }
-
-        function onScanFailure(error) {}
-
-        function stopScanner() {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then((ignore) => {
-                    document.getElementById('scanner-modal').style.display = 'none';
-                }).catch((err) => {
-                    document.getElementById('scanner-modal').style.display = 'none';
-                });
-            } else {
-                document.getElementById('scanner-modal').style.display = 'none';
-            }
-        }
-
-        // --- 검색 로직 ---
         function parseExcelDate(value) {
             if (!value) return "-";
             if (typeof value === 'number') {
@@ -411,7 +485,6 @@
                     const str = String(value);
                     return `${str.substring(0, 4)}-${str.substring(4, 6)}-${str.substring(6, 8)}`;
                 }
-                // [FIX] 날짜 계산 시 12시간(43200000ms)을 더해 Noon 기준으로 설정 (하루 전날 방지)
                 const dateObj = new Date(Math.round((value - 25569) * 86400 * 1000) + 43200000);
                 if (!isNaN(dateObj)) {
                     if (dateObj.getFullYear() <= 1900) return "-";
@@ -420,9 +493,7 @@
             } 
             if (typeof value === 'string') {
                 const trimmed = value.trim();
-                if (/^\d{8}$/.test(trimmed)) {
-                    return `${trimmed.substring(0, 4)}-${trimmed.substring(4, 6)}-${trimmed.substring(6, 8)}`;
-                }
+                if (/^\d{8}$/.test(trimmed)) return `${trimmed.substring(0, 4)}-${trimmed.substring(4, 6)}-${trimmed.substring(6, 8)}`;
                 if (trimmed.startsWith("1900")) return "-";
                 if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
             }
@@ -431,11 +502,9 @@
 
         function performSearch() {
             const inputRaw = document.getElementById('itemInput').value.trim();
-            if (!inputRaw) { 
-                alert("제품번호를 입력해주세요.\nPlease enter Item No."); 
-                return; 
-            }
+            if (!inputRaw) { alert("제품번호를 입력해주세요."); return; }
             const cleanInput = inputRaw.replace(/[^0-9]/g, '');
+            
             document.getElementById('loading').style.display = 'block';
             document.getElementById('resultSection').style.display = 'none';
             setTimeout(() => {
@@ -447,48 +516,31 @@
 
         function searchExcel(targetCleanInput) {
             const groupedMap = new Map();
-            const today = new Date();
-            today.setHours(0,0,0,0);
+            const today = new Date(); today.setHours(0,0,0,0);
             
             rawData.forEach(row => {
-                let rawE = row['E'];
-                let rawB = row['B'];
-                let itemNoStr = String(rawE || "").trim();
-                let containerStr = String(rawB || "").trim();
+                let itemNoStr = String(row['E'] || "").trim();
+                let containerStr = String(row['B'] || "").trim();
                 
                 let cleanItemNo = itemNoStr.replace(/[^0-9]/g, '');
                 let cleanContainer = containerStr.replace(/[^a-zA-Z0-9]/g, ''); 
 
                 let isMatch = false;
-                if (cleanItemNo && (cleanItemNo.includes(targetCleanInput) || targetCleanInput.includes(cleanItemNo))) {
-                    isMatch = true;
-                } else if (cleanContainer && cleanContainer.toLowerCase().includes(targetCleanInput.toLowerCase())) {
-                    isMatch = true;
-                }
+                if (cleanItemNo && (cleanItemNo.includes(targetCleanInput) || targetCleanInput.includes(cleanItemNo))) isMatch = true;
+                else if (cleanContainer && cleanContainer.toLowerCase().includes(targetCleanInput.toLowerCase())) isMatch = true;
 
                 if (isMatch) {
-                    let itemName = row['C'] || "";
-                    let hfb = row['F'] || "";
-                    let ssdRaw = row['G']; 
-                    let edsRaw = row['H'];
-                    let plannedDateRaw = row['M']; 
-                    let qty = parseFloat(row['P']) || 0;
-
+                    let plannedDateRaw = row['M'];
                     let plannedDateStr = "미정";
                     let plannedDateObj = null;
 
                     if (plannedDateRaw) {
                         if (typeof plannedDateRaw === 'number' && plannedDateRaw < 100000) {
-                            // [FIX] 날짜 계산 시 12시간 더하기
                             const tempDate = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000) + 43200000);
                             if (!isNaN(tempDate)) {
                                 if (tempDate.getFullYear() > 1900) {
                                     plannedDateObj = tempDate;
-                                    // 비교를 위해 시분초는 0으로 다시 셋팅하지만, 생성 자체는 정오(Noon) 기준이라 날짜 안 밀림
-                                    const comparisonDate = new Date(tempDate);
-                                    comparisonDate.setHours(0,0,0,0);
-                                    
-                                    plannedDateObj = comparisonDate; 
+                                    plannedDateObj.setHours(0,0,0,0);
                                     plannedDateStr = tempDate.toISOString().split('T')[0];
                                 }
                             }
@@ -496,35 +548,28 @@
                             if (!plannedDateRaw.startsWith("1900")) {
                                 plannedDateStr = plannedDateRaw; 
                                 const parsed = new Date(plannedDateRaw);
-                                if (!isNaN(parsed)) {
-                                    plannedDateObj = parsed;
-                                    plannedDateObj.setHours(0,0,0,0);
-                                }
+                                if (!isNaN(parsed)) { plannedDateObj = parsed; plannedDateObj.setHours(0,0,0,0); }
                             }
                         }
                     }
 
-                    if (plannedDateObj && plannedDateObj < today) {
-                        return; 
-                    }
-
+                    if (plannedDateObj && plannedDateObj < today) return; 
                     if (containerStr === "") containerStr = "배송준비중";
 
                     const key = `${containerStr}_${plannedDateStr}`;
+                    let qty = parseFloat(row['P']) || 0;
                     
                     if (groupedMap.has(key)) {
                         groupedMap.get(key).quantity += qty;
                     } else {
                         groupedMap.set(key, { 
-                            hfb, 
+                            hfb: row['F'] || "", 
                             itemNo: itemNoStr, 
-                            itemName, 
-                            ssdRaw, 
-                            edsRaw, 
-                            plannedDateStr, 
-                            plannedDateObj, 
-                            quantity: qty, 
-                            container: containerStr 
+                            itemName: row['C'] || "", 
+                            ssdRaw: row['G'], 
+                            edsRaw: row['H'], 
+                            plannedDateStr, plannedDateObj, 
+                            quantity: qty, container: containerStr 
                         });
                     }
                 }
@@ -533,31 +578,29 @@
         }
 
         function displayResults(results) {
+            const resultSection = document.getElementById('resultSection');
             const statusBar = document.getElementById('statusBar');
             const pcTbody = document.getElementById('pcResultBody');
             const mobileProductSummary = document.getElementById('mobileProductSummary');
             const mobileScheduleList = document.getElementById('mobileScheduleList');
 
-            document.getElementById('resultSection').style.display = 'block';
+            resultSection.style.display = 'block';
             pcTbody.innerHTML = '';
             mobileProductSummary.innerHTML = '';
             mobileScheduleList.innerHTML = '';
 
             if (results.length > 0) {
-                statusBar.innerHTML = `${results.length}개의 배송 계획을 찾았습니다! 
-                    <div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">Found ${results.length} arrival plans!</div>`;
+                statusBar.innerHTML = `${results.length}개의 배송 계획을 찾았습니다!`;
                 statusBar.className = 'status-msg status-success';
                 document.querySelector('.dashboard').style.display = 'flex';
             } else {
-                statusBar.innerHTML = `검색 결과가 존재하지 않습니다.<br><span style="font-size:0.8em">(과거 날짜는 표시되지 않습니다)</span>
-                    <div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">No results found (Past dates excluded).</div>`;
+                statusBar.innerHTML = `검색 결과가 존재하지 않습니다. (과거 날짜 제외)`;
                 statusBar.className = 'status-msg status-fail';
                 document.querySelector('.dashboard').style.display = 'none';
                 return;
             }
 
             document.getElementById('totalResults').innerText = results.length;
-            
             results.sort((a, b) => {
                 if (a.plannedDateStr === "미정") return 1;
                 if (b.plannedDateStr === "미정") return -1;
@@ -575,52 +618,178 @@
                     document.getElementById('futureDeliveryQty').innerText = "0";
                     document.getElementById('nextDeliveryDate').innerText = "-";
                 }
-            } else {
-                document.getElementById('futureDeliveryQty').innerText = "0";
-                document.getElementById('nextDeliveryDate').innerText = "-";
             }
 
             results.forEach(row => {
                 const tr = document.createElement('tr');
                 let dateHtml = row.plannedDateStr === "미정" ? `<span class="date-tbd">미정</span>` : row.plannedDateStr;
-                tr.innerHTML = `
-                    <td>${row.hfb}</td><td><strong>${row.itemNo}</strong></td><td>${row.itemName}</td>
-                    <td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td>
-                    <td>${dateHtml}</td><td style="font-weight:bold; color:var(--ikea-blue);">${row.quantity}</td><td>${row.container}</td>
-                `;
+                tr.innerHTML = `<td>${row.hfb}</td><td><strong>${row.itemNo}</strong></td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${dateHtml}</td><td style="font-weight:bold; color:var(--ikea-blue);">${row.quantity}</td><td>${row.container}</td>`;
                 pcTbody.appendChild(tr);
             });
 
             if(results.length > 0) {
                 const common = results[0]; 
-                mobileProductSummary.innerHTML = `
-                    <div class="summary-row"><span class="label">Item No</span> <span class="value" style="font-size:1.2rem; color:var(--ikea-blue);">${common.itemNo}</span></div>
-                    <div class="summary-row"><span class="label">Name</span> <span class="value">${common.itemName}</span></div>
-                    <div class="summary-row"><span class="label">HFB</span> <span class="value">${common.hfb}</span></div>
-                    <div class="summary-row"><span class="label">SSD</span> <span class="value">${parseExcelDate(common.ssdRaw)}</span></div>
-                    <div class="summary-row"><span class="label">EDS</span> <span class="value">${parseExcelDate(common.edsRaw)}</span></div>
-                `;
-
+                mobileProductSummary.innerHTML = `<div class="summary-row"><span class="label">Item No</span> <span class="value" style="font-size:1.2rem; color:var(--ikea-blue);">${common.itemNo}</span></div><div class="summary-row"><span class="label">Name</span> <span class="value">${common.itemName}</span></div><div class="summary-row"><span class="label">HFB</span> <span class="value">${common.hfb}</span></div>`;
+                
                 results.forEach(row => {
-                    const isFixed = row.plannedDateStr !== "미정";
-                    const borderClass = isFixed ? "fixed-date" : "";
-                    const dateDisplay = isFixed ? row.plannedDateStr : "미정 (TBD)";
-                    const dateColor = isFixed ? "#333" : "#d63031";
-
+                    const dateColor = row.plannedDateStr === "미정" ? "#d63031" : "#333";
                     const div = document.createElement('div');
-                    div.className = `schedule-item ${borderClass}`;
-                    div.innerHTML = `
-                        <div class="schedule-date" style="color:${dateColor}">
-                            ${dateDisplay}
-                        </div>
-                        <div class="schedule-details">
-                            <div class="schedule-qty">${row.quantity} ea</div>
-                            <div class="schedule-container"><i class="fas fa-box"></i> ${row.container}</div>
-                        </div>
-                    `;
+                    div.className = `schedule-item`;
+                    div.innerHTML = `<div class="schedule-date" style="color:${dateColor}">${row.plannedDateStr}</div><div class="schedule-details"><div class="schedule-qty">${row.quantity} ea</div><div class="schedule-container"><i class="fas fa-box"></i> ${row.container}</div></div>`;
                     mobileScheduleList.appendChild(div);
                 });
             }
+        }
+
+        // ==========================================
+        //  [TAB 2] Goods Arrival Logic (Ver 3.0)
+        // ==========================================
+        function renderPivotTable(data) {
+            const today = new Date(); today.setHours(0,0,0,0);
+            
+            // 1. 데이터 가공 (ItemNo 기준 Grouping & 날짜별 합산)
+            const pivotMap = {};
+            const uniqueDates = new Set();
+
+            data.forEach(row => {
+                let plannedDateRaw = row['M'];
+                let plannedDateStr = null;
+                let plannedDateObj = null;
+
+                // 날짜 파싱 (기존 로직 사용)
+                if (plannedDateRaw) {
+                    if (typeof plannedDateRaw === 'number' && plannedDateRaw < 100000) {
+                        const tempDate = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000) + 43200000);
+                        if (!isNaN(tempDate)) {
+                            if (tempDate.getFullYear() > 1900) {
+                                plannedDateObj = tempDate;
+                                plannedDateObj.setHours(0,0,0,0);
+                                plannedDateStr = tempDate.toISOString().split('T')[0];
+                            }
+                        }
+                    } else if (typeof plannedDateRaw === 'string' && !plannedDateRaw.startsWith("1900")) {
+                        const parsed = new Date(plannedDateRaw);
+                        if (!isNaN(parsed)) { plannedDateObj = parsed; plannedDateObj.setHours(0,0,0,0); plannedDateStr = plannedDateRaw; }
+                    }
+                }
+
+                // 과거 날짜 및 미정 날짜 제외 (미래 계획만 보기 위함)
+                if (!plannedDateObj || plannedDateObj < today) return;
+
+                const itemNo = String(row['E'] || "").trim();
+                const qty = parseFloat(row['P']) || 0;
+
+                if (!pivotMap[itemNo]) {
+                    pivotMap[itemNo] = {
+                        hfb: row['F'] || "",
+                        pa: row['D'] || "",
+                        itemNo: itemNo,
+                        itemName: row['C'] || "",
+                        activity: row['L'] || "",
+                        dates: {}
+                    };
+                }
+
+                if (!pivotMap[itemNo].dates[plannedDateStr]) pivotMap[itemNo].dates[plannedDateStr] = 0;
+                pivotMap[itemNo].dates[plannedDateStr] += qty;
+                uniqueDates.add(plannedDateStr);
+            });
+
+            // 2. 날짜 컬럼 정렬
+            const sortedDates = Array.from(uniqueDates).sort();
+
+            // 3. 테이블 헤더 생성
+            const thead = document.getElementById('pivotHead');
+            let headerHtml = `
+                <tr>
+                    <th>HFB<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th>
+                    <th>PA<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th>
+                    <th>Item No<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th>
+                    <th class="col-hide-mobile">Item Name<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th>
+                    <th class="col-hide-mobile">Activity<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th>
+            `;
+            sortedDates.forEach(date => {
+                headerHtml += `<th class="date-col">${date}</th>`;
+            });
+            headerHtml += `</tr>`;
+            thead.innerHTML = headerHtml;
+
+            // 4. 테이블 바디 생성
+            const tbody = document.getElementById('pivotBody');
+            let bodyHtml = "";
+            
+            // HFB, PA 정렬을 위해 배열로 변환
+            const sortedRows = Object.values(pivotMap).sort((a, b) => {
+                if (a.hfb !== b.hfb) return String(a.hfb).localeCompare(String(b.hfb));
+                return String(a.pa).localeCompare(String(b.pa));
+            });
+
+            sortedRows.forEach(row => {
+                bodyHtml += `<tr>
+                    <td>${row.hfb}</td>
+                    <td>${row.pa}</td>
+                    <td><b>${row.itemNo}</b></td>
+                    <td class="col-hide-mobile" style="text-align:left;">${row.itemName}</td>
+                    <td class="col-hide-mobile">${row.activity}</td>
+                `;
+                
+                sortedDates.forEach(date => {
+                    const qty = row.dates[date] || ""; // 값이 없으면 빈칸
+                    bodyHtml += `<td class="qty-cell">${qty}</td>`;
+                });
+                bodyHtml += `</tr>`;
+            });
+            tbody.innerHTML = bodyHtml;
+        }
+
+        // 피벗 테이블 필터링 함수
+        function filterPivot() {
+            const table = document.getElementById("pivotTable");
+            const inputs = table.getElementsByTagName("input");
+            const tr = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+            // 각 컬럼별 필터 값 가져오기
+            const filterValues = [];
+            for (let i = 0; i < inputs.length; i++) {
+                filterValues.push(inputs[i].value.toUpperCase());
+            }
+
+            // 행 반복하며 필터링
+            for (let i = 0; i < tr.length; i++) {
+                let showRow = true;
+                const tds = tr[i].getElementsByTagName("td");
+                
+                // HFB, PA, ItemNo, Name, Act (0~4 인덱스) 확인
+                for (let j = 0; j < filterValues.length; j++) {
+                    if (filterValues[j]) {
+                        const cellValue = tds[j].textContent || tds[j].innerText;
+                        if (cellValue.toUpperCase().indexOf(filterValues[j]) === -1) {
+                            showRow = false;
+                            break;
+                        }
+                    }
+                }
+                tr[i].style.display = showRow ? "" : "none";
+            }
+        }
+
+        // 스캐너 관련 로직 (Tab 1)
+        function startScanner() {
+            document.getElementById('scanner-modal').style.display = 'flex';
+            if (!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("reader");
+            const config = { fps: 15, qrbox: { width: 300, height: 150 }, aspectRatio: 1.0, experimentalFeatures: { useBarCodeDetectorIfSupported: true } };
+            html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure).catch(err => alert("Camera Error"));
+        }
+        function onScanSuccess(decodedText) {
+            const numeric = decodedText.replace(/[^0-9]/g, '');
+            let resultItemNo = numeric.match(/\d{8}/) ? numeric.match(/\d{8}/)[0] : numeric;
+            document.getElementById('itemInput').value = resultItemNo;
+            stopScanner(); performSearch();
+        }
+        function onScanFailure(error) {}
+        function stopScanner() {
+            if (html5QrcodeScanner) html5QrcodeScanner.stop().then(() => document.getElementById('scanner-modal').style.display = 'none').catch(() => document.getElementById('scanner-modal').style.display = 'none');
+            else document.getElementById('scanner-modal').style.display = 'none';
         }
     </script>
 </body>
