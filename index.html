@@ -41,12 +41,11 @@
             background-color: var(--ikea-blue);
             color: white;
             padding: 0 40px;
-            height: 100px; /* 링크가 늘어나서 높이 약간 여유 */
+            height: 100px;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
-        /* 헤더 왼쪽 영역 */
         .header-left {
             display: flex;
             flex-direction: column;
@@ -64,12 +63,11 @@
             gap: 10px; 
         }
 
-        /* 링크 모음 (SäljaPro, IKEA, MHS) */
         .link-group {
             display: flex;
-            gap: 20px; /* 링크 간 간격 */
+            gap: 20px;
             margin-top: 5px;
-            margin-left: 38px; /* 아이콘 아래 텍스트 라인 맞춤 */
+            margin-left: 38px;
         }
 
         .header-sub-link {
@@ -215,7 +213,7 @@
             </div>
         </div>
         <div class="header-right">
-            Ver 2.4 Quick Links<br>
+            Ver 2.6 Date Fix<br>
             Bilingual Support
             <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">
                 data update : -
@@ -318,7 +316,10 @@
 
         window.onload = async function() {
             try {
-                const response = await fetch(EXCEL_FILE_URL);
+                // [Cache Fix] URL 뒤에 타임스탬프를 붙여서 항상 최신 파일 로드
+                const uniqueUrl = EXCEL_FILE_URL + "?t=" + new Date().getTime();
+                
+                const response = await fetch(uniqueUrl);
                 const lastModified = response.headers.get('Last-Modified');
                 if (lastModified) {
                     const dateObj = new Date(lastModified);
@@ -397,7 +398,8 @@
                     const str = String(value);
                     return `${str.substring(0, 4)}-${str.substring(4, 6)}-${str.substring(6, 8)}`;
                 }
-                const dateObj = new Date(Math.round((value - 25569) * 86400 * 1000));
+                // [FIX] 날짜 계산 시 12시간(43200000ms)을 더해 Noon 기준으로 설정 (하루 전날 방지)
+                const dateObj = new Date(Math.round((value - 25569) * 86400 * 1000) + 43200000);
                 if (!isNaN(dateObj)) {
                     if (dateObj.getFullYear() <= 1900) return "-";
                     return dateObj.toISOString().split('T')[0];
@@ -464,11 +466,16 @@
 
                     if (plannedDateRaw) {
                         if (typeof plannedDateRaw === 'number' && plannedDateRaw < 100000) {
-                            const tempDate = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000));
+                            // [FIX] 날짜 계산 시 12시간 더하기
+                            const tempDate = new Date(Math.round((plannedDateRaw - 25569) * 86400 * 1000) + 43200000);
                             if (!isNaN(tempDate)) {
                                 if (tempDate.getFullYear() > 1900) {
                                     plannedDateObj = tempDate;
-                                    plannedDateObj.setHours(0,0,0,0);
+                                    // 비교를 위해 시분초는 0으로 다시 셋팅하지만, 생성 자체는 정오(Noon) 기준이라 날짜 안 밀림
+                                    const comparisonDate = new Date(tempDate);
+                                    comparisonDate.setHours(0,0,0,0);
+                                    
+                                    plannedDateObj = comparisonDate; 
                                     plannedDateStr = tempDate.toISOString().split('T')[0];
                                 }
                             }
