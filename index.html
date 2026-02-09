@@ -100,13 +100,30 @@
         .tab-content { display: none; width: 100%; flex-direction: column; align-items: center; }
         .tab-content.active { display: flex; }
 
+        /* 공통 데이터 상태 표시 (우측 상단) */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background-color: #fff3cd; /* 기본: 로딩 (노랑) */
+            color: #856404;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .status-badge.connected {
+            background-color: #d4edda; /* 연결됨 (초록) */
+            color: #155724;
+        }
+        .status-badge.error {
+            background-color: #f8d7da; /* 에러 (빨강) */
+            color: #721c24;
+        }
+
         /* Article Search Styles */
         .search-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 800px; text-align: left; position: relative; }
         .search-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .search-title { font-size: 1.2rem; font-weight: 600; color: var(--ikea-blue); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-        
-        /* [수정] 데이터 상태 표시 (기본값: 연결중) */
-        .data-status { font-size: 0.8rem; background-color: #fff3cd; color: #856404; padding: 5px 10px; border-radius: 4px; font-weight: 500; text-align: right; }
         
         .input-wrapper { display: flex; gap: 10px; height: 50px; }
         input[type="text"] { flex-grow: 1; padding: 0 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
@@ -122,6 +139,7 @@
         .dash-card p { font-size: 0.8rem; color: #888; text-transform: uppercase; margin: 0; }
         
         /* Goods Arrival Styles */
+        .pivot-header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .pivot-container {
             width: 100%;
             overflow-x: auto;
@@ -143,6 +161,10 @@
         .date-col { background-color: #fff; min-width: 80px; font-weight: bold; color: var(--ikea-blue); }
         .qty-cell { font-weight: bold; color: var(--ikea-blue); }
         .not-fixed-col { background-color: #fff0f0; color: #c0392b; font-weight: bold; min-width: 80px; }
+
+        /* [NEW] 날짜 확정/예상 스타일 */
+        .date-confirmed { color: #27ae60; font-weight: bold; } /* 녹색 */
+        .date-estimated { color: #d35400; font-weight: bold; font-size: 0.9em; background-color: #ffeaa7; padding: 2px 6px; border-radius: 4px; } /* 주황 배경 */
 
         /* Common */
         .table-wrap { background: white; border-radius: 8px; overflow-x: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -199,6 +221,8 @@
             .filter-input { width: 100%; font-size: 0.7rem; }
             .pc-only-text { display: none; }
             .mobile-only-text { display: block; }
+            
+            .pivot-header-area { flex-direction: column; gap: 10px; align-items: flex-start; }
         }
     </style>
 </head>
@@ -238,7 +262,7 @@
             </div>
         </div>
         <div class="header-right">
-            Ver 3.3 Auto Refresh<br>
+            Ver 3.4 Week Forecast<br>
             Bilingual Support
             <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">
                 data update : -
@@ -266,9 +290,8 @@
                             <i class="fas fa-search"></i> 검색 (제품 번호 8자리)
                             <span class="en-sub">Search (Item No 8 digits)</span>
                         </div>
-                        <div class="data-status">
-                            <i class="fas fa-spinner fa-spin"></i> 데이터 연결 중...
-                            <div style="font-size:0.7em; opacity:0.8; font-weight:300;">Connecting...</div>
+                        <div class="status-badge" id="statusBadge1">
+                            <i class="fas fa-spinner fa-spin"></i> 연결 중...
                         </div>
                     </div>
                     <div class="input-wrapper">
@@ -308,10 +331,16 @@
 
             <div id="tab-arrival" class="tab-content">
                 <div class="pivot-container">
-                    <h2 style="color:var(--ikea-blue); margin-top:0;">
-                        <i class="fas fa-calendar-alt"></i> Goods Arrival Overview
-                        <span class="en-sub" style="font-size:0.6em; display:block; margin-left:0; margin-top:5px;">오늘부터 미래의 도착 예정 물량을 보여줍니다.</span>
-                    </h2>
+                    <div class="pivot-header-area">
+                        <h2 style="color:var(--ikea-blue); margin:0;">
+                            <i class="fas fa-calendar-alt"></i> Goods Arrival Overview
+                            <span class="en-sub" style="font-size:0.6em; display:block; margin-left:0; margin-top:5px;">오늘부터 미래의 도착 예정 물량을 보여줍니다.</span>
+                        </h2>
+                        <div class="status-badge" id="statusBadge2">
+                            <i class="fas fa-spinner fa-spin"></i> 연결 중...
+                        </div>
+                    </div>
+                    
                     <div style="overflow-x:auto;">
                         <table class="pivot-table" id="pivotTable">
                             <thead id="pivotHead"></thead>
@@ -343,16 +372,28 @@
             document.getElementById('nav-arrival').classList.remove('active');
             document.getElementById('tab-' + tabName).classList.add('active');
             document.getElementById('nav-' + tabName).classList.add('active');
-            
-            // 데이터가 이미 로드되었으면 렌더링
             if (tabName === 'arrival') {
-                if (rawData.length > 0) {
-                    renderPivotTable(rawData);
-                } else {
-                    // 데이터 로딩중 표시
+                if (rawData.length > 0) renderPivotTable(rawData);
+                else {
                     document.getElementById('pivotBody').innerHTML = "";
                     document.getElementById('pivotLoading').style.display = "block";
                 }
+            }
+        }
+
+        // 상태 배너 업데이트 함수
+        function updateStatus(status) {
+            const b1 = document.getElementById('statusBadge1');
+            const b2 = document.getElementById('statusBadge2');
+            
+            if (status === 'connected') {
+                const html = `<i class="fas fa-check-circle"></i> 데이터 연결됨`;
+                b1.innerHTML = html; b1.className = 'status-badge connected';
+                b2.innerHTML = html; b2.className = 'status-badge connected';
+            } else if (status === 'error') {
+                const html = `<i class="fas fa-exclamation-triangle"></i> 연결 실패`;
+                b1.innerHTML = html; b1.className = 'status-badge error';
+                b2.innerHTML = html; b2.className = 'status-badge error';
             }
         }
 
@@ -375,22 +416,16 @@
                 if (!sheetName) sheetName = workbook.SheetNames[0];
                 rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: "A", defval: "", range: 1 }); 
                 
-                // [FIX] 데이터 로딩 성공 시 배너 변경
-                const statusDiv = document.querySelector('.data-status');
-                if(statusDiv) {
-                    statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> 데이터 연결됨 <div style="font-size:0.7em; opacity:0.8; font-weight:300;">Data Connected</div>`;
-                    statusDiv.style.backgroundColor = '#e5f4e7';
-                    statusDiv.style.color = '#27ae60';
-                }
+                // 로딩 완료 -> 상태 업데이트
+                updateStatus('connected');
 
-                // [FIX] 현재 보고 있는 탭이 'Goods Arrival'이면 자동 렌더링 (Race Condition 해결)
+                // 자동 렌더링 (Goods Arrival 탭인 경우)
                 if(document.getElementById('tab-arrival').classList.contains('active')) {
                     renderPivotTable(rawData);
                 }
 
             } catch (error) {
-                const statusDiv = document.querySelector('.data-status');
-                if(statusDiv) { statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 연결 실패`; statusDiv.style.color = '#e74c3c'; statusDiv.style.backgroundColor = '#fdeea9'; }
+                updateStatus('error');
             }
         };
 
@@ -405,9 +440,19 @@
             return null;
         }
 
-        // Tab 1 Logic
+        // 주차(Week Number) 계산 함수 (ISO 8601 기준)
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+            return weekNo;
+        }
+
+        // --- Tab 1 Logic ---
         document.getElementById('itemInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') performSearch(); });
         function parseExcelDate(value) {
+            // ... (기존과 동일하지만, 여기도 주차 로직 넣고 싶으면 수정 가능. 일단 유지)
             if (!value) return "-";
             if (typeof value === 'number') {
                 if (value > 19000000) return `${String(value).substring(0, 4)}-${String(value).substring(4, 6)}-${String(value).substring(6, 8)}`;
@@ -417,6 +462,7 @@
             if (typeof value === 'string' && /^\d{8}$/.test(value.trim())) return `${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`;
             return value;
         }
+        
         function performSearch() {
             const inputRaw = document.getElementById('itemInput').value.trim();
             if (!inputRaw) { alert("제품번호를 입력해주세요."); return; }
@@ -429,6 +475,7 @@
                 document.getElementById('loading').style.display = 'none';
             }, 300);
         }
+
         function searchExcel(target) {
             const groupedMap = new Map();
             const today = new Date(); today.setHours(0,0,0,0);
@@ -439,14 +486,26 @@
                 let isMatch = (itemNo && (itemNo.includes(target) || target.includes(itemNo))) || (cleanCont && cleanCont.toLowerCase().includes(target.toLowerCase()));
                 if (isMatch) {
                     let pDate = getSafeDate(row['M']);
+                    let portDate = getSafeDate(row['U']); // U열: Port Arrival Date
                     let pStr = "미정";
+                    
+                    // [NEW Logic] 미정이면 PortDate + 7일로 예상 주차 계산
                     if (pDate) {
                         const checkDate = new Date(pDate); checkDate.setHours(0,0,0,0);
-                        if (checkDate < today) return; 
+                        if (checkDate < today) return; // 과거 제외
                         pStr = pDate.toISOString().split('T')[0];
+                    } else if (portDate) {
+                        // 날짜 미정이지만 PortDate가 있는 경우
+                        const estDate = new Date(portDate);
+                        estDate.setDate(estDate.getDate() + 7); // D+7
+                        const weekNo = getWeekNumber(estDate);
+                        pStr = `<span class="date-estimated">WK${weekNo} 예상</span>`;
+                    } else {
+                        pStr = `<span class="date-tbd">미정</span>`;
                     }
+
                     if (container === "") container = "배송준비중";
-                    const key = `${container}_${pStr}`;
+                    const key = `${container}_${pStr}`; // 키에 HTML 태그 들어가도 됨
                     let qty = parseFloat(row['P']) || 0;
                     if (groupedMap.has(key)) groupedMap.get(key).quantity += qty;
                     else groupedMap.set(key, { hfb: row['F'], itemNo: String(row['E'] || "").trim(), itemName: row['C'], ssdRaw: row['G'], edsRaw: row['H'], plannedDateStr: pStr, plannedDateObj: pDate, quantity: qty, container });
@@ -454,6 +513,7 @@
             });
             return Array.from(groupedMap.values());
         }
+
         function displayResults(results) {
             const resultSection = document.getElementById('resultSection');
             const statusBar = document.getElementById('statusBar');
@@ -469,18 +529,21 @@
                 statusBar.className = 'status-msg status-success';
                 document.querySelector('.dashboard').style.display = 'flex';
             } else {
-                statusBar.innerHTML = `검색 결과가 존재하지 않습니다.<br><span style="font-size:0.8em">(과거 날짜는 표시되지 않습니다)</span><div class="en-white" style="font-size:0.85em; opacity:0.9; font-weight:300;">No results found (Past dates excluded).</div>`;
+                statusBar.innerHTML = `검색 결과가 존재하지 않습니다.<br><span style="font-size:0.8em">(과거 날짜는 표시되지 않습니다)</span>`;
                 statusBar.className = 'status-msg status-fail';
                 document.querySelector('.dashboard').style.display = 'none';
                 return;
             }
             document.getElementById('totalResults').innerText = results.length;
             results.sort((a, b) => {
-                if (a.plannedDateStr === "미정") return 1; if (b.plannedDateStr === "미정") return -1;
-                return (a.plannedDateObj || new Date(9999,0,1)) - (b.plannedDateObj || new Date(9999,0,1));
+                // 날짜 정렬 (확정 > 예상 > 미정)
+                const dateA = a.plannedDateObj || new Date(9999,0,1);
+                const dateB = b.plannedDateObj || new Date(9999,0,1);
+                return dateA - dateB;
             });
             
-            const future = results.filter(r => r.plannedDateStr !== "미정");
+            // 통계 (확정된 날짜 중 가장 빠른 것)
+            const future = results.filter(r => r.plannedDateObj !== null);
             if (future.length > 0) {
                 const nextDate = future[0].plannedDateStr;
                 const totalNext = future.filter(r => r.plannedDateStr === nextDate).reduce((s, i) => s + i.quantity, 0);
@@ -492,7 +555,12 @@
             }
 
             results.forEach(row => {
-                const dateHtml = row.plannedDateStr === "미정" ? `<span class="date-tbd">미정</span>` : row.plannedDateStr;
+                // pStr에 이미 태그가 포함되어 있을 수 있음 (WK예상 등)
+                let dateHtml = row.plannedDateStr;
+                // 확정 날짜(YYYY-MM-DD)라면 녹색 클래스 추가
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dateHtml)) {
+                    dateHtml = `<span class="date-confirmed">${dateHtml}</span>`;
+                }
                 pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td><strong>${row.itemNo}</strong></td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${dateHtml}</td><td style="font-weight:bold; color:var(--ikea-blue);">${row.quantity}</td><td>${row.container}</td></tr>`;
             });
 
@@ -500,15 +568,14 @@
                 const c = results[0];
                 mobileProductSummary.innerHTML = `<div class="summary-row"><span class="label">Item No</span> <span class="value" style="font-size:1.2rem; color:var(--ikea-blue);">${c.itemNo}</span></div><div class="summary-row"><span class="label">Name</span> <span class="value">${c.itemName}</span></div><div class="summary-row"><span class="label">HFB</span> <span class="value">${c.hfb}</span></div>`;
                 results.forEach(row => {
-                    const dateColor = row.plannedDateStr === "미정" ? "#d63031" : "#333";
-                    mobileScheduleList.innerHTML += `<div class="schedule-item"><div class="schedule-date" style="color:${dateColor}">${row.plannedDateStr}</div><div class="schedule-details"><div class="schedule-qty">${row.quantity} ea</div><div class="schedule-container"><i class="fas fa-box"></i> ${row.container}</div></div></div>`;
+                    mobileScheduleList.innerHTML += `<div class="schedule-item"><div class="schedule-date">${row.plannedDateStr}</div><div class="schedule-details"><div class="schedule-qty">${row.quantity} ea</div><div class="schedule-container"><i class="fas fa-box"></i> ${row.container}</div></div></div>`;
                 });
             }
         }
 
-        // Tab 2 Logic
+        // --- Tab 2 Logic (Pivot) ---
         function renderPivotTable(data) {
-            document.getElementById('pivotLoading').style.display = "none"; // 로딩 숨김
+            document.getElementById('pivotLoading').style.display = "none";
             const today = new Date(); today.setHours(0,0,0,0);
             const pivotMap = {};
             const uniqueDates = new Set();
@@ -518,7 +585,7 @@
                 const itemNo = String(row['E'] || "").trim();
                 const qty = parseFloat(row['P']) || 0;
 
-                if (!itemNo) return; // Skip invalid rows
+                if (!itemNo) return;
 
                 if (!pivotMap[itemNo]) {
                     pivotMap[itemNo] = {
@@ -554,7 +621,6 @@
 
             let bodyHtml = "";
             sortedRows.forEach(row => {
-                // 데이터가 없는 행(과거 데이터만 있는 경우)은 표시하지 않을 수도 있음. 현재는 모두 표시.
                 const notFixedDisplay = row.notFixedQty > 0 ? row.notFixedQty : "";
                 
                 bodyHtml += `<tr><td>${row.hfb}</td><td>${row.pa}</td><td><b>${row.itemNo}</b></td><td class="col-hide-mobile" style="text-align:left;">${row.itemName}</td><td class="col-hide-mobile">${row.activity}</td><td class="not-fixed-col">${notFixedDisplay}</td>`;
@@ -582,7 +648,6 @@
             }
         }
 
-        // Scanner
         function startScanner() { document.getElementById('scanner-modal').style.display = 'flex'; if(!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("reader"); html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 300, height: 150 }, aspectRatio: 1.0 }, onScanSuccess).catch(e=>alert("Camera Error")); }
         function onScanSuccess(t) { document.getElementById('itemInput').value = t.replace(/[^0-9]/g, ''); stopScanner(); performSearch(); }
         function stopScanner() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(()=>document.getElementById('scanner-modal').style.display='none'); else document.getElementById('scanner-modal').style.display='none'; }
