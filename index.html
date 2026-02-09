@@ -30,7 +30,7 @@
             min-height: 100vh;
         }
 
-        /* --- 1. 상단 헤더 --- */
+        /* --- 헤더 --- */
         header {
             background-color: var(--ikea-blue);
             color: white;
@@ -53,7 +53,7 @@
         .header-sub-link:hover { opacity: 0.8; text-decoration: underline; }
         .header-right { text-align: right; font-size: 0.75rem; line-height: 1.3; opacity: 0.9; }
 
-        /* --- 2. 메인 컨테이너 --- */
+        /* --- 메인 컨테이너 --- */
         .app-container {
             display: flex;
             flex: 1;
@@ -69,10 +69,8 @@
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            padding-top: 20px; /* 타이틀 삭제로 인한 상단 여백 추가 */
+            padding-top: 20px;
         }
-
-        /* .sidebar-header 삭제됨 */
 
         .nav-item {
             padding: 15px 20px;
@@ -98,27 +96,18 @@
             background-color: var(--bg-color);
         }
 
-        /* --- 3. 푸터 --- */
-        footer {
-            background-color: #eef0f3;
-            text-align: center;
-            padding: 15px 0;
-            color: #888;
-            font-size: 0.75rem;
-            border-top: 1px solid #e0e0e0;
-            width: 100%;
-            flex-shrink: 0;
-        }
-
         /* --- 탭 컨텐츠 --- */
         .tab-content { display: none; width: 100%; flex-direction: column; align-items: center; }
         .tab-content.active { display: flex; }
 
-        /* === [Tab 1] Article Search Styles === */
+        /* Article Search Styles */
         .search-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 800px; text-align: left; position: relative; }
         .search-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .search-title { font-size: 1.2rem; font-weight: 600; color: var(--ikea-blue); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-        .data-status { font-size: 0.8rem; background-color: #e5f4e7; color: #27ae60; padding: 5px 10px; border-radius: 4px; font-weight: 500; text-align: right; }
+        
+        /* [수정] 데이터 상태 표시 (기본값: 연결중) */
+        .data-status { font-size: 0.8rem; background-color: #fff3cd; color: #856404; padding: 5px 10px; border-radius: 4px; font-weight: 500; text-align: right; }
+        
         .input-wrapper { display: flex; gap: 10px; height: 50px; }
         input[type="text"] { flex-grow: 1; padding: 0 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
         .btn-search { background-color: var(--ikea-blue); color: white; border: none; padding: 0 25px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 1rem; white-space: nowrap; line-height: 1.2; }
@@ -132,7 +121,7 @@
         .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; color: var(--text-dark); white-space: nowrap; }
         .dash-card p { font-size: 0.8rem; color: #888; text-transform: uppercase; margin: 0; }
         
-        /* === [Tab 2] Goods Arrival Styles === */
+        /* Goods Arrival Styles */
         .pivot-container {
             width: 100%;
             overflow-x: auto;
@@ -153,11 +142,9 @@
         .filter-input { width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
         .date-col { background-color: #fff; min-width: 80px; font-weight: bold; color: var(--ikea-blue); }
         .qty-cell { font-weight: bold; color: var(--ikea-blue); }
-        
-        /* 미정 컬럼 스타일 */
         .not-fixed-col { background-color: #fff0f0; color: #c0392b; font-weight: bold; min-width: 80px; }
 
-        /* Table & Mobile Common */
+        /* Common */
         .table-wrap { background: white; border-radius: 8px; overflow-x: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
         .mobile-result-view { display: none; width: 100%; max-width: 600px; margin: 0 auto; }
@@ -171,39 +158,34 @@
         .schedule-qty { font-size: 1.2rem; font-weight: 800; color: var(--ikea-blue); text-align: right; }
         .schedule-container { font-size: 0.75rem; color: #777; margin-top: 2px; text-align: right; }
 
-        /* Utility */
         .en-sub { font-size: 0.75em; color: #777; font-weight: 300; margin-left: 6px; font-family: 'Roboto', sans-serif; }
         .en-block { display: block; font-size: 0.85em; color: #888; margin-top: 3px; font-weight: 300; font-family: 'Roboto', sans-serif; }
         .en-btn { font-size: 0.75em; display: block; font-weight: 300; opacity: 0.9; margin-top: -2px; }
         .en-white { color: rgba(255,255,255,0.85); }
         .pc-only-text { display: block; }
         .mobile-only-text { display: none; }
-
-        /* PC View */
+        
         .pc-table-view { display: block; }
         .pc-table-view th { background-color: #f9f9f9; padding: 15px; font-size: 0.8rem; color: #555; text-align: left; }
         .pc-table-view td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
 
+        footer { background-color: #eef0f3; text-align: center; padding: 15px 0; color: #888; font-size: 0.75rem; border-top: 1px solid #e0e0e0; width:100%; flex-shrink: 0; }
+        #loading { display: none; margin-top: 20px; color: var(--ikea-blue); }
         #scanner-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
         #reader { width: 100%; max-width: 500px; background: black; border-radius: 8px; overflow: hidden; }
         .scan-controls { margin-top: 20px; display: flex; gap: 15px; }
         .btn-modal { padding: 10px 20px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
         .btn-close { background: white; color: black; }
-        #loading { display: none; margin-top: 20px; color: var(--ikea-blue); }
 
-        /* --- 반응형 (Mobile) --- */
         @media (max-width: 768px) {
             .app-container { flex-direction: column; display: block; }
             .sidebar { width: 100%; height: auto; flex-direction: row; padding-top: 0; }
             .nav-item { flex: 1; text-align: center; padding: 12px; border-right: 1px solid #ddd; }
             .nav-item.active { border-left: none; border-bottom: 4px solid var(--ikea-yellow); }
-            
             .content-area { padding: 20px 10px; }
-            
             header { height: auto; padding: 20px; flex-direction: column; gap: 10px; text-align: center; }
             .header-left { align-items: center; }
             .link-group { margin-left: 0; justify-content: center; }
-            
             .search-card { padding: 20px; }
             .btn-scan-trigger { display: flex; }
             .dashboard { gap: 10px; }
@@ -211,12 +193,10 @@
             .dash-card h3 { font-size: 1.3rem; }
             .pc-table-view { display: none !important; }
             .mobile-result-view { display: block; }
-            
             .col-hide-mobile { display: none; }
             .pivot-table { min-width: auto; }
             .pivot-table th, .pivot-table td { padding: 5px; font-size: 0.7rem; }
             .filter-input { width: 100%; font-size: 0.7rem; }
-            
             .pc-only-text { display: none; }
             .mobile-only-text { display: block; }
         }
@@ -231,9 +211,7 @@
         </div>
         <div id="reader"></div>
         <div class="scan-controls">
-            <button class="btn-modal btn-close" onclick="stopScanner()">
-                닫기 <span style="font-size:0.8em; color:#666;">(Close)</span>
-            </button>
+            <button class="btn-modal btn-close" onclick="stopScanner()">닫기</button>
         </div>
     </div>
 
@@ -260,7 +238,7 @@
             </div>
         </div>
         <div class="header-right">
-            Ver 3.2 Add 'Not Fixed'<br>
+            Ver 3.3 Auto Refresh<br>
             Bilingual Support
             <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">
                 data update : -
@@ -289,8 +267,8 @@
                             <span class="en-sub">Search (Item No 8 digits)</span>
                         </div>
                         <div class="data-status">
-                            <i class="fas fa-check-circle"></i> 데이터 연결됨
-                            <div style="font-size:0.7em; color:#27ae60; opacity:0.8; font-weight:300;">Data Connected</div>
+                            <i class="fas fa-spinner fa-spin"></i> 데이터 연결 중...
+                            <div style="font-size:0.7em; opacity:0.8; font-weight:300;">Connecting...</div>
                         </div>
                     </div>
                     <div class="input-wrapper">
@@ -300,10 +278,10 @@
                     </div>
                     <div class="helper-text">
                         <i class="fas fa-lightbulb" style="color: var(--ikea-yellow);"></i> <strong>Tip:</strong>
-                        <div class="pc-only-text">8자리 숫자를 입력 후 검색을 눌러주세요.<div class="en-block">Please enter 8-digit number and press search.</div></div>
-                        <div class="mobile-only-text">모바일에서는 카메라 아이콘을 눌러 바코드를 자동으로 입력할 수 있습니다.<div class="en-block">On mobile, tap the camera icon to scan barcode.</div></div>
+                        <div class="pc-only-text">8자리 숫자를 입력 후 검색을 눌러주세요.</div>
+                        <div class="mobile-only-text">모바일에서는 카메라 아이콘을 눌러 바코드를 자동으로 입력할 수 있습니다.</div>
                     </div>
-                    <div id="loading" style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br>데이터 검색 중...<div class="en-block" style="color:var(--ikea-blue);">Searching data...</div></div>
+                    <div id="loading" style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br>데이터 검색 중...</div>
                 </div>
 
                 <div id="resultSection" class="result-section">
@@ -339,6 +317,9 @@
                             <thead id="pivotHead"></thead>
                             <tbody id="pivotBody"></tbody>
                         </table>
+                        <div id="pivotLoading" style="text-align:center; padding:20px; color:#777; display:none;">
+                            <i class="fas fa-spinner fa-spin"></i> 데이터를 불러오는 중입니다...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -362,7 +343,17 @@
             document.getElementById('nav-arrival').classList.remove('active');
             document.getElementById('tab-' + tabName).classList.add('active');
             document.getElementById('nav-' + tabName).classList.add('active');
-            if (tabName === 'arrival') renderPivotTable(rawData);
+            
+            // 데이터가 이미 로드되었으면 렌더링
+            if (tabName === 'arrival') {
+                if (rawData.length > 0) {
+                    renderPivotTable(rawData);
+                } else {
+                    // 데이터 로딩중 표시
+                    document.getElementById('pivotBody').innerHTML = "";
+                    document.getElementById('pivotLoading').style.display = "block";
+                }
+            }
         }
 
         window.onload = async function() {
@@ -383,16 +374,28 @@
                 let sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes("orderinformation"));
                 if (!sheetName) sheetName = workbook.SheetNames[0];
                 rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: "A", defval: "", range: 1 }); 
+                
+                // [FIX] 데이터 로딩 성공 시 배너 변경
+                const statusDiv = document.querySelector('.data-status');
+                if(statusDiv) {
+                    statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> 데이터 연결됨 <div style="font-size:0.7em; opacity:0.8; font-weight:300;">Data Connected</div>`;
+                    statusDiv.style.backgroundColor = '#e5f4e7';
+                    statusDiv.style.color = '#27ae60';
+                }
+
+                // [FIX] 현재 보고 있는 탭이 'Goods Arrival'이면 자동 렌더링 (Race Condition 해결)
+                if(document.getElementById('tab-arrival').classList.contains('active')) {
+                    renderPivotTable(rawData);
+                }
+
             } catch (error) {
                 const statusDiv = document.querySelector('.data-status');
                 if(statusDiv) { statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 연결 실패`; statusDiv.style.color = '#e74c3c'; statusDiv.style.backgroundColor = '#fdeea9'; }
             }
         };
 
-        // --- Common Date Logic ---
         function getSafeDate(raw) {
             if (typeof raw === 'number' && raw < 100000) {
-                // 12시간 버퍼 추가
                 const d = new Date(Math.round((raw - 25569) * 86400 * 1000) + 43200000);
                 return !isNaN(d) && d.getFullYear() > 1900 ? d : null;
             } else if (typeof raw === 'string' && !raw.startsWith("1900")) {
@@ -402,7 +405,7 @@
             return null;
         }
 
-        // --- Tab 1 Logic ---
+        // Tab 1 Logic
         document.getElementById('itemInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') performSearch(); });
         function parseExcelDate(value) {
             if (!value) return "-";
@@ -503,8 +506,9 @@
             }
         }
 
-        // --- Tab 2 Logic (Pivot) ---
+        // Tab 2 Logic
         function renderPivotTable(data) {
+            document.getElementById('pivotLoading').style.display = "none"; // 로딩 숨김
             const today = new Date(); today.setHours(0,0,0,0);
             const pivotMap = {};
             const uniqueDates = new Set();
@@ -514,16 +518,16 @@
                 const itemNo = String(row['E'] || "").trim();
                 const qty = parseFloat(row['P']) || 0;
 
+                if (!itemNo) return; // Skip invalid rows
+
                 if (!pivotMap[itemNo]) {
                     pivotMap[itemNo] = {
                         hfb: row['F'] || "", pa: row['D'] || "", itemNo: itemNo, itemName: row['C'] || "", activity: row['L'] || "", 
-                        dates: {}, 
-                        notFixedQty: 0 // [New] 미정 수량
+                        dates: {}, notFixedQty: 0
                     };
                 }
 
                 if (pDate) {
-                    // 유효한 날짜인 경우
                     const checkDate = new Date(pDate); checkDate.setHours(0,0,0,0);
                     if (checkDate >= today) {
                         const pStr = pDate.toISOString().split('T')[0];
@@ -532,23 +536,13 @@
                         uniqueDates.add(pStr);
                     }
                 } else {
-                    // 날짜가 없거나 1900년인 경우 -> [New] 미정 수량에 합산
                     pivotMap[itemNo].notFixedQty += qty;
                 }
             });
 
             const sortedDates = Array.from(uniqueDates).sort();
             
-            // 헤더 생성 (미정 컬럼 추가됨)
-            let headerHtml = `
-                <tr>
-                    <th>HFB<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th>
-                    <th>PA<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th>
-                    <th>Item No<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th>
-                    <th class="col-hide-mobile">Item Name<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th>
-                    <th class="col-hide-mobile">Activity<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th>
-                    <th class="not-fixed-col">미정<br>(Not Fixed)</th>
-            `;
+            let headerHtml = `<tr><th>HFB<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th><th>PA<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th><th>Item No<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th><th class="col-hide-mobile">Item Name<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th><th class="col-hide-mobile">Activity<br><input type="text" class="filter-input" onkeyup="filterPivot()" placeholder="Filter"></th><th class="not-fixed-col">미정<br>(Not Fixed)</th>`;
             sortedDates.forEach(d => headerHtml += `<th class="date-col">${d}</th>`);
             headerHtml += `</tr>`;
             document.getElementById('pivotHead').innerHTML = headerHtml;
@@ -560,17 +554,10 @@
 
             let bodyHtml = "";
             sortedRows.forEach(row => {
-                // 미정 수량 및 날짜별 수량이 모두 없으면(과거 데이터만 있는 경우 등) 표시 안 할 수도 있으나, 현재 로직은 모두 표시
+                // 데이터가 없는 행(과거 데이터만 있는 경우)은 표시하지 않을 수도 있음. 현재는 모두 표시.
                 const notFixedDisplay = row.notFixedQty > 0 ? row.notFixedQty : "";
                 
-                bodyHtml += `<tr>
-                    <td>${row.hfb}</td>
-                    <td>${row.pa}</td>
-                    <td><b>${row.itemNo}</b></td>
-                    <td class="col-hide-mobile" style="text-align:left;">${row.itemName}</td>
-                    <td class="col-hide-mobile">${row.activity}</td>
-                    <td class="not-fixed-col">${notFixedDisplay}</td>
-                `;
+                bodyHtml += `<tr><td>${row.hfb}</td><td>${row.pa}</td><td><b>${row.itemNo}</b></td><td class="col-hide-mobile" style="text-align:left;">${row.itemName}</td><td class="col-hide-mobile">${row.activity}</td><td class="not-fixed-col">${notFixedDisplay}</td>`;
                 sortedDates.forEach(date => {
                     const q = row.dates[date] || "";
                     bodyHtml += `<td class="qty-cell">${q}</td>`;
@@ -595,7 +582,7 @@
             }
         }
 
-        // --- Scanner Helpers ---
+        // Scanner
         function startScanner() { document.getElementById('scanner-modal').style.display = 'flex'; if(!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("reader"); html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 300, height: 150 }, aspectRatio: 1.0 }, onScanSuccess).catch(e=>alert("Camera Error")); }
         function onScanSuccess(t) { document.getElementById('itemInput').value = t.replace(/[^0-9]/g, ''); stopScanner(); performSearch(); }
         function stopScanner() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(()=>document.getElementById('scanner-modal').style.display='none'); else document.getElementById('scanner-modal').style.display='none'; }
