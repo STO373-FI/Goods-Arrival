@@ -156,7 +156,7 @@
             </div>
         </div>
         <div class="header-right">
-            Ver 3.6 Performance Fix<br>
+            Ver 3.7 Limit 3000<br>
             Bilingual Support
             <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">data update : -</div>
         </div>
@@ -229,8 +229,8 @@
                             <i class="fas fa-spinner fa-spin"></i> 데이터를 불러오는 중입니다...
                         </div>
                         <div id="limitWarning" class="limit-warning" style="display:none;">
-                            <i class="fas fa-info-circle"></i> 성능 최적화를 위해 상위 300개 결과만 표시됩니다. 더 찾으려면 필터를 사용하세요.<br>
-                            <span class="en-sub">Showing top 300 results for performance. Please use filters to refine.</span>
+                            <i class="fas fa-info-circle"></i> 성능 최적화를 위해 상위 3000개 결과만 표시됩니다. 더 찾으려면 필터를 사용하세요.<br>
+                            <span class="en-sub">Showing top 3000 results for performance. Please use filters to refine.</span>
                         </div>
                     </div>
                 </div>
@@ -514,11 +514,11 @@
             if(shouldRender) updateTableDisplay(allPivotRows);
         }
 
-        // [Performance] Only render top 300 rows
+        // [Performance] Only render top 3000 rows
         function updateTableDisplay(rowsToRender) {
             const tbody = document.getElementById('pivotBody');
             const limitWarning = document.getElementById('limitWarning');
-            const limit = 300; // Limit for rendering
+            const limit = 3000; // Limit for rendering
             
             let bodyHtml = "";
             const count = Math.min(rowsToRender.length, limit);
