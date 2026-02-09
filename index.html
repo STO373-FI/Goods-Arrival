@@ -9,7 +9,7 @@
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -41,12 +41,12 @@
             background-color: var(--ikea-blue);
             color: white;
             padding: 0 40px;
-            height: 90px; /* SäljaPro 링크 추가로 높이 살짝 증가 */
+            height: 100px; /* 링크가 늘어나서 높이 약간 여유 */
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
-        /* 헤더 왼쪽 영역 (타이틀 + SäljaPro) */
+        /* 헤더 왼쪽 영역 */
         .header-left {
             display: flex;
             flex-direction: column;
@@ -64,21 +64,26 @@
             gap: 10px; 
         }
 
-        /* SäljaPro 링크 스타일 */
-        .saljapro-link {
+        /* 링크 모음 (SäljaPro, IKEA, MHS) */
+        .link-group {
+            display: flex;
+            gap: 20px; /* 링크 간 간격 */
+            margin-top: 5px;
+            margin-left: 38px; /* 아이콘 아래 텍스트 라인 맞춤 */
+        }
+
+        .header-sub-link {
             color: var(--ikea-yellow);
             text-decoration: none;
-            font-weight: 700;
-            font-size: 1.1rem; /* 조금 크게 */
+            font-weight: 500;
+            font-size: 0.95rem; 
             font-family: 'Roboto', sans-serif;
-            margin-top: 4px;
-            margin-left: 38px; /* 아이콘 너비만큼 들여쓰기 */
             display: flex;
             align-items: center;
             gap: 5px;
             transition: opacity 0.2s;
         }
-        .saljapro-link:hover {
+        .header-sub-link:hover {
             opacity: 0.8;
             text-decoration: underline;
         }
@@ -160,7 +165,7 @@
             header { flex-direction: column; height: auto; padding: 15px; gap: 10px; text-align: center; }
             .header-left { align-items: center; }
             .header-left .main-title { justify-content: center; font-size: 1.2rem; }
-            .saljapro-link { margin-left: 0; font-size: 1rem; }
+            .link-group { margin-left: 0; gap: 15px; justify-content: center; flex-wrap: wrap; }
             
             .main-content { padding: 30px 15px; }
             .search-card { padding: 20px; }
@@ -196,12 +201,21 @@
                 <i class="fas fa-truck-fast" style="color: var(--ikea-yellow);"></i> 
                 STO373 Goods Arrival Plan Search
             </a>
-            <a href="https://coworker.ingka.com/kr/ko/v1/" target="_blank" class="saljapro-link">
-                SäljaPro <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
-            </a>
+            
+            <div class="link-group">
+                <a href="https://coworker.ingka.com/kr/ko/v1/" target="_blank" class="header-sub-link">
+                    SäljaPro <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
+                </a>
+                <a href="https://www.ikea.com/kr/ko/" target="_blank" class="header-sub-link">
+                    IKEA Home <i class="fas fa-home" style="font-size: 0.8em;"></i>
+                </a>
+                <a href="https://mhs-373.ikea.com/gateway/" target="_blank" class="header-sub-link">
+                    MHS <i class="fas fa-warehouse" style="font-size: 0.8em;"></i>
+                </a>
+            </div>
         </div>
         <div class="header-right">
-            Ver 2.3 SäljaPro Link<br>
+            Ver 2.4 Quick Links<br>
             Bilingual Support
             <div id="data-update-date" style="font-size:0.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">
                 data update : -
@@ -418,7 +432,6 @@
 
         function searchExcel(targetCleanInput) {
             const groupedMap = new Map();
-            // [중요] 오늘 날짜 계산
             const today = new Date();
             today.setHours(0,0,0,0);
             
@@ -471,7 +484,6 @@
                         }
                     }
 
-                    // [Ver 2.1 로직] 날짜가 존재하고 오늘보다 작으면 스킵 (D-Day 포함)
                     if (plannedDateObj && plannedDateObj < today) {
                         return; 
                     }
