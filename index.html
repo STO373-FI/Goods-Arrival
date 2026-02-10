@@ -41,7 +41,7 @@
       display:inline-block; padding:5px 12px; border-radius:20px; 
       font-size:.8rem; font-weight:bold; background:#fff3cd; color:#856404; 
       box-shadow:0 2px 5px rgba(0,0,0,.1); 
-      white-space: nowrap; /* 줄바꿈 방지 */
+      white-space: nowrap; 
     }
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
@@ -77,10 +77,9 @@
     /* --- Pivot Table Column Widths --- */
     .pivot-container { width: 100%; overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; box-sizing: border-box; }
     
-    /* [FIX] Header Alignment - Force Space Between */
     .pivot-header-area { 
       display: flex; 
-      justify-content: space-between; /* Left-Right split */
+      justify-content: space-between; 
       align-items: center; 
       margin-bottom: 15px; 
       width: 100%;
@@ -91,13 +90,19 @@
     .pivot-table td { padding: 8px 5px; border: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; }
     .pivot-table tbody tr:hover { background-color: #f9f9f9; }
 
-    /* Column Specific Widths */
+    /* [FIX] Column Specific Widths (Updated Ver 4.5) */
     .col-hfb { width: 60px; }
     .col-pa { width: 60px; }
     .col-itemno { width: 90px; }
-    .col-activity { width: 100px; }
+    
+    /* Activity: Increased from 100px to 140px */
+    .col-activity { width: 140px; } 
+    
     .not-fixed-col { width: 90px; background-color: #fff0f0; color: #c0392b; font-weight: bold; }
-    .date-col { width: 85px; background-color: #fff; font-weight: bold; color: var(--ikea-blue); }
+    
+    /* Date: Decreased from 85px to 75px */
+    .date-col { width: 75px; min-width: 75px; background-color: #fff; font-weight: bold; color: var(--ikea-blue); text-align: center; }
+    
     .col-itemname { width: 350px; white-space: normal; word-break: break-word; text-align: left !important; padding-left: 10px !important; }
 
     .qty-cell { font-weight: bold; color: var(--ikea-blue); }
@@ -202,7 +207,7 @@
       </div>
     </div>
     <div class="header-right">
-      Ver 4.4 Right Fixed Badge<br/>
+      Ver 4.5 Activity Width<br/>
       Bilingual Support
       <div id="data-update-date" style="font-size:.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">data update : -</div>
     </div>
