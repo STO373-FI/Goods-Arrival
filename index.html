@@ -37,7 +37,12 @@
     .tab-content.active{ display:flex; }
 
     /* Badges */
-    .status-badge{ display:inline-block; padding:5px 12px; border-radius:20px; font-size:.8rem; font-weight:bold; background:#fff3cd; color:#856404; box-shadow:0 2px 5px rgba(0,0,0,.1); }
+    .status-badge{ 
+      display:inline-block; padding:5px 12px; border-radius:20px; 
+      font-size:.8rem; font-weight:bold; background:#fff3cd; color:#856404; 
+      box-shadow:0 2px 5px rgba(0,0,0,.1); 
+      white-space: nowrap; /* 줄바꿈 방지 */
+    }
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
 
@@ -69,42 +74,31 @@
     .filter-chip i { font-size: 0.8em; }
     .filter-chip.active i { color: var(--ikea-yellow); }
 
-    /* --- [FIX] Pivot Table Column Widths --- */
+    /* --- Pivot Table Column Widths --- */
     .pivot-container { width: 100%; overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; box-sizing: border-box; }
     
-    .pivot-table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      /* [Important] Increase min-width so Item Name doesn't shrink */
-      min-width: 1600px; 
-      table-layout: fixed; 
+    /* [FIX] Header Alignment - Force Space Between */
+    .pivot-header-area { 
+      display: flex; 
+      justify-content: space-between; /* Left-Right split */
+      align-items: center; 
+      margin-bottom: 15px; 
+      width: 100%;
     }
-    
-    .pivot-table th { 
-      background-color: #f1f2f6; color: #333; padding: 10px 5px; border: 1px solid #ddd; 
-      font-size: 0.85rem; text-align: center; position: sticky; top: 0; z-index: 10; vertical-align: top; 
-    }
-    .pivot-table td { 
-      padding: 8px 5px; border: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; 
-    }
+
+    .pivot-table { width: 100%; border-collapse: collapse; min-width: 1600px; table-layout: fixed; }
+    .pivot-table th { background-color: #f1f2f6; color: #333; padding: 10px 5px; border: 1px solid #ddd; font-size: 0.85rem; text-align: center; position: sticky; top: 0; z-index: 10; vertical-align: top; }
+    .pivot-table td { padding: 8px 5px; border: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; }
     .pivot-table tbody tr:hover { background-color: #f9f9f9; }
 
     /* Column Specific Widths */
-    .col-hfb { width: 60px; }      /* Narrow */
-    .col-pa { width: 60px; }       /* Narrow */
-    .col-itemno { width: 90px; }   /* Similar to Date */
-    .col-activity { width: 100px; } /* Moderate */
+    .col-hfb { width: 60px; }
+    .col-pa { width: 60px; }
+    .col-itemno { width: 90px; }
+    .col-activity { width: 100px; }
     .not-fixed-col { width: 90px; background-color: #fff0f0; color: #c0392b; font-weight: bold; }
     .date-col { width: 85px; background-color: #fff; font-weight: bold; color: var(--ikea-blue); }
-    
-    /* [Important] Wide Item Name */
-    .col-itemname { 
-      width: 350px; 
-      white-space: normal; 
-      word-break: break-word; 
-      text-align: left !important; /* Left align for names */
-      padding-left: 10px !important;
-    }
+    .col-itemname { width: 350px; white-space: normal; word-break: break-word; text-align: left !important; padding-left: 10px !important; }
 
     .qty-cell { font-weight: bold; color: var(--ikea-blue); }
 
@@ -208,7 +202,7 @@
       </div>
     </div>
     <div class="header-right">
-      Ver 4.3 Width Fix<br/>
+      Ver 4.4 Right Fixed Badge<br/>
       Bilingual Support
       <div id="data-update-date" style="font-size:.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">data update : -</div>
     </div>
