@@ -41,7 +41,7 @@
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
 
-    /* --- Multi-Select Date Filter (New) --- */
+    /* --- Multi-Select Date Filter --- */
     .filter-tray-container {
       width: 100%; max-width: 100%; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box;
@@ -62,31 +62,50 @@
       display: inline-flex; align-items: center; gap: 6px;
     }
     .filter-chip:hover { background: #e9ecef; border-color: #ccc; }
-    
-    /* Active State (Selected) */
     .filter-chip.active { 
-      background-color: var(--ikea-blue); 
-      color: white; 
-      border-color: var(--ikea-blue); 
+      background-color: var(--ikea-blue); color: white; border-color: var(--ikea-blue); 
       box-shadow: 0 2px 4px rgba(0,88,163,0.3);
     }
     .filter-chip i { font-size: 0.8em; }
     .filter-chip.active i { color: var(--ikea-yellow); }
 
-    /* Pivot Table */
-    .col-hfb { width: 50px; min-width: 50px; max-width: 50px; text-align: center; }
-    .col-pa { width: 50px; min-width: 50px; max-width: 50px; text-align: center; }
-    .col-itemno { width: 100px; min-width: 100px; }
-    .col-itemname { min-width: 350px; max-width: 500px; white-space: normal; word-break: break-word; }
-    .col-activity { min-width: 120px; }
-    .not-fixed-col { background-color: #fff0f0; color: #c0392b; font-weight: bold; min-width: 80px; text-align: center; }
-    .date-col { background-color: #fff; min-width: 85px; font-weight: bold; color: var(--ikea-blue); text-align: center; }
-    
+    /* --- [FIX] Pivot Table Column Widths --- */
     .pivot-container { width: 100%; overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; box-sizing: border-box; }
-    .pivot-table { width: 100%; border-collapse: collapse; min-width: 1200px; table-layout: fixed; }
-    .pivot-table th { background-color: #f1f2f6; color: #333; padding: 10px 5px; border: 1px solid #ddd; font-size: 0.85rem; text-align: center; position: sticky; top: 0; z-index: 10; vertical-align: top; }
-    .pivot-table td { padding: 8px 5px; border: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; }
+    
+    .pivot-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      /* [Important] Increase min-width so Item Name doesn't shrink */
+      min-width: 1600px; 
+      table-layout: fixed; 
+    }
+    
+    .pivot-table th { 
+      background-color: #f1f2f6; color: #333; padding: 10px 5px; border: 1px solid #ddd; 
+      font-size: 0.85rem; text-align: center; position: sticky; top: 0; z-index: 10; vertical-align: top; 
+    }
+    .pivot-table td { 
+      padding: 8px 5px; border: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; 
+    }
     .pivot-table tbody tr:hover { background-color: #f9f9f9; }
+
+    /* Column Specific Widths */
+    .col-hfb { width: 60px; }      /* Narrow */
+    .col-pa { width: 60px; }       /* Narrow */
+    .col-itemno { width: 90px; }   /* Similar to Date */
+    .col-activity { width: 100px; } /* Moderate */
+    .not-fixed-col { width: 90px; background-color: #fff0f0; color: #c0392b; font-weight: bold; }
+    .date-col { width: 85px; background-color: #fff; font-weight: bold; color: var(--ikea-blue); }
+    
+    /* [Important] Wide Item Name */
+    .col-itemname { 
+      width: 350px; 
+      white-space: normal; 
+      word-break: break-word; 
+      text-align: left !important; /* Left align for names */
+      padding-left: 10px !important;
+    }
+
     .qty-cell { font-weight: bold; color: var(--ikea-blue); }
 
     .filter-input { width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
@@ -189,7 +208,7 @@
       </div>
     </div>
     <div class="header-right">
-      Ver 4.2 Multi-Select<br/>
+      Ver 4.3 Width Fix<br/>
       Bilingual Support
       <div id="data-update-date" style="font-size:.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">data update : -</div>
     </div>
@@ -555,7 +574,6 @@
 
     function clearDateFilters() {
       selectedDateFilters.clear();
-      // Re-render chips to remove active class
       const chips = document.querySelectorAll('.filter-chip');
       chips.forEach(c => c.classList.remove('active'));
       filterPivot();
@@ -572,7 +590,7 @@
         const row = rowsToRender[i];
         const notFixedDisplay = row.notFixedQty > 0 ? row.notFixedQty : "";
         
-        bodyHtml += `<tr><td class="col-hfb">${row.hfb}</td><td class="col-pa">${row.pa}</td><td class="col-itemno"><b>${row.itemNo}</b></td><td class="col-itemname col-hide-mobile" style="text-align:left;">${row.itemName}</td><td class="col-activity col-hide-mobile">${row.activity}</td><td class="not-fixed-col">${notFixedDisplay}</td>`;
+        bodyHtml += `<tr><td class="col-hfb">${row.hfb}</td><td class="col-pa">${row.pa}</td><td class="col-itemno"><b>${row.itemNo}</b></td><td class="col-itemname col-hide-mobile">${row.itemName}</td><td class="col-activity col-hide-mobile">${row.activity}</td><td class="not-fixed-col">${notFixedDisplay}</td>`;
         globalSortedDates.forEach(date => {
           const q = row.dates[date] || "";
           bodyHtml += `<td class="qty-cell">${q}</td>`;
