@@ -54,11 +54,15 @@
     
     /* === [HYBRID UI LOGIC] === */
     
-    /* 1. PC Default Styles (Ver 5.2 Style) */
-    .mobile-only-filters { display: none; } /* Hide big mobile filters on PC */
+    /* PC Default Styles */
+    .mobile-only-filters { display: none; }
+    
+    /* PC Table Filters (Default) */
     .pc-header-filter { display: block; width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
+    .always-visible-filter { display: block; width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
+
     .pivot-table { min-width: 1600px; table-layout: fixed; }
-    .empty-state { display: none; } /* PC shows table by default */
+    .empty-state { display: none; } 
     
     /* Column Widths (PC) */
     .col-hfb { width: 60px; }
@@ -79,7 +83,7 @@
     .pivot-table tbody tr:hover { background-color: #f9f9f9; }
     .qty-cell { font-weight: bold; color: var(--ikea-blue); }
 
-    /* Date Filter Tray (Multi-Select) */
+    /* Date Filter Tray */
     .filter-tray-container { width: 100%; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
     .tray-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .tray-title { font-size: 0.9rem; color: #333; font-weight: 600; display:flex; align-items:center; gap:5px; }
@@ -96,7 +100,7 @@
     .mobile-result-view { display: none; }
     
     /* =========================================
-       2. Mobile Specific Overrides (Ver 5.2.1 Style) 
+       2. Mobile Specific Overrides (Optimized) 
        ========================================= */
     @media (max-width: 768px) {
       .app-container { flex-direction: column; display: block; }
@@ -118,13 +122,16 @@
       .dashboard { gap: 10px; } .dash-card { padding: 15px 5px; } .dash-card h3 { font-size: 1.3rem; }
       
       /* Goods Arrival Tab Mobile */
+      /* [FIX 1] HFB/PA Filters Centered */
       .mobile-only-filters { display: flex; gap: 10px; background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-      .pf-group { display: flex; flex-direction: column; gap: 5px; flex: 1; }
-      .pf-label { font-size: 0.85rem; font-weight: 700; color: var(--ikea-blue); }
-      .pf-input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; text-align: center; }
+      .pf-group { display: flex; flex-direction: column; gap: 5px; flex: 1; justify-content: center; }
+      .pf-label { font-size: 0.85rem; font-weight: 700; color: var(--ikea-blue); text-align: center; display: block; }
+      .pf-input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; text-align: center; width: 100%; box-sizing: border-box; }
       
-      .pc-header-filter { display: none; } /* Hide table header inputs on mobile */
-      
+      /* [FIX 3] Item No Filter Visible on Mobile */
+      .pc-header-filter { display: none; } /* Hide regular header inputs */
+      .always-visible-filter { display: block; width: 100%; margin: 3px auto; font-size: 0.75rem; padding: 4px; box-sizing: border-box; }
+
       .pivot-header-area { flex-direction: column; gap: 10px; align-items: flex-start; }
       .pivot-controls-right { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; }
       
@@ -132,10 +139,16 @@
       .col-itemname { width: auto; min-width: 140px; }
       .col-itemno { width: 70px; font-size: 0.75rem; }
       .date-col, .not-fixed-col { width: auto; min-width: 60px; font-size: 0.75rem; }
-      .col-activity, .col-hfb, .col-pa { /* These might be hidden dynamically in JS if mobile */ }
+      .col-activity, .col-hfb, .col-pa { /* Hidden via logic or CSS if needed */ }
       
       /* Mobile Empty State */
       .empty-state { display: block; padding: 40px; text-align: center; color: #888; background: #f9f9f9; border-radius: 8px; border: 1px dashed #ccc; margin-top: 10px; }
+
+      /* [FIX 2] Date Filter Compact */
+      .filter-tray-container { padding: 10px; margin-bottom: 10px; }
+      .tray-title { font-size: 0.8rem; }
+      .filter-chip { padding: 4px 10px; font-size: 0.75rem; gap: 4px; }
+      .chip-container { gap: 6px; }
     }
     
     .product-summary-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid var(--ikea-yellow); }
@@ -169,7 +182,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 5.3 Hybrid UI</span>
+      <span>Ver 5.3.1 Mobile Fix</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -197,7 +210,8 @@
           </div>
           <div class="helper-text">
             <i class="fas fa-lightbulb" style="color:var(--ikea-yellow);"></i> <strong>Tip:</strong>
-            <span style="font-size:0.9em;">8자리 숫자를 입력 후 검색을 눌러주세요. 모바일은 바코드 스캔 가능.</span>
+            <div class="pc-only-text">8자리 숫자를 입력 후 검색을 눌러주세요.</div>
+            <div class="mobile-only-text">모바일에서는 카메라 아이콘을 눌러 바코드를 자동으로 입력할 수 있습니다.</div>
           </div>
           <div id="loading"><i class="fas fa-spinner fa-spin fa-2x"></i><br/>데이터 검색 중...</div>
         </div>
@@ -518,10 +532,8 @@
     function filterPivot() { updateTableDisplay(); }
 
     function updateTableDisplay() {
-      // Logic: Mobile needs separate inputs, PC uses header inputs
       const isMobile = window.innerWidth <= 768;
       
-      // Get values from whichever input is visible (or both)
       const pfHfb = document.getElementById('pf-hfb').value.trim().toUpperCase();
       const pfPa = document.getElementById('pf-pa').value.trim().toUpperCase();
       const headerHfb = document.getElementById('hfb-filter') ? document.getElementById('hfb-filter').value.trim().toUpperCase() : "";
@@ -531,7 +543,6 @@
       const paVal = isMobile ? pfPa : headerPa;
       const hasDateFilter = selectedDateFilters.size > 0;
 
-      // Mobile: Empty State Logic
       if (isMobile) {
           const isEmpty = (!hfbVal && !paVal && !hasDateFilter);
           document.getElementById('pivotEmptyState').style.display = isEmpty ? 'block' : 'none';
@@ -542,32 +553,27 @@
           document.getElementById('pivotTable').style.display = 'table';
       }
 
-      // Re-build Header (Responsive)
-      // PC: Inputs in Header, All Dates
-      // Mobile: No Inputs in Header, Selected Dates Only
       let visibleDates = (isMobile && hasDateFilter) ? globalSortedDates.filter(d => selectedDateFilters.has(d)) : [...globalSortedDates];
       const showNotFixed = (!isMobile) || (!hasDateFilter) || (selectedDateFilters.has('Not Fixed'));
 
+      // Re-build Header
       let theadHtml = `<tr>
         <th class="col-hfb">HFB<br><input id="hfb-filter" type="text" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
         <th class="col-pa">PA<br><input id="pa-filter" type="text" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
-        <th class="col-itemno">Item No<br><input data-field="itemNo" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
+        <th class="col-itemno">Item No<br><input data-field="itemNo" class="always-visible-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
         <th class="col-itemname">Item Name<br><input data-field="itemName" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
         <th class="col-activity">Activity<br><input data-field="activity" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>`;
       
       if(showNotFixed) theadHtml += `<th class="not-fixed-col">미정<br>(Not Fixed)</th>`;
-      
       visibleDates.forEach(d => { theadHtml += `<th class="date-col">${d}</th>`; });
       theadHtml += `</tr>`;
       document.getElementById('pivotHead').innerHTML = theadHtml;
       
-      // Restore PC inputs values after re-render
       if (!isMobile) {
           document.getElementById('hfb-filter').value = hfbVal;
           document.getElementById('pa-filter').value = paVal;
       }
 
-      // Filter Rows
       const itemNoVal = document.querySelector('input[data-field="itemNo"]')?.value.trim().toUpperCase() || "";
       const itemNameVal = document.querySelector('input[data-field="itemName"]')?.value.trim().toUpperCase() || "";
       
@@ -588,13 +594,12 @@
 
       displayedPivotRows = filteredRows;
 
-      // Build Body
       let tbodyHtml = "";
       const count = Math.min(filteredRows.length, 3000);
       for(let i=0; i<count; i++) {
         const r = filteredRows[i];
         const nfVal = (showNotFixed && r.notFixedQty > 0) ? r.notFixedQty : "";
-        tbodyHtml += `<tr><td class="col-hfb">${r.hfb}</td><td class="col-pa">${r.pa}</td><td class="col-itemno"><b>${r.itemNo}</b></td><td class="col-itemname">${r.itemName}</td><td class="col-activity">${r.activity}</td>`;
+        tbodyHtml += `<tr><td class="col-hfb">${r.hfb}</td><td class="col-pa">${r.pa}</td><td class="col-itemno"><b>${r.itemNo}</b></td><td class="col-itemname">${r.itemName}</td><td class="col-activity mobile-hidden">${r.activity}</td>`;
         if(showNotFixed) tbodyHtml += `<td class="not-fixed-col">${nfVal}</td>`;
         visibleDates.forEach(d => { tbodyHtml += `<td class="qty-cell">${r.dates[d] || ""}</td>`; });
         tbodyHtml += `</tr>`;
