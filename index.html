@@ -24,7 +24,6 @@
     .header-sub-link{ color:var(--ikea-yellow); text-decoration:none; font-weight:500; font-size:.95rem; font-family:'Roboto',sans-serif; display:flex; align-items:center; gap:5px; transition:opacity .2s; }
     .header-sub-link:hover{ opacity:.8; text-decoration:underline; }
     
-    /* [FIX] Header Right Layout for Badge & Button */
     .header-right{ display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 5px; text-align:right; font-size:.75rem; line-height:1.3; opacity:.9; }
 
     /* Container */
@@ -48,7 +47,7 @@
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
 
-    /* --- Multi-Select Date Filter --- */
+    /* Filter Tray */
     .filter-tray-container {
       width: 100%; max-width: 100%; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box;
@@ -59,37 +58,21 @@
       background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; color: #555;
     }
     .btn-clear-filter:hover { background: #f0f0f0; }
-
     .chip-container { display: flex; flex-wrap: wrap; gap: 8px; }
-    
     .filter-chip {
       padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; user-select: none;
       background: #f8f9fa; border: 1px solid #ddd; color: #555; 
-      transition: all 0.15s ease-in-out;
-      display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.15s ease-in-out; display: inline-flex; align-items: center; gap: 6px;
     }
     .filter-chip:hover { background: #e9ecef; border-color: #ccc; }
-    .filter-chip.active { 
-      background-color: var(--ikea-blue); color: white; border-color: var(--ikea-blue); 
-      box-shadow: 0 2px 4px rgba(0,88,163,0.3);
-    }
+    .filter-chip.active { background-color: var(--ikea-blue); color: white; border-color: var(--ikea-blue); box-shadow: 0 2px 4px rgba(0,88,163,0.3); }
     .filter-chip i { font-size: 0.8em; }
     .filter-chip.active i { color: var(--ikea-yellow); }
 
-    /* --- Pivot Table Column Widths --- */
+    /* Pivot Table */
     .pivot-container { width: 100%; overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; box-sizing: border-box; }
-    
-    .pivot-header-area { 
-      display: flex; justify-content: space-between; align-items: flex-start; /* Align Top */
-      margin-bottom: 15px; width: 100%;
-    }
-    
-    /* [NEW] Right side controls container */
-    .pivot-controls-right {
-        display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
-    }
-
-    /* [NEW] Export Button */
+    .pivot-header-area { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; width: 100%; }
+    .pivot-controls-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
     .btn-export-csv {
         background-color: #217346; color: white; border: none; padding: 6px 12px; 
         border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500;
@@ -121,7 +104,6 @@
     .date-confirmed{ color:#27ae60; font-weight:bold; }
     .date-estimated{ color:#d35400; font-weight:bold; font-size:.9em; background:#ffeaa7; padding:2px 6px; border-radius:4px; }
     .limit-warning{ text-align:center; padding:10px; color:#7f8c8d; font-size:.85rem; background:#f9f9f9; border-top:1px solid #eee; }
-    
     .en-sub { font-size: 0.75em; color: #777; font-weight: 300; margin-left: 6px; font-family: 'Roboto', sans-serif; }
     .en-block { display: block; font-size: 0.85em; color: #888; margin-top: 3px; font-weight: 300; font-family: 'Roboto', sans-serif; }
     .en-btn { font-size: 0.75em; display: block; font-weight: 300; opacity: 0.9; margin-top: -2px; }
@@ -168,7 +150,7 @@
       .content-area { padding: 20px 10px; }
       header { height: auto; padding: 20px; flex-direction: column; gap: 10px; text-align: center; }
       .header-left { align-items: center; }
-      .header-right { align-items: center; } /* Center align on mobile */
+      .header-right { align-items: center; }
       .link-group { margin-left: 0; justify-content: center; }
       .search-card { padding: 20px; }
       .btn-scan-trigger { display: flex; }
@@ -214,7 +196,7 @@
       </div>
     </div>
     <div class="header-right">
-      Ver 5.0 Auto-File & Export<br/>
+      Ver 5.1 Date Fix<br/>
       Bilingual Support
       <div id="data-update-date" style="font-size:.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">data update : -</div>
     </div>
@@ -276,8 +258,7 @@
               <i class="fas fa-sync-alt"></i> Clear All / Show All
             </button>
           </div>
-          <div class="chip-container" id="dateFilterChips">
-            </div>
+          <div class="chip-container" id="dateFilterChips"></div>
         </div>
 
         <div class="pivot-container">
@@ -321,15 +302,15 @@
     // ==========================================================
     // [USER CONFIG] Github 정보 입력 (필수)
     // ==========================================================
-    const GITHUB_OWNER = 'STO373-FI'; // 예: 'sto373-fi'
-    const GITHUB_REPO = 'Goods-Arrival';  // 예: 'sto373-tools'
-    const FALLBACK_FILE_URL = './STO373 Goods arrival plan.xlsx'; // API 실패 시 사용할 기본 파일
+    const GITHUB_OWNER = 'STO373-FI'; 
+    const GITHUB_REPO = 'Goods-Arrival'; 
+    const FALLBACK_FILE_URL = './STO373 Goods arrival plan.xlsx'; 
     // ==========================================================
 
     let rawData = [];
     let html5QrcodeScanner = null;
     let allPivotRows = [];
-    let displayedPivotRows = []; // For Export
+    let displayedPivotRows = []; 
     let globalSortedDates = [];
     let selectedDateFilters = new Set(); 
 
@@ -365,19 +346,29 @@
     window.onload = async function(){
       try{
         const fileUrl = await fetchLatestExcelUrl();
-        console.log("Loading file:", fileUrl);
-
         const resp = await fetch(fileUrl);
-        const lastModified = resp.headers.get('Last-Modified');
-        if (lastModified){
-          const d = new Date(lastModified);
-          document.getElementById('data-update-date').innerText = `data update : ${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-        }
+        
+        // [FallBack] Header Date (Can be unstable)
+        const headerDateStr = resp.headers.get('Last-Modified');
+        
         if (!resp.ok) throw new Error('Excel file not found');
         const buf = await resp.arrayBuffer();
-        const wb = XLSX.read(buf, { type:'array' });
         
-        // Find sheet: [Table_7_final] preferred, else orderinfo..., else first
+        // [FIX] Read Workbook with Property Parsing
+        const wb = XLSX.read(buf, { type:'array', cellDates: true });
+        
+        // [FIX] Priority: Internal Excel Properties > HTTP Header
+        let finalDate = null;
+        if (wb.Props && wb.Props.ModifiedDate) {
+            finalDate = new Date(wb.Props.ModifiedDate);
+        } else if (headerDateStr) {
+            finalDate = new Date(headerDateStr);
+        }
+
+        if (finalDate) {
+            document.getElementById('data-update-date').innerText = `data update : ${ymd(finalDate)}`;
+        }
+
         let sheetName = wb.SheetNames.find(n => String(n).toLowerCase() === 'table_7_final');
         if (!sheetName) sheetName = wb.SheetNames.find(n => String(n).toLowerCase().includes('orderinformation'));
         if (!sheetName) sheetName = wb.SheetNames[0];
@@ -393,31 +384,17 @@
       }
     };
 
-    // [New] Fetch Latest File from GitHub API
+    // Fetch Latest File from GitHub API
     async function fetchLatestExcelUrl() {
-        // If owner/repo not set, fallback to default file
-        if (GITHUB_OWNER === 'YOUR_GITHUB_ID' || GITHUB_REPO === 'YOUR_REPO_NAME') {
-            return FALLBACK_FILE_URL; 
-        }
-
+        if (GITHUB_OWNER === 'YOUR_GITHUB_ID' || GITHUB_REPO === 'YOUR_REPO_NAME') return FALLBACK_FILE_URL; 
         try {
             const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`;
             const response = await fetch(apiUrl);
             if (!response.ok) throw new Error("GitHub API Error");
             const files = await response.json();
-
-            // Filter for files starting with "order followup functions" and ending in .xlsx
-            const targetFiles = files.filter(f => 
-                f.name.toLowerCase().startsWith("order followup functions") && 
-                f.name.toLowerCase().endsWith(".xlsx")
-            );
-
+            const targetFiles = files.filter(f => f.name.toLowerCase().startsWith("order followup functions") && f.name.toLowerCase().endsWith(".xlsx"));
             if (targetFiles.length === 0) return FALLBACK_FILE_URL;
-
-            // Sort by name descending (assuming date is in name, newer date = larger string)
             targetFiles.sort((a, b) => b.name.localeCompare(a.name));
-
-            // Return the raw download URL of the latest file
             return targetFiles[0].download_url;
         } catch (e) {
             console.warn("Auto-fetch failed, using fallback.", e);
@@ -637,7 +614,7 @@
     }
 
     function updateTableDisplay(rowsToRender) {
-      displayedPivotRows = rowsToRender; // Store for Export
+      displayedPivotRows = rowsToRender; 
       const tbody = document.getElementById('pivotBody');
       const limitWarning = document.getElementById('limitWarning');
       const limit = 3000;
@@ -687,45 +664,21 @@
       updateTableDisplay(filteredRows);
     }
 
-    // [New] Export to CSV
     function exportToCsv() {
-        if (!displayedPivotRows || displayedPivotRows.length === 0) {
-            alert("No data to export");
-            return;
-        }
-
-        // Build Data Array for SheetJS
-        // Header Row
+        if (!displayedPivotRows || displayedPivotRows.length === 0) { alert("No data to export"); return; }
         const header = ["HFB", "PA", "Item No", "Item Name", "Activity", "Not Fixed"];
         globalSortedDates.forEach(d => header.push(d));
-        
-        // Data Rows
         const data = [header];
         displayedPivotRows.forEach(row => {
-            const rowData = [
-                row.hfb,
-                row.pa,
-                row.itemNo,
-                row.itemName,
-                row.activity,
-                row.notFixedQty || ""
-            ];
-            globalSortedDates.forEach(d => {
-                rowData.push(row.dates[d] || "");
-            });
+            const rowData = [row.hfb, row.pa, row.itemNo, row.itemName, row.activity, row.notFixedQty || ""];
+            globalSortedDates.forEach(d => { rowData.push(row.dates[d] || ""); });
             data.push(rowData);
         });
-
-        // Create Worksheet
         const ws = XLSX.utils.aoa_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Arrival_Export");
-
-        // Generate Filename: YYYY-MM-DD_export.csv
         const today = new Date();
         const fname = `${ymd(today)}_export.csv`;
-
-        // Download
         XLSX.writeFile(wb, fname, { bookType: 'csv' });
     }
 
