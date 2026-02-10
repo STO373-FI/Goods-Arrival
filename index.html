@@ -56,6 +56,14 @@
     .dash-card { flex: 1; background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--ikea-blue); }
     .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; } .dash-card p { font-size: 0.8rem; color: #888; }
     
+    /* [FIX] Date Badge Styles */
+    .date-badge {
+        display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; width: 90px;
+    }
+    .date-badge.confirmed { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; } /* Green */
+    .date-badge.estimated { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; } /* Yellow */
+    .date-badge.tbd { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }       /* Red */
+
     /* PC Logic */
     .mobile-only-filters { display: none; }
     .pc-header-filter { display: block; width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
@@ -150,7 +158,6 @@
     .product-summary-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid var(--ikea-yellow); }
     .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #eee; padding-bottom: 8px; }
     .schedule-item { background: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #ccc; margin-bottom:10px; }
-    .date-confirmed{ color:#27ae60; font-weight:bold; }
     
     #loading { display: none; margin-top: 20px; color: var(--ikea-blue); text-align:center; }
     #scanner-modal { position: fixed; inset:0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
@@ -179,7 +186,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 5.5 Fast Load</span>
+      <span>Ver 5.6 Date Color Fix</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -338,6 +345,9 @@
       const firstThursday = new Date(Date.UTC(target.getUTCFullYear(),0,4));
       return 1 + Math.round((target - firstThursday) / (7*24*3600*1000));
     }
+    function escapeHtml(str=''){
+      return String(str).replace(/[&<>"'`=\/]/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;' }[s]));
+    }
     function normKey(s){ return String(s||'').toLowerCase().replace(/[\s_\\/-]+/g,'').replace(/[^\w]/g,''); }
     function findColIndex(header, candidates){
       if(!header || !header.length) return -1;
@@ -367,10 +377,6 @@
         if (!resp.ok) throw new Error('Excel file not found');
         const buf = await resp.arrayBuffer();
         
-        // ▼▼▼ Speed Optimized Reading ▼▼▼
-        // 1. Read only 1st sheet (sheets:0) 
-        // 2. Use dense mode (dense:true)
-        // 3. Skip parsing styles/images
         const wb = XLSX.read(buf, { type:'array', cellDates: true, sheets: 0, dense: true, cellStyles: false, cellImages: false });
         
         let finalDate = null;
@@ -378,10 +384,8 @@
         else if (headerDateStr) finalDate = new Date(headerDateStr);
         if (finalDate) document.getElementById('data-update-date').innerText = `data update : ${ymd(finalDate)}`;
 
-        // Get first sheet (always)
         const ws = wb.Sheets[wb.SheetNames[0]];
 
-        // ▼▼▼ !ref Optimization ▼▼▼
         if (ws["!ref"]) {
           const range = XLSX.utils.decode_range(ws['!ref']);
           ws['!ref'] = XLSX.utils.encode_range({
@@ -390,7 +394,6 @@
           });
         }
 
-        // ▼▼▼ sheet_to_json Optimization ▼▼▼
         const json = XLSX.utils.sheet_to_json(ws, { 
             header: 1, 
             defval: "", 
@@ -461,12 +464,20 @@
       setTimeout(() => { const results = searchData(target); displayResults(results); document.getElementById('loading').style.display = 'none'; }, 300);
     }
     
+    // [FIX] determinePlanned now returns objects with 'type' and 'label' (HTML)
     function determinePlanned(row){
       const pd = excelToDate(row.plannedDate); const today = new Date(); today.setHours(0,0,0,0);
-      if (pd){ const dd = new Date(pd); dd.setHours(0,0,0,0); if (dd >= today) return { type:'confirmed', dateObj: dd, label: ymd(dd) }; }
+      if (pd){ 
+          const dd = new Date(pd); dd.setHours(0,0,0,0); 
+          if (dd >= today) return { type:'confirmed', dateObj: dd, label: `<span class="date-badge confirmed">${ymd(dd)}</span>` }; 
+      }
       const port = excelToDate(row.portDate);
-      if (port){ const est = addDays(port, 7); const wk = getWeekNumber(est); return { type:'estimated', dateObj: null, label: `<span class="date-estimated">WK${wk} 예상</span>` }; }
-      return { type:'tbd', dateObj: null, label: `<span class="date-estimated">미정</span>` };
+      if (port){ 
+          const est = addDays(port, 7); 
+          const wk = getWeekNumber(est); 
+          return { type:'estimated', dateObj: null, label: `<span class="date-badge estimated">WK${wk} 예상</span>` }; 
+      }
+      return { type:'tbd', dateObj: null, label: `<span class="date-badge tbd">미정</span>` };
     }
 
     function searchData(target){
@@ -476,10 +487,27 @@
         const cont = String(row.container||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
         if ((itemNo && itemNo.includes(target)) || (cont && cont.includes(target))) {
             const plan = determinePlanned(row);
-            if (plan.type==='confirmed'){ const d = excelToDate(row.plannedDate); if (d && new Date(d) < today) return; }
-            const container = row.container || '배송준비중'; const key = `${container}__${plan.label}`; const qty = safeNum(row.qty);
+            // Confirmed date check for past dates
+            if (plan.type === 'confirmed') {
+                const d = excelToDate(row.plannedDate);
+                if (d && new Date(d) < today) return; 
+            }
+            const container = row.container || '배송준비중'; 
+            // Use label as key component? No, key should probably be cleaner. 
+            // Let's use a simpler string for key, but store label in object
+            const keyStr = plan.type === 'confirmed' ? ymd(plan.dateObj) : (plan.type === 'estimated' ? 'WK_EST' : 'TBD');
+            const key = `${container}__${keyStr}`; 
+            
+            const qty = safeNum(row.qty);
             if (grouped.has(key)){ grouped.get(key).quantity += qty; } 
-            else { grouped.set(key, { hfb: row.hfb, itemNo: row.itemNo, itemName: row.itemName, ssdRaw: row.ssd, edsRaw: row.eds, plannedDateStr: plan.label, plannedDateObj: plan.type==='confirmed' ? excelToDate(row.plannedDate) : null, quantity: qty, container }); }
+            else { 
+                grouped.set(key, { 
+                    hfb: row.hfb, itemNo: row.itemNo, itemName: row.itemName, ssdRaw: row.ssd, edsRaw: row.eds, 
+                    plannedDateStr: plan.label, // Store HTML label
+                    plannedDateObj: plan.type==='confirmed' ? plan.dateObj : null, 
+                    quantity: qty, container 
+                }); 
+            }
         }
       });
       return Array.from(grouped.values());
@@ -495,16 +523,27 @@
       document.getElementById('totalResults').innerText = results.length;
       results.sort((a, b) => (a.plannedDateObj || new Date(9999,0,1)) - (b.plannedDateObj || new Date(9999,0,1)));
       const future = results.filter(r => r.plannedDateObj !== null);
-      if (future.length > 0) { const nextDate = future[0].plannedDateStr; const totalNext = future.filter(r => r.plannedDateStr === nextDate).reduce((s, i) => s + i.quantity, 0); document.getElementById('futureDeliveryQty').innerText = totalNext; document.getElementById('nextDeliveryDate').innerText = nextDate.replace(/<[^>]*>/g,''); } else { document.getElementById('futureDeliveryQty').innerText = "0"; document.getElementById('nextDeliveryDate').innerText = "-"; }
+      if (future.length > 0) { 
+          // Need to extract text from HTML label for comparison
+          const nextDateRow = future[0];
+          const totalNext = future.filter(r => r.plannedDateStr === nextDateRow.plannedDateStr).reduce((s, i) => s + i.quantity, 0); 
+          document.getElementById('futureDeliveryQty').innerText = totalNext; 
+          // Strip HTML tags for simple display
+          document.getElementById('nextDeliveryDate').innerText = nextDateRow.plannedDateStr.replace(/<[^>]*>/g,''); 
+      } else { 
+          document.getElementById('futureDeliveryQty').innerText = "0"; document.getElementById('nextDeliveryDate').innerText = "-"; 
+      }
       
       results.forEach(row => {
-        let dateHtml = /^\d{4}-\d{2}-\d{2}$/.test(row.plannedDateStr) ? `<span class="date-confirmed">${row.plannedDateStr}</span>` : row.plannedDateStr;
-        pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td><strong>${row.itemNo}</strong></td><td>${row.itemName}</td><td>${row.ssdRaw?ymd(excelToDate(row.ssdRaw)):'-'}</td><td>${row.edsRaw?ymd(excelToDate(row.edsRaw)):'-'}</td><td>${dateHtml}</td><td class="qty-cell">${row.quantity}</td><td>${row.container}</td></tr>`;
+        // row.plannedDateStr is now HTML
+        pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td><strong>${row.itemNo}</strong></td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${row.plannedDateStr}</td><td class="qty-cell">${row.quantity}</td><td>${row.container}</td></tr>`;
       });
       if(results.length > 0) {
         const c = results[0];
         mobileProductSummary.innerHTML = `<div class="summary-row"><span class="label">Item No</span> <span class="value" style="font-size:1.2rem; color:var(--ikea-blue);">${c.itemNo}</span></div><div class="summary-row"><span class="label">Name</span> <span class="value">${c.itemName}</span></div><div class="summary-row"><span class="label">HFB</span> <span class="value">${c.hfb}</span></div>`;
-        results.forEach(row => { mobileScheduleList.innerHTML += `<div class="schedule-item"><div class="schedule-date">${row.plannedDateStr}</div><div class="schedule-details"><div class="schedule-qty">${row.quantity} ea</div><div class="schedule-container"><i class="fas fa-box"></i> ${row.container}</div></div></div>`; });
+        results.forEach(row => { 
+            mobileScheduleList.innerHTML += `<div class="schedule-item"><div class="schedule-date">${row.plannedDateStr}</div><div class="schedule-details"><div class="schedule-qty">${row.quantity} ea</div><div class="schedule-container"><i class="fas fa-box"></i> ${row.container}</div></div></div>`; 
+        });
       }
     }
 
@@ -642,6 +681,11 @@
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Arrival_Export");
         XLSX.writeFile(wb, `${ymd(new Date())}_export.csv`, { bookType: 'csv' });
+    }
+
+    function parseExcelDate(value) {
+        const d = excelToDate(value);
+        return d ? ymd(d) : '-';
     }
 
     function startScanner() { document.getElementById('scanner-modal').style.display = 'flex'; if(!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("reader"); html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 300, height: 150 }, aspectRatio: 1.0 }, onScanSuccess).catch(e=>alert("Camera Error")); }
