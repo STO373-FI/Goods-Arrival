@@ -23,7 +23,6 @@
     .link-group{ display:flex; gap:20px; margin-top:5px; margin-left:38px; flex-wrap:wrap; }
     .header-sub-link{ color:var(--ikea-yellow); text-decoration:none; font-weight:500; font-size:.95rem; font-family:'Roboto',sans-serif; display:flex; align-items:center; gap:5px; transition:opacity .2s; }
     .header-sub-link:hover{ opacity:.8; text-decoration:underline; }
-    
     .header-right{ display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 5px; text-align:right; font-size:.75rem; line-height:1.3; opacity:.9; }
 
     /* Container */
@@ -38,32 +37,18 @@
     .tab-content.active{ display:flex; }
 
     /* Badges */
-    .status-badge{ 
-      display:inline-block; padding:4px 10px; border-radius:20px; 
-      font-size:.75rem; font-weight:bold; background:#fff3cd; color:#856404; 
-      box-shadow:0 2px 5px rgba(0,0,0,.1); 
-      white-space: nowrap; 
-    }
+    .status-badge{ display:inline-block; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:bold; background:#fff3cd; color:#856404; box-shadow:0 2px 5px rgba(0,0,0,.1); white-space: nowrap; }
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
 
     /* Filter Tray */
-    .filter-tray-container {
-      width: 100%; max-width: 100%; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box;
-    }
+    .filter-tray-container { width: 100%; max-width: 100%; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
     .tray-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .tray-title { font-size: 0.9rem; color: #333; font-weight: 600; display:flex; align-items:center; gap:5px; }
-    .btn-clear-filter {
-      background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; color: #555;
-    }
+    .btn-clear-filter { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; color: #555; }
     .btn-clear-filter:hover { background: #f0f0f0; }
     .chip-container { display: flex; flex-wrap: wrap; gap: 8px; }
-    .filter-chip {
-      padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; user-select: none;
-      background: #f8f9fa; border: 1px solid #ddd; color: #555; 
-      transition: all 0.15s ease-in-out; display: inline-flex; align-items: center; gap: 6px;
-    }
+    .filter-chip { padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; user-select: none; background: #f8f9fa; border: 1px solid #ddd; color: #555; transition: all 0.15s ease-in-out; display: inline-flex; align-items: center; gap: 6px; }
     .filter-chip:hover { background: #e9ecef; border-color: #ccc; }
     .filter-chip.active { background-color: var(--ikea-blue); color: white; border-color: var(--ikea-blue); box-shadow: 0 2px 4px rgba(0,88,163,0.3); }
     .filter-chip i { font-size: 0.8em; }
@@ -73,12 +58,8 @@
     .pivot-container { width: 100%; overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; box-sizing: border-box; }
     .pivot-header-area { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; width: 100%; }
     .pivot-controls-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-    .btn-export-csv {
-        background-color: #217346; color: white; border: none; padding: 6px 12px; 
-        border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500;
-        display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: background 0.2s;
-    }
+    
+    .btn-export-csv { background-color: #217346; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s; }
     .btn-export-csv:hover { background-color: #1e6b41; }
 
     .pivot-table { width: 100%; border-collapse: collapse; min-width: 1600px; table-layout: fixed; }
@@ -89,7 +70,7 @@
     .col-hfb { width: 60px; }
     .col-pa { width: 60px; }
     .col-itemno { width: 90px; }
-    .col-activity { width: 140px; } 
+    .col-activity { width: 140px; }
     .not-fixed-col { width: 90px; background-color: #fff0f0; color: #c0392b; font-weight: bold; }
     .date-col { width: 75px; min-width: 75px; background-color: #fff; font-weight: bold; color: var(--ikea-blue); text-align: center; }
     .col-itemname { width: 350px; white-space: normal; word-break: break-word; text-align: left !important; padding-left: 10px !important; }
@@ -196,7 +177,7 @@
       </div>
     </div>
     <div class="header-right">
-      Ver 5.1 Date Fix<br/>
+      Ver 5.2 Critical Fix<br/>
       Bilingual Support
       <div id="data-update-date" style="font-size:.9em; color:var(--ikea-yellow); margin-top:3px; font-weight:500;">data update : -</div>
     </div>
@@ -267,7 +248,6 @@
               <i class="fas fa-calendar-alt"></i> Goods Arrival Overview
               <span class="en-sub" style="font-size:.6em; display:block; margin-left:0; margin-top:5px;">오늘부터 미래의 도착 예정 물량을 보여줍니다.</span>
             </h2>
-            
             <div class="pivot-controls-right">
                 <div class="status-badge" id="statusBadge2"><i class="fas fa-spinner fa-spin"></i> 연결 중...</div>
                 <button class="btn-export-csv" onclick="exportToCsv()" title="Excel Download">
@@ -307,12 +287,29 @@
     const FALLBACK_FILE_URL = './STO373 Goods arrival plan.xlsx'; 
     // ==========================================================
 
-    let rawData = [];
+    let rawRows = []; // 2D array
+    let data = [];    // Objects
     let html5QrcodeScanner = null;
     let allPivotRows = [];
     let displayedPivotRows = []; 
     let globalSortedDates = [];
     let selectedDateFilters = new Set(); 
+
+    // Header Aliases (Ver 4.x Logic Restored)
+    const ALIASES = {
+      ItemNo: ['ItemNo','ITEM NO','ARTNO','ITEMNO'],
+      ItemName: ['ItemName','ITEM NAME','ARTNAME','ARTNAME_UNICODE','ITEMNAME'],
+      PA: ['PA'],
+      HFB: ['HFB'],
+      SSD: ['SSD'],
+      EDS: ['EDS'],
+      PlannedReceivingDate: ['Planned Receiving Date','PLANNED RECEIVING DATE','PLANNED DATE','PlannedDate'],
+      Port: ['Port','PORT'],
+      ArrivalDate: ['Arrival Date','Arrival','ARRIVAL'],
+      LatestQty: ['LatestQty','LATESTQTY','QTY','Quantity'],
+      Container: ['Container','CONTAINER','ContainerNo','Container No'],
+      Activity: ['Activity & offer','Activity','Activity & Offer','ACTIVITY & OFFER']
+    };
 
     // Utilities
     const debounce = (fn, t=300) => { let tm; return (...a)=>{clearTimeout(tm); tm=setTimeout(()=>fn(...a), t);} };
@@ -331,14 +328,56 @@
     function escapeHtml(str=''){
       return String(str).replace(/[&<>"'`=\/]/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;' }[s]));
     }
-    function getSafeDate(raw) {
-      if (typeof raw === 'number' && raw < 100000) {
-        const d = new Date(Math.round((raw - 25569) * 86400 * 1000) + 43200000);
-        return !isNaN(d) && d.getFullYear() > 1900 ? d : null;
-      } else if (typeof raw === 'string' && !raw.startsWith("1900")) {
-        const d = new Date(raw);
-        return !isNaN(d) ? d : null;
+    function normKey(s){ return String(s||'').toLowerCase().replace(/[\s_\\/-]+/g,'').replace(/[^\w]/g,''); }
+    
+    // Column Finding Logic
+    function findColIndex(header, candidates){
+      if(!header || !header.length) return -1;
+      const normHeader = header.map(h => normKey(h));
+      for (const c of candidates){
+        const n = normKey(c);
+        const idx = normHeader.indexOf(n);
+        if (idx !== -1) return idx;
       }
+      for (let i=0;i<header.length;i++){
+        for (const c of candidates){
+          if (normHeader[i].includes(normKey(c))) return i;
+        }
+      }
+      return -1;
+    }
+    function buildColumnMap(header){
+      const map = {};
+      for (const k of Object.keys(ALIASES)){
+        map[k] = findColIndex(header, ALIASES[k]);
+      }
+      return map;
+    }
+
+    // Robust Date Parser (12h fix restored)
+    function excelToDate(v){
+      if(!v && v!==0) return null;
+      if (typeof v === 'number'){
+        if(v > 10000 && v < 60000){ 
+          const d = new Date(Math.round((v - 25569) * 86400 * 1000) + 43200000);
+          return isNaN(d) ? null : d;
+        }
+        if (v >= 19000101 && v <= 29991231){
+          const s = String(v);
+          const d = new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}T00:00:00`);
+          return isNaN(d) ? null : d;
+        }
+      }
+      if (typeof v === 'string'){
+        const s = v.trim();
+        if (/^\d{8}$/.test(s)){ 
+          const d = new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}T00:00:00`);
+          return isNaN(d) ? null : d;
+        }
+        const d = new Date(s);
+        return isNaN(d) ? null : d;
+      }
+      if (v instanceof Date) return v;
       return null;
     }
 
@@ -347,44 +386,63 @@
       try{
         const fileUrl = await fetchLatestExcelUrl();
         const resp = await fetch(fileUrl);
-        
-        // [FallBack] Header Date (Can be unstable)
         const headerDateStr = resp.headers.get('Last-Modified');
-        
         if (!resp.ok) throw new Error('Excel file not found');
         const buf = await resp.arrayBuffer();
         
-        // [FIX] Read Workbook with Property Parsing
+        // Read Workbook
         const wb = XLSX.read(buf, { type:'array', cellDates: true });
         
-        // [FIX] Priority: Internal Excel Properties > HTTP Header
+        // Set Data Update Date
         let finalDate = null;
         if (wb.Props && wb.Props.ModifiedDate) {
             finalDate = new Date(wb.Props.ModifiedDate);
         } else if (headerDateStr) {
             finalDate = new Date(headerDateStr);
         }
-
         if (finalDate) {
             document.getElementById('data-update-date').innerText = `data update : ${ymd(finalDate)}`;
         }
 
+        // Sheet Selection
         let sheetName = wb.SheetNames.find(n => String(n).toLowerCase() === 'table_7_final');
         if (!sheetName) sheetName = wb.SheetNames.find(n => String(n).toLowerCase().includes('orderinformation'));
         if (!sheetName) sheetName = wb.SheetNames[0];
 
-        rawData = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: "A", defval: "", range: 1 }); 
+        // Parse Data (Header 1 -> Array of Arrays)
+        const ws = wb.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: true });
+        
+        const rawHeader = (json[0] || []).map(x=>String(x).trim());
+        rawRows = json.slice(1);
+        const COL = buildColumnMap(rawHeader);
+
+        // Normalize Data
+        data = rawRows.map(r => ({
+          itemNo: String(r[COL.ItemNo] ?? '').trim(),
+          itemName: r[COL.ItemName] ?? '',
+          pa: r[COL.PA] ?? '',
+          hfb: r[COL.HFB] ?? '',
+          ssd: r[COL.SSD] ?? '',
+          eds: r[COL.EDS] ?? '',
+          plannedDate: r[COL.PlannedReceivingDate],
+          portDate: r[COL.Port],
+          arrivalDate: r[COL.ArrivalDate],
+          qty: safeNum(r[COL.LatestQty]),
+          container: String(r[COL.Container] ?? '').trim(),
+          activity: r[COL.Activity] ?? ''
+        }));
         
         updateStatus('connected');
-        if(document.getElementById('tab-arrival').classList.contains('active')) renderPivotTable(rawData);
-        else setTimeout(() => renderPivotTable(rawData, false), 500); 
+        if(document.getElementById('tab-arrival').classList.contains('active')) renderPivotTable(data);
+        else setTimeout(() => renderPivotTable(data, false), 500); 
       } catch (error) { 
         console.error(error);
         updateStatus('error'); 
       }
     };
 
-    // Fetch Latest File from GitHub API
+    // GitHub API Fetcher
     async function fetchLatestExcelUrl() {
         if (GITHUB_OWNER === 'YOUR_GITHUB_ID' || GITHUB_REPO === 'YOUR_REPO_NAME') return FALLBACK_FILE_URL; 
         try {
@@ -423,7 +481,7 @@
       document.getElementById('nav-' + tabName).classList.add('active');
       if (tabName === 'arrival') {
         if (allPivotRows.length > 0) updateTableDisplay(allPivotRows); 
-        else if (rawData.length > 0) renderPivotTable(rawData);
+        else if (data.length > 0) renderPivotTable(data);
         else { document.getElementById('pivotBody').innerHTML = ""; document.getElementById('pivotLoading').style.display = "block"; }
       }
     }
@@ -431,58 +489,75 @@
     // --- Tab 1 Search Logic ---
     document.getElementById('itemInput').addEventListener('keypress', e => { if (e.key==='Enter') performSearch(); });
     function performSearch() {
-      const inputRaw = document.getElementById('itemInput').value.trim();
-      if (!inputRaw) { alert("제품번호를 입력해주세요."); return; }
-      const cleanInput = inputRaw.replace(/[^0-9]/g, '');
+      const raw = document.getElementById('itemInput').value.trim();
+      if (!raw) { alert("제품번호를 입력해주세요."); return; }
+      const target = raw.replace(/[^0-9A-Za-z]/g,'').toLowerCase();
       document.getElementById('loading').style.display = 'block';
       document.getElementById('resultSection').style.display = 'none';
       setTimeout(() => {
-        const results = searchExcel(cleanInput);
+        const results = searchData(target);
         displayResults(results);
         document.getElementById('loading').style.display = 'none';
       }, 300);
     }
+    
     function parseExcelDate(value) {
-      if (!value) return "-";
-      if (typeof value === 'number') {
-        if (value > 19000000) return `${String(value).substring(0, 4)}-${String(value).substring(4, 6)}-${String(value).substring(6, 8)}`;
-        const d = getSafeDate(value);
-        return d ? d.toISOString().split('T')[0] : "-";
-      }
-      return value;
+        const d = excelToDate(value);
+        return d ? ymd(d) : '-';
     }
-    function searchExcel(target) {
-      const groupedMap = new Map();
+
+    function determinePlanned(row){
+      const pd = excelToDate(row.plannedDate);
       const today = new Date(); today.setHours(0,0,0,0);
-      rawData.forEach(row => {
-        let itemNo = String(row['E'] || "").trim().replace(/[^0-9]/g, '');
-        let container = String(row['B'] || "").trim();
-        let cleanCont = container.replace(/[^a-zA-Z0-9]/g, '');
-        let isMatch = (itemNo && (itemNo.includes(target) || target.includes(itemNo))) || (cleanCont && cleanCont.toLowerCase().includes(target.toLowerCase()));
-        if (isMatch) {
-          let pDate = getSafeDate(row['M']);
-          let portDate = getSafeDate(row['U']);
-          let pStr = "미정";
-          if (pDate) {
-            const checkDate = new Date(pDate); checkDate.setHours(0,0,0,0);
-            if (checkDate < today) return;
-            pStr = pDate.toISOString().split('T')[0];
-          } else if (portDate) {
-            const estDate = new Date(portDate); estDate.setDate(estDate.getDate() + 7);
-            const weekNo = getWeekNumber(estDate);
-            pStr = `<span class="date-estimated">WK${weekNo} 예상</span>`;
-          } else {
-            pStr = `<span class="date-tbd">미정</span>`;
+      if (pd){
+        const dd = new Date(pd); dd.setHours(0,0,0,0);
+        if (dd >= today) return { type:'confirmed', dateObj: dd, label: ymd(dd) };
+      }
+      const port = excelToDate(row.portDate);
+      if (port){
+        const est = addDays(port, 7);
+        const wk = getWeekNumber(est);
+        return { type:'estimated', dateObj: null, label: `<span class="date-estimated">WK${wk} 예상</span>` };
+      }
+      return { type:'tbd', dateObj: null, label: `<span class="date-estimated">미정</span>` };
+    }
+
+    function searchData(target){
+      const grouped = new Map();
+      const today = new Date(); today.setHours(0,0,0,0);
+      data.forEach(row => {
+        const itemNo = String(row.itemNo||'').replace(/\s+/g,'').toLowerCase();
+        const cont = String(row.container||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
+        const isMatch = (itemNo && (itemNo.includes(target) || target.includes(itemNo))) || (cont && cont.includes(target));
+        if (!isMatch) return;
+
+        const plan = determinePlanned(row);
+        if (plan.type==='confirmed'){
+          const d = excelToDate(row.plannedDate);
+          if (d){
+            const dd = new Date(d); dd.setHours(0,0,0,0);
+            if (dd < today) return;
           }
-          if (container === "") container = "배송준비중";
-          const key = `${container}_${pStr}`;
-          let qty = parseFloat(row['P']) || 0;
-          if (groupedMap.has(key)) groupedMap.get(key).quantity += qty;
-          else groupedMap.set(key, { hfb: row['F'], itemNo: String(row['E'] || "").trim(), itemName: row['C'], ssdRaw: row['G'], edsRaw: row['H'], plannedDateStr: pStr, plannedDateObj: pDate, quantity: qty, container });
+        }
+        const container = row.container || '배송준비중';
+        const key = `${container}__${plan.label}`;
+        const qty = safeNum(row.qty);
+        
+        if (grouped.has(key)){
+          grouped.get(key).quantity += qty;
+        } else {
+          grouped.set(key, {
+            hfb: row.hfb, itemNo: row.itemNo, itemName: row.itemName,
+            ssdRaw: row.ssd, edsRaw: row.eds,
+            plannedDateStr: plan.label,
+            plannedDateObj: plan.type==='confirmed' ? excelToDate(row.plannedDate) : null,
+            quantity: qty, container
+          });
         }
       });
-      return Array.from(groupedMap.values());
+      return Array.from(grouped.values());
     }
+
     function displayResults(results) {
       const resultSection = document.getElementById('resultSection');
       const statusBar = document.getElementById('statusBar');
@@ -503,24 +578,23 @@
       }
       document.getElementById('totalResults').innerText = results.length;
       results.sort((a, b) => {
-        const dateA = a.plannedDateObj || new Date(9999,0,1);
-        const dateB = b.plannedDateObj || new Date(9999,0,1);
-        return dateA - dateB;
+        const A = a.plannedDateObj || new Date(9999,0,1);
+        const B = b.plannedDateObj || new Date(9999,0,1);
+        return A - B;
       });
       const future = results.filter(r => r.plannedDateObj !== null);
       if (future.length > 0) {
         const nextDate = future[0].plannedDateStr;
         const totalNext = future.filter(r => r.plannedDateStr === nextDate).reduce((s, i) => s + i.quantity, 0);
         document.getElementById('futureDeliveryQty').innerText = totalNext;
-        document.getElementById('nextDeliveryDate').innerText = nextDate;
+        document.getElementById('nextDeliveryDate').innerText = nextDate.replace(/<[^>]*>/g,'');
       } else {
         document.getElementById('futureDeliveryQty').innerText = "0";
         document.getElementById('nextDeliveryDate').innerText = "-";
       }
       results.forEach(row => {
-        let dateHtml = row.plannedDateStr;
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dateHtml)) dateHtml = `<span class="date-confirmed">${dateHtml}</span>`;
-        pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td><strong>${row.itemNo}</strong></td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${dateHtml}</td><td style="font-weight:bold; color:var(--ikea-blue);">${row.quantity}</td><td>${row.container}</td></tr>`;
+        let dateHtml = /^\d{4}-\d{2}-\d{2}$/.test(row.plannedDateStr) ? `<span class="date-confirmed">${row.plannedDateStr}</span>` : row.plannedDateStr;
+        pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td><strong>${row.itemNo}</strong></td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${dateHtml}</td><td class="qty-cell">${row.quantity}</td><td>${row.container}</td></tr>`;
       });
       if(results.length > 0) {
         const c = results[0];
@@ -532,40 +606,37 @@
     }
 
     // --- Tab 2 Pivot & Filter Logic ---
-    function renderPivotTable(data, shouldRender = true) {
+    function renderPivotTable(list, shouldRender = true) {
       const today = new Date(); today.setHours(0,0,0,0);
       const pivotMap = {};
       const uniqueDates = new Set();
       let hasNotFixed = false;
 
-      data.forEach(row => {
-        let pDate = getSafeDate(row['M']);
-        const itemNo = String(row['E'] || "").trim();
-        const qty = parseFloat(row['P']) || 0;
-        if (!itemNo) return;
+      list.forEach(row => {
+        if (!row.itemNo) return;
+        const pd = excelToDate(row.plannedDate);
+        const qty = safeNum(row.qty);
 
-        if (!pivotMap[itemNo]) {
-          pivotMap[itemNo] = { hfb: row['F']||"", pa: row['D']||"", itemNo: itemNo, itemName: row['C']||"", activity: row['L']||"", dates: {}, notFixedQty: 0 };
+        if (!pivotMap[row.itemNo]) {
+          pivotMap[row.itemNo] = { hfb: row.hfb||"", pa: row.pa||"", itemNo: row.itemNo, itemName: row.itemName||"", activity: row.activity||"", dates: {}, notFixedQty: 0 };
         }
-        if (pDate) {
-          const checkDate = new Date(pDate); checkDate.setHours(0,0,0,0);
-          if (checkDate >= today) {
-            const pStr = pDate.toISOString().split('T')[0];
-            if (!pivotMap[itemNo].dates[pStr]) pivotMap[itemNo].dates[pStr] = 0;
-            pivotMap[itemNo].dates[pStr] += qty;
+        if (pd) {
+          const dd = new Date(pd); dd.setHours(0,0,0,0);
+          if (dd >= today) {
+            const pStr = ymd(dd);
+            pivotMap[row.itemNo].dates[pStr] = (pivotMap[row.itemNo].dates[pStr]||0) + qty;
             uniqueDates.add(pStr);
           }
         } else {
-          pivotMap[itemNo].notFixedQty += qty;
+          pivotMap[row.itemNo].notFixedQty += qty;
           hasNotFixed = true;
         }
       });
 
       globalSortedDates = Array.from(uniqueDates).sort();
-      
       renderDateFilterChips(globalSortedDates, hasNotFixed);
 
-      let headerHtml = `<tr><th class="col-hfb">HFB<br><input type="text" class="filter-input" placeholder="Filter"></th><th class="col-pa">PA<br><input type="text" class="filter-input" placeholder="Filter"></th><th class="col-itemno">Item No<br><input type="text" class="filter-input" placeholder="Filter"></th><th class="col-itemname col-hide-mobile">Item Name<br><input type="text" class="filter-input" placeholder="Filter"></th><th class="col-activity col-hide-mobile">Activity<br><input type="text" class="filter-input" placeholder="Filter"></th><th class="not-fixed-col">미정<br>(Not Fixed)</th>`;
+      let headerHtml = `<tr><th class="col-hfb">HFB<br><input data-field="hfb" class="filter-input" placeholder="Filter"></th><th class="col-pa">PA<br><input data-field="pa" class="filter-input" placeholder="Filter"></th><th class="col-itemno">Item No<br><input data-field="itemNo" class="filter-input" placeholder="Filter"></th><th class="col-itemname col-hide-mobile">Item Name<br><input data-field="itemName" class="filter-input" placeholder="Filter"></th><th class="col-activity col-hide-mobile">Activity<br><input data-field="activity" class="filter-input" placeholder="Filter"></th><th class="not-fixed-col">미정<br>(Not Fixed)</th>`;
       globalSortedDates.forEach(d => headerHtml += `<th class="date-col">${d}</th>`);
       headerHtml += `</tr>`;
       document.getElementById('pivotHead').innerHTML = headerHtml;
@@ -637,14 +708,15 @@
 
     function filterPivot() {
       const inputs = document.querySelectorAll("#pivotTable .filter-input");
-      const filters = Array.from(inputs).map(i => i.value.toUpperCase());
+      const filters = {};
+      inputs.forEach(i => { filters[i.dataset.field] = i.value.trim().toUpperCase(); });
 
       const filteredRows = allPivotRows.filter(row => {
-        if (filters[0] && String(row.hfb).toUpperCase().indexOf(filters[0]) === -1) return false;
-        if (filters[1] && String(row.pa).toUpperCase().indexOf(filters[1]) === -1) return false;
-        if (filters[2] && String(row.itemNo).toUpperCase().indexOf(filters[2]) === -1) return false;
-        if (filters[3] && String(row.itemName).toUpperCase().indexOf(filters[3]) === -1) return false;
-        if (filters[4] && String(row.activity).toUpperCase().indexOf(filters[4]) === -1) return false;
+        if (filters.hfb && String(row.hfb).toUpperCase().indexOf(filters.hfb) === -1) return false;
+        if (filters.pa && String(row.pa).toUpperCase().indexOf(filters.pa) === -1) return false;
+        if (filters.itemNo && String(row.itemNo).toUpperCase().indexOf(filters.itemNo) === -1) return false;
+        if (filters.itemName && String(row.itemName).toUpperCase().indexOf(filters.itemName) === -1) return false;
+        if (filters.activity && String(row.activity).toUpperCase().indexOf(filters.activity) === -1) return false;
 
         if (selectedDateFilters.size > 0) {
           let hasDataInSelectedDate = false;
