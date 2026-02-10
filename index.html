@@ -387,7 +387,13 @@
         const headerDateStr = resp.headers.get('Last-Modified');
         if (!resp.ok) throw new Error('Excel file not found');
         const buf = await resp.arrayBuffer();
-        const wb = XLSX.read(buf, { type:'array', cellDates: true });
+        // 개선된 코드: 첫 번째 시트만 읽음 + Dense 모드 (빠름)
+        const wb = XLSX.read(buf, { 
+          type: 'array', 
+          cellDates: true, 
+          sheets: 0,      // [핵심] 0번(첫 번째) 시트만 읽어라
+          dense: true     // [핵심] 메모리 효율적인 데이터 구조 사용 (속도 향상)
+        });
         
         let finalDate = null;
         if (wb.Props && wb.Props.ModifiedDate) finalDate = new Date(wb.Props.ModifiedDate);
@@ -648,3 +654,4 @@
   </script>
 </body>
 </html>
+
