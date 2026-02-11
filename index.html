@@ -37,11 +37,16 @@
     .tab-content.active{ display:flex; }
 
     /* --- Information Tab Styles --- */
-    .info-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 30px; } /* Width Increased */
+    .info-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 30px; } 
     .info-card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 30px; align-items: flex-start; }
     .info-text-area { flex: 1.2; }
-    .info-visual-area { flex: 0.8; text-align: center; background: #f9f9f9; border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: center; min-height: 200px; }
-    .info-visual-area img { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    
+    /* Image Area with Fallback */
+    .info-visual-area { flex: 0.8; text-align: center; background: #f9f9f9; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; position: relative; overflow: hidden; }
+    .info-visual-area img { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: block; }
+    .info-visual-area .fallback-icon { display: none; color: #dfe6e9; font-size: 4rem; }
+    .info-visual-area.error img { display: none; }
+    .info-visual-area.error .fallback-icon { display: block; }
     
     .info-title { font-size: 1.5rem; font-weight: 700; color: var(--ikea-blue); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
     .info-desc { font-size: 1rem; color: #333; line-height: 1.6; }
@@ -204,7 +209,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 6.1 Final Update</span>
+      <span>Ver 6.3 Exact Match</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -279,8 +284,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="info-visual-area">
-                    <img src="./Search.jpg" alt="Article Search Guide">
+                <div class="info-visual-area" id="visual-search">
+                    <img src="./Search.jpg" alt="Article Search Guide" onerror="this.parentElement.classList.add('error')">
+                    <i class="fas fa-mobile-alt fallback-icon"></i>
+                    <span class="fallback-icon" style="font-size:1rem; margin-top:10px;">Image Not Uploaded</span>
                 </div>
             </div>
 
@@ -302,8 +309,10 @@
                         </p>
                     </div>
                 </div>
-                <div class="info-visual-area">
-                    <img src="./Arrival.jpg" alt="Goods Arrival Guide">
+                <div class="info-visual-area" id="visual-arrival">
+                    <img src="./Arrival.jpg" alt="Goods Arrival Guide" onerror="this.parentElement.classList.add('error')">
+                    <i class="fas fa-table fallback-icon"></i>
+                    <span class="fallback-icon" style="font-size:1rem; margin-top:10px;">Image Not Uploaded</span>
                 </div>
             </div>
 
@@ -499,6 +508,7 @@
         if (!resp.ok) throw new Error('Excel file not found');
         const buf = await resp.arrayBuffer();
         
+        // ▼▼▼ Speed Optimized Reading ▼▼▼
         const wb = XLSX.read(buf, { type:'array', cellDates: true, sheets: 0, dense: true, cellStyles: false, cellImages: false });
         
         let finalDate = null;
@@ -568,7 +578,6 @@
       else { b1.innerHTML = `<i class="fas fa-exclamation-triangle"></i>`; b1.className = 'status-badge error'; b2.innerHTML = `<i class="fas fa-exclamation-triangle"></i>`; b2.className = 'status-badge error'; }
     }
 
-    // [MODIFIED] SwitchTab Function to handle 'info'
     function switchTab(tabName) {
       // Deactivate all
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -762,8 +771,11 @@
       const itemNameVal = document.querySelector('input[data-field="itemName"]')?.value.trim().toUpperCase() || "";
       
       const filteredRows = allPivotRows.filter(row => {
-        if (hfbVal && String(row.hfb).toUpperCase().indexOf(hfbVal) === -1) return false;
-        if (paVal && String(row.pa).toUpperCase().indexOf(paVal) === -1) return false;
+        // [FIX] Exact Match for HFB & PA
+        if (hfbVal && String(row.hfb).toUpperCase() !== hfbVal) return false;
+        if (paVal && String(row.pa).toUpperCase() !== paVal) return false;
+        
+        // Partial Match for Item No/Name (Keep)
         if (itemNoVal && String(row.itemNo).toUpperCase().indexOf(itemNoVal) === -1) return false;
         if (itemNameVal && String(row.itemName).toUpperCase().indexOf(itemNameVal) === -1) return false;
 
@@ -818,4 +830,3 @@
   </script>
 </body>
 </html>
-
