@@ -209,7 +209,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 6.3 Exact Match</span>
+      <span>Ver 6.4 Input Lag Fix</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -447,6 +447,7 @@
     let rawRows = []; let data = []; let html5QrcodeScanner = null;
     let allPivotRows = []; let displayedPivotRows = []; let globalSortedDates = [];
     let selectedDateFilters = new Set(); 
+    let lastRenderedDateColumns = ""; // For Sticky Header Optimization
 
     const ALIASES = {
       ItemNo: ['ItemNo','ITEM NO','ARTNO','ITEMNO'],
@@ -508,7 +509,6 @@
         if (!resp.ok) throw new Error('Excel file not found');
         const buf = await resp.arrayBuffer();
         
-        // ▼▼▼ Speed Optimized Reading ▼▼▼
         const wb = XLSX.read(buf, { type:'array', cellDates: true, sheets: 0, dense: true, cellStyles: false, cellImages: false });
         
         let finalDate = null;
@@ -724,13 +724,17 @@
 
     function filterPivot() { updateTableDisplay(); }
 
+    // [FIX] Rendering Optimization to Prevent Input Lag & Disappearing Text
     function updateTableDisplay() {
       const isMobile = window.innerWidth <= 768;
       
       const pfHfb = document.getElementById('pf-hfb').value.trim().toUpperCase();
       const pfPa = document.getElementById('pf-pa').value.trim().toUpperCase();
-      const headerHfb = document.getElementById('hfb-filter') ? document.getElementById('hfb-filter').value.trim().toUpperCase() : "";
-      const headerPa = document.getElementById('pa-filter') ? document.getElementById('pa-filter').value.trim().toUpperCase() : "";
+      const headerHfbEl = document.getElementById('hfb-filter');
+      const headerPaEl = document.getElementById('pa-filter');
+      
+      const headerHfb = headerHfbEl ? headerHfbEl.value.trim().toUpperCase() : "";
+      const headerPa = headerPaEl ? headerPaEl.value.trim().toUpperCase() : "";
       
       const hfbVal = isMobile ? pfHfb : headerHfb;
       const paVal = isMobile ? pfPa : headerPa;
@@ -749,22 +753,28 @@
       let visibleDates = (isMobile && hasDateFilter) ? globalSortedDates.filter(d => selectedDateFilters.has(d)) : [...globalSortedDates];
       const showNotFixed = (!isMobile) || (!hasDateFilter) || (selectedDateFilters.has('Not Fixed'));
 
-      // Re-build Header
-      let theadHtml = `<tr>
-        <th class="col-hfb">HFB<br><input id="hfb-filter" type="text" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
-        <th class="col-pa">PA<br><input id="pa-filter" type="text" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
-        <th class="col-itemno">Item No<br><input data-field="itemNo" class="always-visible-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
-        <th class="col-itemname">Item Name<br><input data-field="itemName" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
-        <th class="col-activity">Activity<br><input data-field="activity" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>`;
+      // [CRITICAL FIX] Only Re-render Header if Columns Changed
+      const newHeaderSignature = visibleDates.join('|') + (showNotFixed ? '|NF' : '') + (isMobile ? '|M' : '|P');
       
-      if(showNotFixed) theadHtml += `<th class="not-fixed-col">미정<br>(Not Fixed)</th>`;
-      visibleDates.forEach(d => { theadHtml += `<th class="date-col">${d}</th>`; });
-      theadHtml += `</tr>`;
-      document.getElementById('pivotHead').innerHTML = theadHtml;
-      
-      if (!isMobile) {
-          document.getElementById('hfb-filter').value = hfbVal;
-          document.getElementById('pa-filter').value = paVal;
+      if (newHeaderSignature !== lastRenderedDateColumns) {
+          let theadHtml = `<tr>
+            <th class="col-hfb">HFB<br><input id="hfb-filter" type="text" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
+            <th class="col-pa">PA<br><input id="pa-filter" type="text" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
+            <th class="col-itemno">Item No<br><input data-field="itemNo" class="always-visible-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
+            <th class="col-itemname">Item Name<br><input data-field="itemName" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>
+            <th class="col-activity">Activity<br><input data-field="activity" class="pc-header-filter" placeholder="Filter" onkeyup="debounceFilter()"></th>`;
+          
+          if(showNotFixed) theadHtml += `<th class="not-fixed-col">미정<br>(Not Fixed)</th>`;
+          visibleDates.forEach(d => { theadHtml += `<th class="date-col">${d}</th>`; });
+          theadHtml += `</tr>`;
+          document.getElementById('pivotHead').innerHTML = theadHtml;
+          lastRenderedDateColumns = newHeaderSignature;
+          
+          // Restore input values after re-render (only if not mobile specific inputs)
+          if (!isMobile) {
+              if(document.getElementById('hfb-filter')) document.getElementById('hfb-filter').value = hfbVal;
+              if(document.getElementById('pa-filter')) document.getElementById('pa-filter').value = paVal;
+          }
       }
 
       const itemNoVal = document.querySelector('input[data-field="itemNo"]')?.value.trim().toUpperCase() || "";
@@ -775,7 +785,7 @@
         if (hfbVal && String(row.hfb).toUpperCase() !== hfbVal) return false;
         if (paVal && String(row.pa).toUpperCase() !== paVal) return false;
         
-        // Partial Match for Item No/Name (Keep)
+        // Partial Match for others
         if (itemNoVal && String(row.itemNo).toUpperCase().indexOf(itemNoVal) === -1) return false;
         if (itemNameVal && String(row.itemName).toUpperCase().indexOf(itemNameVal) === -1) return false;
 
