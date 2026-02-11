@@ -41,7 +41,7 @@
     .info-card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 30px; align-items: flex-start; }
     .info-text-area { flex: 1.2; }
     
-    /* Image Area with Fallback */
+    /* Image Area */
     .info-visual-area { flex: 0.8; text-align: center; background: #f9f9f9; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; position: relative; overflow: hidden; }
     .info-visual-area img { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: block; }
     .info-visual-area .fallback-icon { display: none; color: #dfe6e9; font-size: 4rem; }
@@ -209,7 +209,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 6.4 Input Lag Fix</span>
+      <span>Ver 6.6 Date Logic Fix</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -447,7 +447,7 @@
     let rawRows = []; let data = []; let html5QrcodeScanner = null;
     let allPivotRows = []; let displayedPivotRows = []; let globalSortedDates = [];
     let selectedDateFilters = new Set(); 
-    let lastRenderedDateColumns = ""; // For Sticky Header Optimization
+    let lastRenderedDateColumns = ""; 
 
     const ALIASES = {
       ItemNo: ['ItemNo','ITEM NO','ARTNO','ITEMNO'],
@@ -554,7 +554,6 @@
         }));
         
         updateStatus('connected');
-        // Do not force render Arrival tab data here since we are now on Info tab by default
       } catch (error) { console.error(error); updateStatus('error'); }
     };
 
@@ -579,15 +578,10 @@
     }
 
     function switchTab(tabName) {
-      // Deactivate all
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      
-      // Activate target
       document.getElementById('nav-' + tabName).classList.add('active');
       document.getElementById('tab-' + tabName).classList.add('active');
-      
-      // Logic for Arrival Tab
       if (tabName === 'arrival') { 
           if (allPivotRows.length > 0) updateTableDisplay(); 
           else if (data.length > 0) processPivotData(data); 
@@ -724,7 +718,6 @@
 
     function filterPivot() { updateTableDisplay(); }
 
-    // [FIX] Rendering Optimization to Prevent Input Lag & Disappearing Text
     function updateTableDisplay() {
       const isMobile = window.innerWidth <= 768;
       
@@ -753,7 +746,6 @@
       let visibleDates = (isMobile && hasDateFilter) ? globalSortedDates.filter(d => selectedDateFilters.has(d)) : [...globalSortedDates];
       const showNotFixed = (!isMobile) || (!hasDateFilter) || (selectedDateFilters.has('Not Fixed'));
 
-      // [CRITICAL FIX] Only Re-render Header if Columns Changed
       const newHeaderSignature = visibleDates.join('|') + (showNotFixed ? '|NF' : '') + (isMobile ? '|M' : '|P');
       
       if (newHeaderSignature !== lastRenderedDateColumns) {
@@ -770,7 +762,6 @@
           document.getElementById('pivotHead').innerHTML = theadHtml;
           lastRenderedDateColumns = newHeaderSignature;
           
-          // Restore input values after re-render (only if not mobile specific inputs)
           if (!isMobile) {
               if(document.getElementById('hfb-filter')) document.getElementById('hfb-filter').value = hfbVal;
               if(document.getElementById('pa-filter')) document.getElementById('pa-filter').value = paVal;
@@ -779,21 +770,30 @@
 
       const itemNoVal = document.querySelector('input[data-field="itemNo"]')?.value.trim().toUpperCase() || "";
       const itemNameVal = document.querySelector('input[data-field="itemName"]')?.value.trim().toUpperCase() || "";
+      const activityVal = document.querySelector('input[data-field="activity"]')?.value.trim().toUpperCase() || "";
       
       const filteredRows = allPivotRows.filter(row => {
-        // [FIX] Exact Match for HFB & PA
         if (hfbVal && String(row.hfb).toUpperCase() !== hfbVal) return false;
         if (paVal && String(row.pa).toUpperCase() !== paVal) return false;
-        
-        // Partial Match for others
         if (itemNoVal && String(row.itemNo).toUpperCase().indexOf(itemNoVal) === -1) return false;
         if (itemNameVal && String(row.itemName).toUpperCase().indexOf(itemNameVal) === -1) return false;
+        if (activityVal && String(row.activity || "").toUpperCase().indexOf(activityVal) === -1) return false;
 
+        // [FIX] Date Filter Logic (Corrected to check selected keys only)
         if (hasDateFilter) {
-            let hasData = false;
-            if (selectedDateFilters.has('Not Fixed') && row.notFixedQty > 0) hasData = true;
-            for (let d of visibleDates) { if (row.dates[d] > 0) { hasData = true; break; } }
-            if (!hasData) return false;
+            let matchesDate = false;
+            if (selectedDateFilters.has('Not Fixed') && row.notFixedQty > 0) {
+                matchesDate = true;
+            } else {
+                for (const dateKey of selectedDateFilters) {
+                    if (dateKey === 'Not Fixed') continue;
+                    if (row.dates[dateKey] > 0) {
+                        matchesDate = true;
+                        break;
+                    }
+                }
+            }
+            if (!matchesDate) return false;
         }
         return true;
       });
