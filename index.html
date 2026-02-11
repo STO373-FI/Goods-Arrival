@@ -36,17 +36,20 @@
     .tab-content{ display:none; width:100%; flex-direction:column; align-items:center; }
     .tab-content.active{ display:flex; }
 
-    /* --- [NEW] Information Tab Styles --- */
-    .info-container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 30px; }
-    .info-card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 30px; align-items: center; }
-    .info-text-area { flex: 1; }
-    .info-visual-area { flex: 1; text-align: center; background: #f9f9f9; border-radius: 8px; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 200px; }
+    /* --- Information Tab Styles --- */
+    .info-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 30px; } /* Width Increased */
+    .info-card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 30px; align-items: flex-start; }
+    .info-text-area { flex: 1.2; }
+    .info-visual-area { flex: 0.8; text-align: center; background: #f9f9f9; border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: center; min-height: 200px; }
     .info-visual-area img { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .info-icon { font-size: 5rem; color: #dfe6e9; }
     
-    .info-title { font-size: 1.5rem; font-weight: 700; color: var(--ikea-blue); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+    .info-title { font-size: 1.5rem; font-weight: 700; color: var(--ikea-blue); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
     .info-desc { font-size: 1rem; color: #333; line-height: 1.6; }
-    .bi-en { display: block; font-size: 0.85em; color: #777; font-weight: 300; margin-top: 4px; } /* English Text Style */
+    .info-desc p { margin-bottom: 15px; }
+    .bi-en { display: block; font-size: 0.85em; color: #777; font-weight: 300; margin-top: 3px; margin-bottom: 4px; }
+    
+    .color-box { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; }
+    .cb-green { background: #27ae60; } .cb-yellow { background: #f1c40f; } .cb-red { background: #e74c3c; }
 
     /* Common Components */
     .status-badge{ display:inline-block; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:bold; background:#fff3cd; color:#856404; white-space: nowrap; }
@@ -118,7 +121,6 @@
       .app-container { flex-direction: column; display: block; }
       .sidebar { width: 100%; height: auto; flex-direction: row; padding-top: 0; }
       
-      /* [FIX] 3 Tabs Equal Width */
       .nav-item { flex: 1; text-align: center; padding: 12px 5px; border-right: 1px solid #ddd; font-size: 0.95rem; white-space: nowrap; }
       .nav-sub { font-size: 0.7rem; }
       
@@ -131,9 +133,9 @@
       .header-right { width: 100%; align-items: center; flex-direction: row; justify-content: center; gap: 15px; margin-top: 5px; }
       
       /* Info Tab Mobile */
-      .info-card { flex-direction: column-reverse; padding: 20px; } /* Text Top (in flex column-reverse image is bottom) */
-      .info-card { flex-direction: column; } /* Actually Text First, then Image */
-      .info-visual-area { min-height: 150px; }
+      .info-card { flex-direction: column; padding: 20px; gap: 20px; } 
+      .info-visual-area { min-height: 150px; order: 2; }
+      .info-text-area { order: 1; }
       
       /* Mobile Search Tab */
       .search-card { padding: 20px; }
@@ -202,7 +204,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 6.0 Info Tab</span>
+      <span>Ver 6.1 Final Update</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -231,6 +233,16 @@
                     이 도구는 제품의 도착 예정 정보를 쉽고 빠르게 조회하기 위해 만들어졌습니다.<br>
                     <span class="bi-en">This tool is designed to quickly and easily check product arrival schedules.</span>
                 </p>
+                <div style="margin-top:20px; font-size:0.9rem; color:#666; background:#f0f2f5; padding:15px; border-radius:8px; display:inline-block; text-align:left;">
+                    <ul style="margin:0; padding-left:20px;">
+                        <li>데이터는 매 영업일 기준, <strong>오후 3~4시</strong> 사이에 업데이트 됩니다.<br>
+                            <span class="bi-en" style="font-size:0.8em; color:#888;">Data is updated between 3 PM and 4 PM on business days.</span>
+                        </li>
+                        <li style="margin-top:8px;">데이터가 최종 업데이트 된 날짜는 우측 상단의 <strong>'data update'</strong> 날짜를 참고해주세요.<br>
+                            <span class="bi-en" style="font-size:0.8em; color:#888;">Please refer to the 'data update' date at the top right for the last update time.</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <div class="info-card">
@@ -240,15 +252,31 @@
                     </div>
                     <div class="info-desc">
                         <p>
-                            <strong>제품 번호 8자리를 입력하세요.</strong><br>
-                            모바일에서는 카메라 아이콘을 눌러 바코드를 스캔할 수도 있습니다.<br>
-                            <span class="bi-en">Enter the 8-digit item number. On mobile, tap the camera icon to scan barcodes.</span>
+                            <strong>제품번호 8자리로 검색합니다. (6자리도 가능)</strong><br>
+                            <span class="bi-en">Search with an 8-digit item number. (6 digits are also possible.)</span>
+                        </p>
+                        <p style="color:#e74c3c;">
+                            만약 제품번호가 잘못됐거나, OIP가 없다면 결과가 나오지 않습니다.<br>
+                            <span class="bi-en">No results will appear if the item number is incorrect or there is no OIP.</span>
+                        </p>
+                        <hr style="border:0; border-top:1px dashed #ddd; margin:15px 0;">
+                        <p>
+                            <strong>Total</strong> : 총 배송될 계획을 의미합니다. (예: 5 = 5개의 배송 계획)<br>
+                            <span class="bi-en">Means the total number of delivery plans. '5' means there are 5 delivery plans.</span>
                         </p>
                         <p>
-                            <strong>검색 결과 확인</strong><br>
-                            입력한 제품의 현재 도착 예정일과 수량을 보여줍니다. 과거 날짜는 제외됩니다.<br>
-                            <span class="bi-en">Check the arrival date and quantity. Past dates are excluded.</span>
+                            <strong>Future Qty</strong> : 가장 가까운 미래에 입고될 제품의 수량을 의미합니다.<br>
+                            <span class="bi-en">Means the quantity of products arriving in the nearest future.</span>
                         </p>
+                        <p>
+                            <strong>Next Date</strong> : 가장 가까운 미래에 입고될 날짜를 의미합니다.<br>
+                            <span class="bi-en">Means the date of the nearest future arrival.</span>
+                        </p>
+                        <div style="background:#f9f9f9; padding:10px; border-radius:4px; margin-top:10px;">
+                            <div style="margin-bottom:5px;"><span class="color-box cb-green"></span> <strong>Green</strong> : 가장 가까운 미래에 입고가 확정된 것<br><span class="bi-en" style="padding-left:17px;">Indicates confirmed arrival in the nearest future.</span></div>
+                            <div style="margin-bottom:5px;"><span class="color-box cb-yellow"></span> <strong>Yellow</strong> : 배송 미확정, 예상 도착 날짜 표기<br><span class="bi-en" style="padding-left:17px;">Delivery not confirmed. Indicates estimated arrival date.</span></div>
+                            <div><span class="color-box cb-red"></span> <strong>Red</strong> : 출발 전 상태, 도착 날짜 확인 불가<br><span class="bi-en" style="padding-left:17px;">Before departure. Arrival date is difficult to confirm.</span></div>
+                        </div>
                     </div>
                 </div>
                 <div class="info-visual-area">
@@ -263,22 +291,30 @@
                     </div>
                     <div class="info-desc">
                         <p>
-                            <strong>필터 사용법</strong><br>
-                            HFB, PA 번호를 입력하거나 특정 날짜를 클릭하여 원하는 데이터만 필터링하세요.<br>
-                            <span class="bi-en">Filter data by entering HFB, PA numbers or clicking specific dates.</span>
+                            <strong>필터링 기능</strong><br>
+                            날짜, HFB, PA, 제품번호, 제품이름, 특정 activity 에 따라서 필터링 가능합니다.<br>
+                            <span class="bi-en">You can filter by Date, HFB, PA, Item No, Item Name, and specific Activity.</span>
                         </p>
                         <p>
-                            <strong>데이터 해석</strong><br>
-                            <span class="date-badge confirmed">2026-02-10</span> : 확정된 날짜 (Confirmed)<br>
-                            <span class="date-badge estimated">WK07 예상</span> : 예상 주차 (Estimated)<br>
-                            <span class="date-badge tbd">미정</span> : 일정 미정 (Not Fixed)<br>
-                            <span class="bi-en">Understand the status colors: Green (Confirmed), Yellow (Estimated), Red (Not Fixed).</span>
+                            <strong>엑셀 다운로드</strong><br>
+                            엑셀 파일로 추출이 가능하며, csv 형태로 export 할 수 있습니다.<br>
+                            <span class="bi-en">Data can be extracted to an Excel file and exported in CSV format.</span>
                         </p>
                     </div>
                 </div>
                 <div class="info-visual-area">
                     <img src="./arrival.jpg" alt="Goods Arrival Guide">
                 </div>
+            </div>
+
+            <div class="info-card" style="display:block; background:#f0f8ff; border:1px solid #d6eaf8;">
+                <div class="info-title" style="margin-bottom:10px; color:#2c3e50; border:none;">
+                    <i class="fas fa-envelope"></i> Question & Request (문의사항)
+                </div>
+                <p style="margin:0; font-size:1rem; color:#555;">
+                    문의 및 요청사항이 있다면 언제든지 <a href="mailto:dl.fi.373@ingka.ikea.com" style="color:var(--ikea-blue); font-weight:bold;">dl.fi.373@ingka.ikea.com</a> 으로 메일 주세요. 감사합니다.<br>
+                    <span class="bi-en">If you have any questions or requests, please email us at any time. Thank you.</span>
+                </p>
             </div>
 
         </div>
@@ -782,4 +818,3 @@
   </script>
 </body>
 </html>
-
