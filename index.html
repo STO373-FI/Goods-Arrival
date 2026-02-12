@@ -26,7 +26,7 @@
     .app-container{ display:flex; flex:1; width:100%; overflow:hidden; }
     .sidebar{ width:var(--sidebar-width); background:#95a5a6; color:#fff; display:flex; flex-direction:column; flex-shrink:0; padding-top:20px; }
     
-    /* Nav Items (3 Tabs) */
+    /* Nav Items */
     .nav-item{ padding:15px 20px; cursor:pointer; transition:all .2s; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,.1); }
     .nav-item:hover{ background:rgba(255,255,255,.1); }
     .nav-item.active{ background:#fff; color:var(--ikea-blue); font-weight:bold; border-left:6px solid var(--ikea-yellow); }
@@ -41,7 +41,6 @@
     .info-card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 30px; align-items: flex-start; }
     .info-text-area { flex: 1.2; }
     
-    /* Image Area */
     .info-visual-area { flex: 0.8; text-align: center; background: #f9f9f9; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; position: relative; overflow: hidden; }
     .info-visual-area img { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: block; }
     .info-visual-area .fallback-icon { display: none; color: #dfe6e9; font-size: 4rem; }
@@ -60,6 +59,8 @@
     .status-badge{ display:inline-block; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:bold; background:#fff3cd; color:#856404; white-space: nowrap; }
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
+    
+    /* Export Button (Green) */
     .btn-export-csv { background-color: #217346; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; }
 
     /* Search Tab */
@@ -209,7 +210,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 6.6 Date Logic Fix</span>
+      <span>Ver 6.7 XLSX Export & Mobile Fix</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -383,6 +384,10 @@
             <div class="pf-group">
                 <label class="pf-label">PA</label>
                 <input type="text" id="pf-pa" class="pf-input" placeholder="All" onkeyup="debounceFilter()">
+            </div>
+            <div class="pf-group">
+                <label class="pf-label">Activity</label>
+                <input type="text" id="pf-activity" class="pf-input" placeholder="All" onkeyup="debounceFilter()">
             </div>
         </div>
 
@@ -723,18 +728,26 @@
       
       const pfHfb = document.getElementById('pf-hfb').value.trim().toUpperCase();
       const pfPa = document.getElementById('pf-pa').value.trim().toUpperCase();
+      // [FIX] Mobile Activity Input Selection
+      const pfActivity = document.getElementById('pf-activity').value.trim().toUpperCase();
+
       const headerHfbEl = document.getElementById('hfb-filter');
       const headerPaEl = document.getElementById('pa-filter');
+      // [FIX] PC Activity Input Selection
+      const headerActivityEl = document.querySelector('input[data-field="activity"]');
       
       const headerHfb = headerHfbEl ? headerHfbEl.value.trim().toUpperCase() : "";
       const headerPa = headerPaEl ? headerPaEl.value.trim().toUpperCase() : "";
+      const headerActivity = headerActivityEl ? headerActivityEl.value.trim().toUpperCase() : "";
       
       const hfbVal = isMobile ? pfHfb : headerHfb;
       const paVal = isMobile ? pfPa : headerPa;
+      const activityVal = isMobile ? pfActivity : headerActivity;
+
       const hasDateFilter = selectedDateFilters.size > 0;
 
       if (isMobile) {
-          const isEmpty = (!hfbVal && !paVal && !hasDateFilter);
+          const isEmpty = (!hfbVal && !paVal && !activityVal && !hasDateFilter);
           document.getElementById('pivotEmptyState').style.display = isEmpty ? 'block' : 'none';
           document.getElementById('pivotTable').style.display = isEmpty ? 'none' : 'table';
           if(isEmpty) return;
@@ -765,12 +778,14 @@
           if (!isMobile) {
               if(document.getElementById('hfb-filter')) document.getElementById('hfb-filter').value = hfbVal;
               if(document.getElementById('pa-filter')) document.getElementById('pa-filter').value = paVal;
+              // Restore PC Activity Input
+              const actInput = document.querySelector('input[data-field="activity"]');
+              if(actInput) actInput.value = activityVal;
           }
       }
 
       const itemNoVal = document.querySelector('input[data-field="itemNo"]')?.value.trim().toUpperCase() || "";
       const itemNameVal = document.querySelector('input[data-field="itemName"]')?.value.trim().toUpperCase() || "";
-      const activityVal = document.querySelector('input[data-field="activity"]')?.value.trim().toUpperCase() || "";
       
       const filteredRows = allPivotRows.filter(row => {
         if (hfbVal && String(row.hfb).toUpperCase() !== hfbVal) return false;
@@ -779,7 +794,6 @@
         if (itemNameVal && String(row.itemName).toUpperCase().indexOf(itemNameVal) === -1) return false;
         if (activityVal && String(row.activity || "").toUpperCase().indexOf(activityVal) === -1) return false;
 
-        // [FIX] Date Filter Logic (Corrected to check selected keys only)
         if (hasDateFilter) {
             let matchesDate = false;
             if (selectedDateFilters.has('Not Fixed') && row.notFixedQty > 0) {
@@ -826,7 +840,8 @@
         const ws = XLSX.utils.aoa_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Arrival_Export");
-        XLSX.writeFile(wb, `${ymd(new Date())}_export.csv`, { bookType: 'csv' });
+        // [FIX] Changed export format to XLSX
+        XLSX.writeFile(wb, `${ymd(new Date())}_export.xlsx`);
     }
 
     function parseExcelDate(value) {
