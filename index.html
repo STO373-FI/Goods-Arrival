@@ -2,8 +2,24 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="STO373 Arrival">
+  <link rel="apple-touch-icon" href="./Search.jpg">
+  <meta name="theme-color" content="#0058a3">
+
   <title>STO373 Goods Arrival Plan Search</title>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3MWM51MSF8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-3MWM51MSF8');
+  </script>
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -22,11 +38,15 @@
     .header-sub-link{ color:var(--ikea-yellow); text-decoration:none; font-weight:500; font-size:.95rem; font-family:'Roboto',sans-serif; display:flex; align-items:center; gap:5px; }
     .header-right{ display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 2px; text-align:right; font-size:.75rem; line-height:1.2; opacity:.9; }
 
+    /* Stale Data Alert */
+    #stale-alert {
+        display: none; width: 100%; background-color: #e74c3c; color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1999;
+    }
+
     /* Layout & Sidebar */
     .app-container{ display:flex; flex:1; width:100%; overflow:hidden; }
     .sidebar{ width:var(--sidebar-width); background:#95a5a6; color:#fff; display:flex; flex-direction:column; flex-shrink:0; padding-top:20px; }
     
-    /* Nav Items */
     .nav-item{ padding:15px 20px; cursor:pointer; transition:all .2s; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,.1); }
     .nav-item:hover{ background:rgba(255,255,255,.1); }
     .nav-item.active{ background:#fff; color:var(--ikea-blue); font-weight:bold; border-left:6px solid var(--ikea-yellow); }
@@ -51,7 +71,6 @@
     .info-desc { font-size: 1rem; color: #333; line-height: 1.6; }
     .info-desc p { margin-bottom: 15px; }
     .bi-en { display: block; font-size: 0.85em; color: #777; font-weight: 300; margin-top: 3px; margin-bottom: 4px; }
-    
     .color-box { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; }
     .cb-green { background: #27ae60; } .cb-yellow { background: #f1c40f; } .cb-red { background: #e74c3c; }
 
@@ -59,8 +78,6 @@
     .status-badge{ display:inline-block; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:bold; background:#fff3cd; color:#856404; white-space: nowrap; }
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
-    
-    /* Export Button (Green) */
     .btn-export-csv { background-color: #217346; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; }
 
     /* Search Tab */
@@ -191,6 +208,10 @@
 </head>
 <body>
 
+  <div id="stale-alert">
+    <i class="fas fa-exclamation-triangle"></i> 주의: 데이터가 3일(72시간) 이상 업데이트되지 않았습니다. (Updated > 72h ago)
+  </div>
+
   <div id="scanner-modal">
     <div style="color:white; margin-bottom:10px; text-align:center;">
       <i class="fas fa-barcode"></i> 바코드에 카메라를 대주세요
@@ -210,133 +231,77 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 6.7 XLSX Export & Mobile Fix</span>
+      <span>Ver 7.1 GA & Update</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
 
   <div class="app-container">
     <nav class="sidebar">
-      <div class="nav-item active" onclick="switchTab('info')" id="nav-info">
-        Information <span class="nav-sub">사용 가이드</span>
-      </div>
-      <div class="nav-item" onclick="switchTab('search')" id="nav-search">
-        Article Search <span class="nav-sub">제품 검색</span>
-      </div>
-      <div class="nav-item" onclick="switchTab('arrival')" id="nav-arrival">
-        Goods Arrival <span class="nav-sub">도착 현황</span>
-      </div>
+      <div class="nav-item active" onclick="switchTab('info')" id="nav-info">Information <span class="nav-sub">사용 가이드</span></div>
+      <div class="nav-item" onclick="switchTab('search')" id="nav-search">Article Search <span class="nav-sub">제품 검색</span></div>
+      <div class="nav-item" onclick="switchTab('arrival')" id="nav-arrival">Goods Arrival <span class="nav-sub">도착 현황</span></div>
     </nav>
 
     <div class="content-area">
-      
       <div id="tab-info" class="tab-content active">
         <div class="info-container">
-            
             <div class="info-card" style="display:block; text-align:center;">
                 <h1 style="color:var(--ikea-blue); margin-bottom:10px;">Welcome to STO373 Goods Arrival Tool</h1>
-                <p style="color:#555;">
-                    이 도구는 제품의 도착 예정 정보를 쉽고 빠르게 조회하기 위해 만들어졌습니다.<br>
-                    <span class="bi-en">This tool is designed to quickly and easily check product arrival schedules.</span>
-                </p>
+                <p style="color:#555;">이 도구는 제품의 도착 예정 정보를 쉽고 빠르게 조회하기 위해 만들어졌습니다.<br><span class="bi-en">This tool is designed to quickly and easily check product arrival schedules.</span></p>
                 <div style="margin-top:20px; font-size:0.9rem; color:#666; background:#f0f2f5; padding:15px; border-radius:8px; display:inline-block; text-align:left;">
                     <ul style="margin:0; padding-left:20px;">
-                        <li>데이터는 매 영업일 기준, <strong>오후 3~4시</strong> 사이에 업데이트 됩니다.<br>
-                            <span class="bi-en" style="font-size:0.8em; color:#888;">Data is updated between 3 PM and 4 PM on business days.</span>
-                        </li>
-                        <li style="margin-top:8px;">데이터가 최종 업데이트 된 날짜는 우측 상단의 <strong>'data update'</strong> 날짜를 참고해주세요.<br>
-                            <span class="bi-en" style="font-size:0.8em; color:#888;">Please refer to the 'data update' date at the top right for the last update time.</span>
-                        </li>
+                        <li>데이터는 매 영업일 기준, <strong>오후 3~4시</strong> 사이에 업데이트 됩니다.<br><span class="bi-en" style="font-size:0.8em; color:#888;">Data is updated between 3 PM and 4 PM on business days.</span></li>
+                        <li style="margin-top:8px;">데이터가 최종 업데이트 된 날짜는 우측 상단의 <strong>'data update'</strong> 날짜를 참고해주세요.<br><span class="bi-en" style="font-size:0.8em; color:#888;">Please refer to the 'data update' date at the top right.</span></li>
                     </ul>
                 </div>
             </div>
-
             <div class="info-card">
                 <div class="info-text-area">
-                    <div class="info-title">
-                        <i class="fas fa-search"></i> 1. Article Search
-                    </div>
+                    <div class="info-title"><i class="fas fa-search"></i> 1. Article Search</div>
                     <div class="info-desc">
-                        <p>
-                            <strong>제품번호 8자리로 검색합니다. (6자리도 가능)</strong><br>
-                            <span class="bi-en">Search with an 8-digit item number. (6 digits are also possible.)</span>
-                        </p>
-                        <p style="color:#e74c3c;">
-                            만약 제품번호가 잘못됐거나, OIP가 없다면 결과가 나오지 않습니다.<br>
-                            <span class="bi-en">No results will appear if the item number is incorrect or there is no OIP.</span>
-                        </p>
+                        <p><strong>제품번호 8자리로 검색합니다. (6자리도 가능)</strong><br><span class="bi-en">Search with an 8-digit item number. (6 digits are also possible.)</span></p>
+                        <p style="color:#e74c3c;">만약 제품번호가 잘못됐거나, OIP가 없다면 결과가 나오지 않습니다.<br><span class="bi-en">No results if incorrect item no or no OIP.</span></p>
                         <hr style="border:0; border-top:1px dashed #ddd; margin:15px 0;">
-                        <p>
-                            <strong>Total</strong> : 총 배송될 계획을 의미합니다. (예: 5 = 5개의 배송 계획)<br>
-                            <span class="bi-en">Means the total number of delivery plans. '5' means there are 5 delivery plans.</span>
-                        </p>
-                        <p>
-                            <strong>Future Qty</strong> : 가장 가까운 미래에 입고될 제품의 수량을 의미합니다.<br>
-                            <span class="bi-en">Means the quantity of products arriving in the nearest future.</span>
-                        </p>
-                        <p>
-                            <strong>Next Date</strong> : 가장 가까운 미래에 입고될 날짜를 의미합니다.<br>
-                            <span class="bi-en">Means the date of the nearest future arrival.</span>
-                        </p>
+                        <p><strong>Total</strong> : 총 배송될 계획 (예: 5 = 5개의 배송 계획)<br><span class="bi-en">Means the total number of delivery plans.</span></p>
+                        <p><strong>Future Qty</strong> : 가장 가까운 미래에 입고될 수량<br><span class="bi-en">Means the quantity arriving in the nearest future.</span></p>
+                        <p><strong>Next Date</strong> : 가장 가까운 미래에 입고될 날짜<br><span class="bi-en">Means the date of the nearest future arrival.</span></p>
                         <div style="background:#f9f9f9; padding:10px; border-radius:4px; margin-top:10px;">
-                            <div style="margin-bottom:5px;"><span class="color-box cb-green"></span> <strong>Green</strong> : 가장 가까운 미래에 입고가 확정된 것<br><span class="bi-en" style="padding-left:17px;">Indicates confirmed arrival in the nearest future.</span></div>
-                            <div style="margin-bottom:5px;"><span class="color-box cb-yellow"></span> <strong>Yellow</strong> : 배송 미확정, 예상 도착 날짜 표기<br><span class="bi-en" style="padding-left:17px;">Delivery not confirmed. Indicates estimated arrival date.</span></div>
-                            <div><span class="color-box cb-red"></span> <strong>Red</strong> : 출발 전 상태, 도착 날짜 확인 불가<br><span class="bi-en" style="padding-left:17px;">Before departure. Arrival date is difficult to confirm.</span></div>
+                            <div style="margin-bottom:5px;"><span class="color-box cb-green"></span> <strong>Green</strong> : 입고 확정<br><span class="bi-en" style="padding-left:17px;">Confirmed arrival.</span></div>
+                            <div style="margin-bottom:5px;"><span class="color-box cb-yellow"></span> <strong>Yellow</strong> : 배송 미확정 (예상)<br><span class="bi-en" style="padding-left:17px;">Estimated arrival date.</span></div>
+                            <div><span class="color-box cb-red"></span> <strong>Red</strong> : 출발 전 (미정)<br><span class="bi-en" style="padding-left:17px;">Not fixed (Before departure).</span></div>
                         </div>
                     </div>
                 </div>
                 <div class="info-visual-area" id="visual-search">
                     <img src="./Search.jpg" alt="Article Search Guide" onerror="this.parentElement.classList.add('error')">
-                    <i class="fas fa-mobile-alt fallback-icon"></i>
-                    <span class="fallback-icon" style="font-size:1rem; margin-top:10px;">Image Not Uploaded</span>
+                    <i class="fas fa-mobile-alt fallback-icon"></i><span class="fallback-icon" style="font-size:1rem; margin-top:10px;">Image Not Uploaded</span>
                 </div>
             </div>
-
             <div class="info-card">
                 <div class="info-text-area">
-                    <div class="info-title">
-                        <i class="fas fa-calendar-alt"></i> 2. Goods Arrival
-                    </div>
+                    <div class="info-title"><i class="fas fa-calendar-alt"></i> 2. Goods Arrival</div>
                     <div class="info-desc">
-                        <p>
-                            <strong>필터링 기능</strong><br>
-                            날짜, HFB, PA, 제품번호, 제품이름, 특정 activity 에 따라서 필터링 가능합니다.<br>
-                            <span class="bi-en">You can filter by Date, HFB, PA, Item No, Item Name, and specific Activity.</span>
-                        </p>
-                        <p>
-                            <strong>엑셀 다운로드</strong><br>
-                            엑셀 파일로 추출이 가능하며, csv 형태로 export 할 수 있습니다.<br>
-                            <span class="bi-en">Data can be extracted to an Excel file and exported in CSV format.</span>
-                        </p>
+                        <p><strong>필터링 기능</strong><br>날짜, HFB, PA, 제품번호, 제품이름, 특정 activity 에 따라서 필터링 가능합니다.<br><span class="bi-en">Filter by Date, HFB, PA, Item No, Item Name, and Activity.</span></p>
+                        <p><strong>엑셀 다운로드</strong><br>엑셀 파일로 추출이 가능하며, csv 형태로 export 할 수 있습니다.<br><span class="bi-en">Data can be exported to Excel/CSV.</span></p>
                     </div>
                 </div>
                 <div class="info-visual-area" id="visual-arrival">
                     <img src="./Arrival.jpg" alt="Goods Arrival Guide" onerror="this.parentElement.classList.add('error')">
-                    <i class="fas fa-table fallback-icon"></i>
-                    <span class="fallback-icon" style="font-size:1rem; margin-top:10px;">Image Not Uploaded</span>
+                    <i class="fas fa-table fallback-icon"></i><span class="fallback-icon" style="font-size:1rem; margin-top:10px;">Image Not Uploaded</span>
                 </div>
             </div>
-
             <div class="info-card" style="display:block; background:#f0f8ff; border:1px solid #d6eaf8;">
-                <div class="info-title" style="margin-bottom:10px; color:#2c3e50; border:none;">
-                    <i class="fas fa-envelope"></i> Question & Request (문의사항)
-                </div>
-                <p style="margin:0; font-size:1rem; color:#555;">
-                    문의 및 요청사항이 있다면 언제든지 <a href="mailto:dl.fi.373@ingka.ikea.com" style="color:var(--ikea-blue); font-weight:bold;">dl.fi.373@ingka.ikea.com</a> 으로 메일 주세요. 감사합니다.<br>
-                    <span class="bi-en">If you have any questions or requests, please email us at any time. Thank you.</span>
-                </p>
+                <div class="info-title" style="margin-bottom:10px; color:#2c3e50; border:none;"><i class="fas fa-envelope"></i> Question & Request (문의사항)</div>
+                <p style="margin:0; font-size:1rem; color:#555;">문의 및 요청사항이 있다면 언제든지 <a href="mailto:dl.fi.373@ingka.ikea.com" style="color:var(--ikea-blue); font-weight:bold;">dl.fi.373@ingka.ikea.com</a> 으로 메일 주세요. 감사합니다.<br><span class="bi-en">If you have any questions, please email us.</span></p>
             </div>
-
         </div>
       </div>
 
       <div id="tab-search" class="tab-content">
         <div class="search-card">
           <div class="search-header">
-            <div class="search-title">
-              <i class="fas fa-search"></i> 검색 (제품 번호 8자리)
-              <span class="en-sub">Search (Item No 8 digits)</span>
-            </div>
+            <div class="search-title"><i class="fas fa-search"></i> 검색 (제품 번호 8자리)<span class="en-sub">Search (Item No 8 digits)</span></div>
             <div class="status-badge" id="statusBadge1"><i class="fas fa-spinner fa-spin"></i> 연결 중...</div>
           </div>
           <div class="input-wrapper">
@@ -351,7 +316,6 @@
           </div>
           <div id="loading"><i class="fas fa-spinner fa-spin fa-2x"></i><br/>데이터 검색 중...</div>
         </div>
-
         <div id="resultSection" class="result-section">
           <div id="statusBar" class="status-msg"></div>
           <div class="dashboard">
@@ -361,10 +325,7 @@
           </div>
           <div class="pc-table-view">
             <div class="table-wrap">
-              <table>
-                <thead><tr><th>HFB</th><th>ITEM NO</th><th>ITEM NAME</th><th>SSD</th><th>EDS</th><th>PLANNED DATE</th><th>QTY</th><th>CONTAINER</th></tr></thead>
-                <tbody id="pcResultBody"></tbody>
-              </table>
+              <table><thead><tr><th>HFB</th><th>ITEM NO</th><th>ITEM NAME</th><th>SSD</th><th>EDS</th><th>PLANNED DATE</th><th>QTY</th><th>CONTAINER</th></tr></thead><tbody id="pcResultBody"></tbody></table>
             </div>
           </div>
           <div class="mobile-result-view">
@@ -375,79 +336,42 @@
       </div>
 
       <div id="tab-arrival" class="tab-content">
-        
         <div class="mobile-only-filters">
-            <div class="pf-group">
-                <label class="pf-label">HFB</label>
-                <input type="text" id="pf-hfb" class="pf-input" placeholder="All" onkeyup="debounceFilter()">
-            </div>
-            <div class="pf-group">
-                <label class="pf-label">PA</label>
-                <input type="text" id="pf-pa" class="pf-input" placeholder="All" onkeyup="debounceFilter()">
-            </div>
-            <div class="pf-group">
-                <label class="pf-label">Activity</label>
-                <input type="text" id="pf-activity" class="pf-input" placeholder="All" onkeyup="debounceFilter()">
-            </div>
+            <div class="pf-group"><label class="pf-label">HFB</label><input type="text" id="pf-hfb" class="pf-input" placeholder="All" onkeyup="debounceFilter()"></div>
+            <div class="pf-group"><label class="pf-label">PA</label><input type="text" id="pf-pa" class="pf-input" placeholder="All" onkeyup="debounceFilter()"></div>
+            <div class="pf-group"><label class="pf-label">Activity</label><input type="text" id="pf-activity" class="pf-input" placeholder="All" onkeyup="debounceFilter()"></div>
         </div>
-
         <div class="filter-tray-container">
-          <div class="tray-header">
-            <div class="tray-title"><i class="fas fa-filter"></i> Date Filter (Click to Toggle)</div>
-            <button class="btn-clear-filter" onclick="clearDateFilters()">
-              <i class="fas fa-sync-alt"></i> Show All
-            </button>
-          </div>
+          <div class="tray-header"><div class="tray-title"><i class="fas fa-filter"></i> Date Filter (Click to Toggle)</div><button class="btn-clear-filter" onclick="clearDateFilters()"><i class="fas fa-sync-alt"></i> Show All</button></div>
           <div class="chip-container" id="dateFilterChips"></div>
         </div>
-
         <div class="pivot-container">
           <div class="pivot-header-area">
-            <h2 style="color:var(--ikea-blue); margin:0;">
-              <i class="fas fa-calendar-alt"></i> Goods Arrival
-              <span class="en-sub" style="font-size:.6em; display:block; margin-left:0; margin-top:5px;">오늘부터 미래의 도착 예정 물량을 보여줍니다.</span>
-            </h2>
+            <h2 style="color:var(--ikea-blue); margin:0;"><i class="fas fa-calendar-alt"></i> Goods Arrival<span class="en-sub" style="font-size:.6em; display:block; margin-left:0; margin-top:5px;">오늘부터 미래의 도착 예정 물량을 보여줍니다.</span></h2>
             <div class="pivot-controls-right">
                 <div class="status-badge" id="statusBadge2"><i class="fas fa-spinner fa-spin"></i> 연결 중...</div>
-                <button class="btn-export-csv" onclick="exportToCsv()">
-                    <i class="fas fa-file-excel"></i> Excel
-                </button>
+                <button class="btn-export-csv" onclick="exportToXlsx()"><i class="fas fa-file-excel"></i> Excel Download</button>
             </div>
           </div>
-
           <div style="overflow-x:auto;">
-            <table class="pivot-table" id="pivotTable">
-              <thead id="pivotHead"></thead>
-              <tbody id="pivotBody"></tbody>
-            </table>
-            
+            <table class="pivot-table" id="pivotTable"><thead id="pivotHead"></thead><tbody id="pivotBody"></tbody></table>
             <div id="pivotEmptyState" class="empty-state">
                 <i class="fas fa-search" style="font-size: 2rem; color:#ddd; margin-bottom:10px;"></i><br>
-                상단의 <strong>HFB</strong>, <strong>PA</strong>를 입력하거나<br>
-                <strong>날짜</strong>를 선택하면 결과가 표시됩니다.
+                상단의 <strong>HFB</strong>, <strong>PA</strong>를 입력하거나<br><strong>날짜</strong>를 선택하면 결과가 표시됩니다.
             </div>
-            
-            <div id="pivotLoading" style="display:none; text-align:center; padding:20px;">
-                <i class="fas fa-spinner fa-spin"></i> Loading...
-            </div>
+            <div id="pivotLoading" style="display:none; text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <footer>
-    <strong>STO373 Tool</strong> — Automated FI
-  </footer>
+  <footer><strong>STO373 Tool</strong> — Automated FI</footer>
 
   <script>
-    // ==========================================================
-    // [USER CONFIG] Github 정보 입력
-    // ==========================================================
     const GITHUB_OWNER = 'STO373-FI'; 
     const GITHUB_REPO = 'Goods-Arrival'; 
     const FALLBACK_FILE_URL = './STO373 Goods arrival plan.xlsx'; 
-    // ==========================================================
 
     let rawRows = []; let data = []; let html5QrcodeScanner = null;
     let allPivotRows = []; let displayedPivotRows = []; let globalSortedDates = [];
@@ -470,7 +394,6 @@
     };
 
     const debounce = (fn, t=300) => { let tm; return (...a)=>{clearTimeout(tm); tm=setTimeout(()=>fn(...a), t);} };
-    const fmtInt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
     const safeNum = v => Number.isFinite(+v) ? +v : 0;
     const pad2 = n => String(n).padStart(2,'0');
     const ymd = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
@@ -481,9 +404,6 @@
       target.setUTCDate(target.getUTCDate() - dayNr + 3); 
       const firstThursday = new Date(Date.UTC(target.getUTCFullYear(),0,4));
       return 1 + Math.round((target - firstThursday) / (7*24*3600*1000));
-    }
-    function escapeHtml(str=''){
-      return String(str).replace(/[&<>"'`=\/]/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;' }[s]));
     }
     function normKey(s){ return String(s||'').toLowerCase().replace(/[\s_\\/-]+/g,'').replace(/[^\w]/g,''); }
     function findColIndex(header, candidates){
@@ -505,9 +425,19 @@
       return null;
     }
 
-    // Init
     window.onload = async function(){
       try{
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        
+        if (!urlParams.has('hfb')) {
+            const savedHfb = localStorage.getItem('last_hfb');
+            if (savedHfb) { if(document.getElementById('pf-hfb')) document.getElementById('pf-hfb').value = savedHfb; }
+        } else {
+            if(document.getElementById('pf-hfb')) document.getElementById('pf-hfb').value = urlParams.get('hfb') || '';
+            if(document.getElementById('pf-pa')) document.getElementById('pf-pa').value = urlParams.get('pa') || '';
+        }
+
         const fileUrl = await fetchLatestExcelUrl();
         const resp = await fetch(fileUrl);
         const headerDateStr = resp.headers.get('Last-Modified');
@@ -519,26 +449,20 @@
         let finalDate = null;
         if (wb.Props && wb.Props.ModifiedDate) finalDate = new Date(wb.Props.ModifiedDate);
         else if (headerDateStr) finalDate = new Date(headerDateStr);
-        if (finalDate) document.getElementById('data-update-date').innerText = `data update : ${ymd(finalDate)}`;
-
-        const ws = wb.Sheets[wb.SheetNames[0]];
-
-        if (ws["!ref"]) {
-          const range = XLSX.utils.decode_range(ws['!ref']);
-          ws['!ref'] = XLSX.utils.encode_range({
-            s: { r: 0, c: 0 },
-            e: { r: range.e.r, c: range.e.c }
-          });
+        if (finalDate) {
+            document.getElementById('data-update-date').innerText = `data update : ${ymd(finalDate)}`;
+            const diffHours = (new Date() - finalDate) / (1000 * 60 * 60);
+            if (diffHours > 72) {
+                document.getElementById('stale-alert').style.display = 'block';
+            }
         }
 
-        const json = XLSX.utils.sheet_to_json(ws, { 
-            header: 1, 
-            defval: "", 
-            raw: true,
-            blankRows: false,
-            range: 0
-        });
-
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        if (ws["!ref"]) {
+          const range = XLSX.utils.decode_range(ws['!ref']);
+          ws['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: range.e.r, c: range.e.c } });
+        }
+        const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: true, blankRows: false, range: 0 });
         const rawHeader = (json[0] || []).map(x=>String(x).trim());
         rawRows = json.slice(1);
         const COL = buildColumnMap(rawHeader);
@@ -559,6 +483,17 @@
         }));
         
         updateStatus('connected');
+        
+        if (tabParam === 'arrival') {
+            switchTab('arrival');
+        } else if (tabParam === 'search') {
+            switchTab('search');
+            if (urlParams.has('itemNo')) {
+                document.getElementById('itemInput').value = urlParams.get('itemNo');
+                performSearch();
+            }
+        }
+
       } catch (error) { console.error(error); updateStatus('error'); }
     };
 
@@ -593,11 +528,12 @@
       }
     }
 
-    // --- Tab 1 ---
     document.getElementById('itemInput').addEventListener('keypress', e => { if (e.key==='Enter') performSearch(); });
     function performSearch() {
       const raw = document.getElementById('itemInput').value.trim();
       if (!raw) { alert("제품번호를 입력해주세요."); return; }
+      localStorage.setItem('last_search_item', raw);
+      
       const target = raw.replace(/[^0-9A-Za-z]/g,'').toLowerCase();
       document.getElementById('loading').style.display = 'block'; document.getElementById('resultSection').style.display = 'none';
       setTimeout(() => { const results = searchData(target); displayResults(results); document.getElementById('loading').style.display = 'none'; }, 300);
@@ -666,20 +602,16 @@
       } else { 
           document.getElementById('futureDeliveryQty').innerText = "0"; document.getElementById('nextDeliveryDate').innerText = "-"; 
       }
-      
       results.forEach(row => {
         pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td><strong>${row.itemNo}</strong></td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${row.plannedDateStr}</td><td class="qty-cell">${row.quantity}</td><td>${row.container}</td></tr>`;
       });
       if(results.length > 0) {
         const c = results[0];
         mobileProductSummary.innerHTML = `<div class="summary-row"><span class="label">Item No</span> <span class="value" style="font-size:1.2rem; color:var(--ikea-blue);">${c.itemNo}</span></div><div class="summary-row"><span class="label">Name</span> <span class="value">${c.itemName}</span></div><div class="summary-row"><span class="label">HFB</span> <span class="value">${c.hfb}</span></div>`;
-        results.forEach(row => { 
-            mobileScheduleList.innerHTML += `<div class="schedule-item"><div class="schedule-date">${row.plannedDateStr}</div><div class="schedule-details"><div class="schedule-qty">${row.quantity} ea</div><div class="schedule-container"><i class="fas fa-box"></i> ${row.container}</div></div></div>`; 
-        });
+        results.forEach(row => { mobileScheduleList.innerHTML += `<div class="schedule-item"><div class="schedule-date">${row.plannedDateStr}</div><div class="schedule-details"><div class="schedule-qty">${row.quantity} ea</div><div class="schedule-container"><i class="fas fa-box"></i> ${row.container}</div></div></div>`; });
       }
     }
 
-    // --- Tab 2 Pivot ---
     function processPivotData(list, shouldRender = true) {
       const today = new Date(); today.setHours(0,0,0,0);
       const pivotMap = {}; const uniqueDates = new Set(); let hasNotFixed = false;
@@ -719,7 +651,11 @@
     }
 
     function clearDateFilters() { selectedDateFilters.clear(); document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); filterPivot(); }
-    function debounceFilter() { debounce(filterPivot, 400)(); }
+    function debounceFilter() { 
+        const hfb = document.getElementById('pf-hfb')?.value || document.getElementById('hfb-filter')?.value;
+        if(hfb) localStorage.setItem('last_hfb', hfb);
+        debounce(filterPivot, 400)(); 
+    }
 
     function filterPivot() { updateTableDisplay(); }
 
@@ -728,12 +664,10 @@
       
       const pfHfb = document.getElementById('pf-hfb').value.trim().toUpperCase();
       const pfPa = document.getElementById('pf-pa').value.trim().toUpperCase();
-      // [FIX] Mobile Activity Input Selection
       const pfActivity = document.getElementById('pf-activity').value.trim().toUpperCase();
 
       const headerHfbEl = document.getElementById('hfb-filter');
       const headerPaEl = document.getElementById('pa-filter');
-      // [FIX] PC Activity Input Selection
       const headerActivityEl = document.querySelector('input[data-field="activity"]');
       
       const headerHfb = headerHfbEl ? headerHfbEl.value.trim().toUpperCase() : "";
@@ -778,7 +712,6 @@
           if (!isMobile) {
               if(document.getElementById('hfb-filter')) document.getElementById('hfb-filter').value = hfbVal;
               if(document.getElementById('pa-filter')) document.getElementById('pa-filter').value = paVal;
-              // Restore PC Activity Input
               const actInput = document.querySelector('input[data-field="activity"]');
               if(actInput) actInput.value = activityVal;
           }
@@ -827,7 +760,7 @@
       document.getElementById('pivotBody').innerHTML = tbodyHtml;
     }
 
-    function exportToCsv() {
+    function exportToXlsx() {
         if (!displayedPivotRows || displayedPivotRows.length === 0) { alert("No data to export"); return; }
         const header = ["HFB", "PA", "Item No", "Item Name", "Activity", "Not Fixed"];
         globalSortedDates.forEach(d => header.push(d));
@@ -840,7 +773,6 @@
         const ws = XLSX.utils.aoa_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Arrival_Export");
-        // [FIX] Changed export format to XLSX
         XLSX.writeFile(wb, `${ymd(new Date())}_export.xlsx`);
     }
 
