@@ -17,7 +17,6 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-3MWM51MSF8');
   </script>
 
@@ -38,43 +37,36 @@
     .header-sub-link{ color:var(--ikea-yellow); text-decoration:none; font-weight:500; font-size:.95rem; font-family:'Roboto',sans-serif; display:flex; align-items:center; gap:5px; }
     .header-right{ display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 2px; text-align:right; font-size:.75rem; line-height:1.2; opacity:.9; }
 
-    /* Stale Data Alert */
-    #stale-alert {
-        display: none; width: 100%; background-color: #e74c3c; color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1999;
-    }
+    /* Stale Alert */
+    #stale-alert { display: none; width: 100%; background-color: #e74c3c; color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 0.9rem; z-index: 1999; }
 
-    /* Layout & Sidebar */
+    /* Layout */
     .app-container{ display:flex; flex:1; width:100%; overflow:hidden; }
     .sidebar{ width:var(--sidebar-width); background:#95a5a6; color:#fff; display:flex; flex-direction:column; flex-shrink:0; padding-top:20px; }
-    
     .nav-item{ padding:15px 20px; cursor:pointer; transition:all .2s; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,.1); }
     .nav-item:hover{ background:rgba(255,255,255,.1); }
     .nav-item.active{ background:#fff; color:var(--ikea-blue); font-weight:bold; border-left:6px solid var(--ikea-yellow); }
     .nav-sub{ font-size:.8rem; opacity:.7; display:block; font-weight:300; margin-top:2px; }
-
     .content-area{ flex:1; padding:40px; overflow-y:auto; background:var(--bg-color); }
     .tab-content{ display:none; width:100%; flex-direction:column; align-items:center; }
     .tab-content.active{ display:flex; }
 
-    /* --- Information Tab Styles --- */
+    /* Info Styles */
     .info-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 30px; } 
     .info-card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 30px; align-items: flex-start; }
     .info-text-area { flex: 1.2; }
-    
-    .info-visual-area { flex: 0.8; text-align: center; background: #f9f9f9; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; position: relative; overflow: hidden; }
+    .info-visual-area { flex: 0.8; text-align: center; background: #f9f9f9; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; }
     .info-visual-area img { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: block; }
     .info-visual-area .fallback-icon { display: none; color: #dfe6e9; font-size: 4rem; }
     .info-visual-area.error img { display: none; }
     .info-visual-area.error .fallback-icon { display: block; }
-    
     .info-title { font-size: 1.5rem; font-weight: 700; color: var(--ikea-blue); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
     .info-desc { font-size: 1rem; color: #333; line-height: 1.6; }
-    .info-desc p { margin-bottom: 15px; }
     .bi-en { display: block; font-size: 0.85em; color: #777; font-weight: 300; margin-top: 3px; margin-bottom: 4px; }
     .color-box { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; }
     .cb-green { background: #27ae60; } .cb-yellow { background: #f1c40f; } .cb-red { background: #e74c3c; }
 
-    /* Common Components */
+    /* Components */
     .status-badge{ display:inline-block; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:bold; background:#fff3cd; color:#856404; white-space: nowrap; }
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
@@ -94,18 +86,21 @@
     .dash-card { flex: 1; background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--ikea-blue); }
     .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; } .dash-card p { font-size: 0.8rem; color: #888; }
     
-    /* Date Badge */
     .date-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; width: 90px; }
     .date-badge.confirmed { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .date-badge.estimated { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
     .date-badge.tbd { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-    /* PC Logic */
+    /* Pivot & Filter */
     .mobile-only-filters { display: none; }
     .pc-header-filter { display: block; width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
     .always-visible-filter { display: block; width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
-    .pivot-table { min-width: 1600px; table-layout: fixed; }
-    .empty-state { display: none; } 
+    
+    .pivot-container { width: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; box-sizing: border-box; max-height: 75vh; overflow: auto; }
+    .pivot-table { min-width: 1600px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+    .pivot-table th { background-color: #f1f2f6; color: #333; padding: 10px 5px; border: 1px solid #ddd; font-size: 0.85rem; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); }
+    .pivot-table td { padding: 8px 5px; border: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; }
+    .pivot-table tbody tr:hover { background-color: #f9f9f9; }
     
     .col-hfb, .col-pa { width: 60px; }
     .col-itemno { width: 90px; }
@@ -113,15 +108,11 @@
     .col-activity { width: 140px; }
     .not-fixed-col { width: 90px; background-color: #fff0f0; color: #c0392b; font-weight: bold; text-align: center; }
     .date-col { width: 75px; background-color: #fff; font-weight: bold; color: var(--ikea-blue); text-align: center; }
+    .qty-cell { font-weight: bold; color: var(--ikea-blue); }
 
-    .pivot-container { width: 100%; overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; box-sizing: border-box; }
     .pivot-header-area { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; width: 100%; }
     .pivot-controls-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-    
-    .pivot-table th { background-color: #f1f2f6; color: #333; padding: 10px 5px; border: 1px solid #ddd; font-size: 0.85rem; text-align: center; position: sticky; top: 0; z-index: 10; vertical-align: top; }
-    .pivot-table td { padding: 8px 5px; border: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; }
-    .pivot-table tbody tr:hover { background-color: #f9f9f9; }
-    .qty-cell { font-weight: bold; color: var(--ikea-blue); }
+    .empty-state { display: none; } 
 
     .filter-tray-container { width: 100%; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
     .tray-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -155,12 +146,14 @@
       .link-group { margin-left: 0; margin-top: 8px; width: 100%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; }
       .header-right { width: 100%; align-items: center; flex-direction: row; justify-content: center; gap: 15px; margin-top: 5px; }
       
-      /* Info Tab Mobile */
+      .pivot-container { max-height: 65vh; }
+      .pivot-table { min-width: auto; width: 100%; table-layout: auto; }
+      .pivot-table th { position: sticky; top: 0; z-index: 100; }
+
       .info-card { flex-direction: column; padding: 20px; gap: 20px; } 
       .info-visual-area { min-height: 150px; order: 2; }
       .info-text-area { order: 1; }
       
-      /* Mobile Search Tab */
       .search-card { padding: 20px; }
       .search-title { display: block; text-align: center; font-size: 1.1rem; }
       .search-title .en-sub { display: block; margin-left: 0; margin-top: 4px; font-size: 0.75rem; color: #999; }
@@ -168,7 +161,6 @@
       .pc-table-view { display: none !important; } .mobile-result-view { display: block; }
       .dashboard { gap: 10px; } .dash-card { padding: 15px 5px; } .dash-card h3 { font-size: 1.3rem; }
       
-      /* Mobile Goods Arrival */
       .pivot-header-area { flex-direction: row; justify-content: space-between; align-items: center; }
       .pivot-header-area h2 { font-size: 1.1rem; margin: 0; white-space: nowrap; }
       .pivot-header-area h2 .en-sub { display: none; }
@@ -183,7 +175,6 @@
       .pc-header-filter { display: none; }
       .always-visible-filter { display: block; width: 100%; margin: 3px auto; font-size: 0.75rem; padding: 4px; box-sizing: border-box; }
 
-      .pivot-table { min-width: auto; width: 100%; table-layout: auto; }
       .col-itemname { width: auto; min-width: 140px; }
       .col-itemno { width: 70px; font-size: 0.75rem; }
       .date-col, .not-fixed-col { width: auto; min-width: 60px; font-size: 0.75rem; }
@@ -231,7 +222,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 7.1 GA & Update</span>
+      <span>Ver 7.3 Date Toggle Fix</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -283,7 +274,7 @@
                     <div class="info-title"><i class="fas fa-calendar-alt"></i> 2. Goods Arrival</div>
                     <div class="info-desc">
                         <p><strong>필터링 기능</strong><br>날짜, HFB, PA, 제품번호, 제품이름, 특정 activity 에 따라서 필터링 가능합니다.<br><span class="bi-en">Filter by Date, HFB, PA, Item No, Item Name, and Activity.</span></p>
-                        <p><strong>엑셀 다운로드</strong><br>엑셀 파일로 추출이 가능하며, XLSX 형태로 export 할 수 있습니다.<br><span class="bi-en">Data can be exported to Excel/XLSX.</span></p>
+                        <p><strong>엑셀 다운로드</strong><br>엑셀 파일로 추출이 가능하며, csv 형태로 export 할 수 있습니다.<br><span class="bi-en">Data can be exported to Excel/CSV.</span></p>
                     </div>
                 </div>
                 <div class="info-visual-area" id="visual-arrival">
@@ -690,8 +681,17 @@
           document.getElementById('pivotTable').style.display = 'table';
       }
 
-      let visibleDates = (isMobile && hasDateFilter) ? globalSortedDates.filter(d => selectedDateFilters.has(d)) : [...globalSortedDates];
-      const showNotFixed = (!isMobile) || (!hasDateFilter) || (selectedDateFilters.has('Not Fixed'));
+      // [FIX] Strict Date Column Hiding (Web + Mobile)
+      let visibleDates;
+      if (hasDateFilter) {
+          // If user selected dates, show ONLY those dates
+          visibleDates = globalSortedDates.filter(d => selectedDateFilters.has(d));
+      } else {
+          // If no selection, show ALL dates
+          visibleDates = [...globalSortedDates];
+      }
+      
+      const showNotFixed = (!hasDateFilter) || (selectedDateFilters.has('Not Fixed'));
 
       const newHeaderSignature = visibleDates.join('|') + (showNotFixed ? '|NF' : '') + (isMobile ? '|M' : '|P');
       
@@ -728,19 +728,20 @@
         if (activityVal && String(row.activity || "").toUpperCase().indexOf(activityVal) === -1) return false;
 
         if (hasDateFilter) {
-            let matchesDate = false;
+            let hasValueInSelected = false;
             if (selectedDateFilters.has('Not Fixed') && row.notFixedQty > 0) {
-                matchesDate = true;
-            } else {
+                hasValueInSelected = true;
+            }
+            if (!hasValueInSelected) {
                 for (const dateKey of selectedDateFilters) {
                     if (dateKey === 'Not Fixed') continue;
                     if (row.dates[dateKey] > 0) {
-                        matchesDate = true;
+                        hasValueInSelected = true;
                         break;
                     }
                 }
             }
-            if (!matchesDate) return false;
+            if (!hasValueInSelected) return false;
         }
         return true;
       });
@@ -787,4 +788,3 @@
   </script>
 </body>
 </html>
-
