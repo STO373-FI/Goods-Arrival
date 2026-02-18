@@ -44,90 +44,13 @@
     .app-container{ display:flex; flex:1; width:100%; overflow:hidden; }
     .sidebar{ width:var(--sidebar-width); background:#95a5a6; color:#fff; display:flex; flex-direction:column; flex-shrink:0; padding-top:20px; }
     .nav-item{ padding:15px 20px; cursor:pointer; transition:all .2s; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,.1); }
-    .nav-item:hover{ background:rgba(255,255,255,.1); }
     .nav-item.active{ background:#fff; color:var(--ikea-blue); font-weight:bold; border-left:6px solid var(--ikea-yellow); }
     .nav-sub{ font-size:.8rem; opacity:.7; display:block; font-weight:300; margin-top:2px; }
-    
-    /* Content Area Scroll */
     .content-area{ flex:1; padding:40px; overflow-y:auto; background:var(--bg-color); }
     .tab-content{ display:none; width:100%; flex-direction:column; align-items:center; }
     .tab-content.active{ display:flex; }
 
-    /* Pivot Container - THE SCROLL BOX */
-    .pivot-container { 
-        width: 100%; 
-        background: white; 
-        border-radius: 8px; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
-        padding: 0; /* Remove padding to let table hit edges */
-        box-sizing: border-box; 
-        
-        /* [FIX] Freeze Panes Logic */
-        height: 72vh; /* Fixed height to force internal scroll */
-        overflow: auto; /* Enable scrollbars */
-        position: relative;
-        border: 1px solid #ddd;
-    }
-    
-    /* Header Area (Above Table) */
-    .pivot-header-wrapper {
-        width: 100%; 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 10px;
-    }
-
-    .pivot-table { 
-        min-width: 1600px; 
-        table-layout: fixed; 
-        border-collapse: separate; /* Essential for sticky */
-        border-spacing: 0; 
-    }
-    
-    /* [FIX] Sticky Header Cells */
-    .pivot-table th { 
-        background-color: #f1f2f6; 
-        color: #333; 
-        padding: 12px 5px; 
-        border-right: 1px solid #ddd; 
-        border-bottom: 2px solid #ccc;
-        font-size: 0.85rem; 
-        text-align: center; 
-        
-        /* Sticky Magic */
-        position: sticky; 
-        top: 0; 
-        z-index: 10; 
-        /* Box Shadow for depth */
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    
-    .pivot-table td { padding: 8px 5px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; }
-    .pivot-table tbody tr:hover { background-color: #f9f9f9; }
-    
-    /* Column Widths */
-    .col-hfb, .col-pa { width: 60px; }
-    .col-itemno { width: 90px; }
-    .col-itemname { width: 350px; text-align: left !important; padding-left: 10px !important; }
-    .col-activity { width: 140px; }
-    .not-fixed-col { width: 90px; background-color: #fff0f0; color: #c0392b; font-weight: bold; text-align: center; }
-    .date-col { width: 75px; background-color: #fff; font-weight: bold; color: var(--ikea-blue); text-align: center; }
-    .qty-cell { font-weight: bold; color: var(--ikea-blue); }
-
-    .pivot-controls-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-    .empty-state { display: none; } 
-
-    /* Filters & Inputs */
-    .filter-tray-container { width: 100%; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
-    .tray-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .tray-title { font-size: 0.9rem; color: #333; font-weight: 600; display:flex; align-items:center; gap:5px; }
-    .chip-container { display: flex; flex-wrap: wrap; gap: 8px; }
-    .filter-chip { padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; user-select: none; background: #f8f9fa; border: 1px solid #ddd; color: #555; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
-    .filter-chip.active { background-color: var(--ikea-blue); color: white; border-color: var(--ikea-blue); }
-    .btn-clear-filter { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; color: #555; }
-
-    /* Info Tab Styles */
+    /* Info Styles */
     .info-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 30px; } 
     .info-card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 30px; align-items: flex-start; }
     .info-text-area { flex: 1.2; }
@@ -140,14 +63,15 @@
     .info-desc { font-size: 1rem; color: #333; line-height: 1.6; }
     .bi-en { display: block; font-size: 0.85em; color: #777; font-weight: 300; margin-top: 3px; margin-bottom: 4px; }
     .color-box { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; }
-    .cb-green { background: #27ae60; } .cb-yellow { background: #f1c40f; } .cb-red { background: #e74c3c; }
+    .cb-green { background: #d4edda; } .cb-yellow { background: #fff3cd; } .cb-red { background: #f8d7da; }
 
-    /* Other Components */
+    /* Components */
     .status-badge{ display:inline-block; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:bold; background:#fff3cd; color:#856404; white-space: nowrap; }
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
     .btn-export-csv { background-color: #217346; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; }
 
+    /* Search Tab */
     .search-card{ background:#fff; padding:40px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,.05); width:100%; max-width:800px; text-align:left; }
     .search-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
     .search-title{ font-size:1.2rem; font-weight:600; color:var(--ikea-blue); display:flex; align-items:center; gap:6px; }
@@ -161,9 +85,49 @@
     .dash-card { flex: 1; background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--ikea-blue); }
     .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; } .dash-card p { font-size: 0.8rem; color: #888; }
     
+    /* [FIX] Date Badge Colors - Strict Enforcement */
+    .date-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; width: 90px; }
+    
+    /* Confirmed: Green Fill, Dark Green Text */
+    .date-badge.confirmed { background-color: #d4edda !important; color: #155724 !important; border: 1px solid #c3e6cb; }
+    
+    /* Estimated: Yellow Fill, Dark Yellow Text */
+    .date-badge.estimated { background-color: #fff3cd !important; color: #856404 !important; border: 1px solid #ffeeba; }
+    
+    /* TBD: Light Red Fill, Dark Red Text */
+    .date-badge.tbd { background-color: #f8d7da !important; color: #721c24 !important; border: 1px solid #f5c6cb; }
+
+    /* Pivot & Filter */
+    .mobile-only-filters { display: none; }
     .pc-header-filter { display: block; width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
     .always-visible-filter { display: block; width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
-    .mobile-only-filters { display: none; }
+    
+    .pivot-container { width: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 0; box-sizing: border-box; height: 72vh; overflow: auto; position: relative; border: 1px solid #ddd; }
+    .pivot-header-wrapper { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .pivot-table { min-width: 1600px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+    
+    .pivot-table th { background-color: #f1f2f6; color: #333; padding: 12px 5px; border-right: 1px solid #ddd; border-bottom: 2px solid #ccc; font-size: 0.85rem; text-align: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .pivot-table td { padding: 8px 5px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; }
+    .pivot-table tbody tr:hover { background-color: #f9f9f9; }
+    
+    .col-hfb, .col-pa { width: 60px; }
+    .col-itemno { width: 90px; }
+    .col-itemname { width: 350px; text-align: left !important; padding-left: 10px !important; }
+    .col-activity { width: 140px; }
+    .not-fixed-col { width: 90px; background-color: #fff0f0; color: #c0392b; font-weight: bold; text-align: center; }
+    .date-col { width: 75px; background-color: #fff; font-weight: bold; color: var(--ikea-blue); text-align: center; }
+    .qty-cell { font-weight: bold; color: var(--ikea-blue); }
+
+    .pivot-controls-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .empty-state { display: none; } 
+
+    .filter-tray-container { width: 100%; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
+    .tray-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .tray-title { font-size: 0.9rem; color: #333; font-weight: 600; display:flex; align-items:center; gap:5px; }
+    .chip-container { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter-chip { padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; user-select: none; background: #f8f9fa; border: 1px solid #ddd; color: #555; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+    .filter-chip.active { background-color: var(--ikea-blue); color: white; border-color: var(--ikea-blue); }
+    .btn-clear-filter { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; color: #555; }
 
     .table-wrap { background: white; border-radius: 8px; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
@@ -180,9 +144,6 @@
     #reader { width: 100%; max-width: 500px; background: black; border-radius: 8px; overflow: hidden; }
     .btn-modal { padding: 10px 20px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; background: white; }
 
-    /* =========================================
-       MOBILE (Max 768px)
-       ========================================= */
     @media (max-width: 768px) {
       .app-container { flex-direction: column; display: block; }
       .sidebar { width: 100%; height: auto; flex-direction: row; padding-top: 0; }
@@ -194,41 +155,33 @@
       .main-title { font-size: 1.1rem; width: 100%; justify-content: center; white-space: nowrap; }
       .link-group { margin-left: 0; margin-top: 8px; width: 100%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; }
       .header-right { width: 100%; align-items: center; flex-direction: row; justify-content: center; gap: 15px; margin-top: 5px; }
-      
-      /* Mobile Pivot Adjustments */
       .pivot-container { height: 60vh; padding: 0; border: 1px solid #ddd; }
       .pivot-table { min-width: auto; width: 100%; table-layout: auto; }
-      
+      .pivot-table th { position: sticky; top: 0; z-index: 100; }
       .info-card { flex-direction: column; padding: 20px; gap: 20px; } 
       .info-visual-area { min-height: 150px; order: 2; }
       .info-text-area { order: 1; }
-      
       .search-card { padding: 20px; }
       .search-title { display: block; text-align: center; font-size: 1.1rem; }
       .search-title .en-sub { display: block; margin-left: 0; margin-top: 4px; font-size: 0.75rem; color: #999; }
       .btn-scan-trigger { display: flex; }
       .pc-table-view { display: none !important; } .mobile-result-view { display: block; }
       .dashboard { gap: 10px; } .dash-card { padding: 15px 5px; } .dash-card h3 { font-size: 1.3rem; }
-      
       .pivot-header-area { flex-direction: row; justify-content: space-between; align-items: center; }
       .pivot-header-area h2 { font-size: 1.1rem; margin: 0; white-space: nowrap; }
       .pivot-header-area h2 .en-sub { display: none; }
       .pivot-controls-right { width: auto; flex-direction: column; align-items: flex-end; gap: 5px; }
       .btn-export-csv { padding: 4px 8px; font-size: 0.75rem; }
-
       .mobile-only-filters { display: flex; gap: 10px; background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
       .pf-group { display: flex; flex-direction: column; gap: 5px; flex: 1; justify-content: center; }
       .pf-label { font-size: 0.85rem; font-weight: 700; color: var(--ikea-blue); text-align: center; display: block; }
       .pf-input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; text-align: center; width: 100%; box-sizing: border-box; }
-      
       .pc-header-filter { display: none; }
       .always-visible-filter { display: block; width: 100%; margin: 3px auto; font-size: 0.75rem; padding: 4px; box-sizing: border-box; }
-
       .col-itemname { width: auto; min-width: 140px; }
       .col-itemno { width: 70px; font-size: 0.75rem; }
       .date-col, .not-fixed-col { width: auto; min-width: 60px; font-size: 0.75rem; }
       .empty-state { display: block; padding: 40px; text-align: center; color: #888; background: #f9f9f9; border-radius: 8px; border: 1px dashed #ccc; margin-top: 10px; }
-
       .filter-tray-container { padding: 10px; margin-bottom: 10px; }
       .tray-title { font-size: 0.8rem; }
       .filter-chip { padding: 4px 10px; font-size: 0.75rem; gap: 4px; }
@@ -261,7 +214,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 7.4 Perfect Sticky</span>
+      <span>Ver 7.5 Logic Fix</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -418,7 +371,8 @@
       SSD: ['SSD'],
       EDS: ['EDS'],
       PlannedReceivingDate: ['Planned Receiving Date','PLANNED RECEIVING DATE','PLANNED DATE','PlannedDate'],
-      Port: ['Port','PORT'],
+      // [FIX] Added LatestRcvDate alias to fix logic error
+      Port: ['Port','PORT','LatestRcvDate','LATESTRCVDATE'],
       ArrivalDate: ['Arrival Date','Arrival','ARRIVAL'],
       LatestQty: ['LatestQty','LATESTQTY','QTY','Quantity'],
       Container: ['Container','CONTAINER','ContainerNo','Container No'],
@@ -766,20 +720,20 @@
         if (activityVal && String(row.activity || "").toUpperCase().indexOf(activityVal) === -1) return false;
 
         if (hasDateFilter) {
-            let hasValueInSelected = false;
+            let matchesDate = false;
             if (selectedDateFilters.has('Not Fixed') && row.notFixedQty > 0) {
-                hasValueInSelected = true;
+                matchesDate = true;
             }
-            if (!hasValueInSelected) {
+            if (!matchesDate) {
                 for (const dateKey of selectedDateFilters) {
                     if (dateKey === 'Not Fixed') continue;
                     if (row.dates[dateKey] > 0) {
-                        hasValueInSelected = true;
+                        matchesDate = true;
                         break;
                     }
                 }
             }
-            if (!hasValueInSelected) return false;
+            if (!matchesDate) return false;
         }
         return true;
       });
