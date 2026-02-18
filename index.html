@@ -47,11 +47,87 @@
     .nav-item:hover{ background:rgba(255,255,255,.1); }
     .nav-item.active{ background:#fff; color:var(--ikea-blue); font-weight:bold; border-left:6px solid var(--ikea-yellow); }
     .nav-sub{ font-size:.8rem; opacity:.7; display:block; font-weight:300; margin-top:2px; }
+    
+    /* Content Area Scroll */
     .content-area{ flex:1; padding:40px; overflow-y:auto; background:var(--bg-color); }
     .tab-content{ display:none; width:100%; flex-direction:column; align-items:center; }
     .tab-content.active{ display:flex; }
 
-    /* Info Styles */
+    /* Pivot Container - THE SCROLL BOX */
+    .pivot-container { 
+        width: 100%; 
+        background: white; 
+        border-radius: 8px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+        padding: 0; /* Remove padding to let table hit edges */
+        box-sizing: border-box; 
+        
+        /* [FIX] Freeze Panes Logic */
+        height: 72vh; /* Fixed height to force internal scroll */
+        overflow: auto; /* Enable scrollbars */
+        position: relative;
+        border: 1px solid #ddd;
+    }
+    
+    /* Header Area (Above Table) */
+    .pivot-header-wrapper {
+        width: 100%; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 10px;
+    }
+
+    .pivot-table { 
+        min-width: 1600px; 
+        table-layout: fixed; 
+        border-collapse: separate; /* Essential for sticky */
+        border-spacing: 0; 
+    }
+    
+    /* [FIX] Sticky Header Cells */
+    .pivot-table th { 
+        background-color: #f1f2f6; 
+        color: #333; 
+        padding: 12px 5px; 
+        border-right: 1px solid #ddd; 
+        border-bottom: 2px solid #ccc;
+        font-size: 0.85rem; 
+        text-align: center; 
+        
+        /* Sticky Magic */
+        position: sticky; 
+        top: 0; 
+        z-index: 10; 
+        /* Box Shadow for depth */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .pivot-table td { padding: 8px 5px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; }
+    .pivot-table tbody tr:hover { background-color: #f9f9f9; }
+    
+    /* Column Widths */
+    .col-hfb, .col-pa { width: 60px; }
+    .col-itemno { width: 90px; }
+    .col-itemname { width: 350px; text-align: left !important; padding-left: 10px !important; }
+    .col-activity { width: 140px; }
+    .not-fixed-col { width: 90px; background-color: #fff0f0; color: #c0392b; font-weight: bold; text-align: center; }
+    .date-col { width: 75px; background-color: #fff; font-weight: bold; color: var(--ikea-blue); text-align: center; }
+    .qty-cell { font-weight: bold; color: var(--ikea-blue); }
+
+    .pivot-controls-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .empty-state { display: none; } 
+
+    /* Filters & Inputs */
+    .filter-tray-container { width: 100%; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
+    .tray-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .tray-title { font-size: 0.9rem; color: #333; font-weight: 600; display:flex; align-items:center; gap:5px; }
+    .chip-container { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter-chip { padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; user-select: none; background: #f8f9fa; border: 1px solid #ddd; color: #555; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+    .filter-chip.active { background-color: var(--ikea-blue); color: white; border-color: var(--ikea-blue); }
+    .btn-clear-filter { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; color: #555; }
+
+    /* Info Tab Styles */
     .info-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 30px; } 
     .info-card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 30px; align-items: flex-start; }
     .info-text-area { flex: 1.2; }
@@ -66,13 +142,12 @@
     .color-box { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; }
     .cb-green { background: #27ae60; } .cb-yellow { background: #f1c40f; } .cb-red { background: #e74c3c; }
 
-    /* Components */
+    /* Other Components */
     .status-badge{ display:inline-block; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:bold; background:#fff3cd; color:#856404; white-space: nowrap; }
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
     .btn-export-csv { background-color: #217346; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; }
 
-    /* Search Tab */
     .search-card{ background:#fff; padding:40px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,.05); width:100%; max-width:800px; text-align:left; }
     .search-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
     .search-title{ font-size:1.2rem; font-weight:600; color:var(--ikea-blue); display:flex; align-items:center; gap:6px; }
@@ -86,70 +161,44 @@
     .dash-card { flex: 1; background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--ikea-blue); }
     .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; } .dash-card p { font-size: 0.8rem; color: #888; }
     
-    .date-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; width: 90px; }
-    .date-badge.confirmed { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .date-badge.estimated { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-    .date-badge.tbd { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-
-    /* Pivot & Filter */
-    .mobile-only-filters { display: none; }
     .pc-header-filter { display: block; width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
     .always-visible-filter { display: block; width: 90%; padding: 4px; margin-top: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8rem; text-align: center; }
-    
-    .pivot-container { width: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; box-sizing: border-box; max-height: 75vh; overflow: auto; }
-    .pivot-table { min-width: 1600px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
-    .pivot-table th { background-color: #f1f2f6; color: #333; padding: 10px 5px; border: 1px solid #ddd; font-size: 0.85rem; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); }
-    .pivot-table td { padding: 8px 5px; border: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; }
-    .pivot-table tbody tr:hover { background-color: #f9f9f9; }
-    
-    .col-hfb, .col-pa { width: 60px; }
-    .col-itemno { width: 90px; }
-    .col-itemname { width: 350px; text-align: left !important; padding-left: 10px !important; }
-    .col-activity { width: 140px; }
-    .not-fixed-col { width: 90px; background-color: #fff0f0; color: #c0392b; font-weight: bold; text-align: center; }
-    .date-col { width: 75px; background-color: #fff; font-weight: bold; color: var(--ikea-blue); text-align: center; }
-    .qty-cell { font-weight: bold; color: var(--ikea-blue); }
-
-    .pivot-header-area { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; width: 100%; }
-    .pivot-controls-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-    .empty-state { display: none; } 
-
-    .filter-tray-container { width: 100%; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box; }
-    .tray-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .tray-title { font-size: 0.9rem; color: #333; font-weight: 600; display:flex; align-items:center; gap:5px; }
-    .chip-container { display: flex; flex-wrap: wrap; gap: 8px; }
-    .filter-chip { padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; user-select: none; background: #f8f9fa; border: 1px solid #ddd; color: #555; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
-    .filter-chip.active { background-color: var(--ikea-blue); color: white; border-color: var(--ikea-blue); }
-    .btn-clear-filter { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; color: #555; }
+    .mobile-only-filters { display: none; }
 
     .table-wrap { background: white; border-radius: 8px; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
     .pc-table-view th { background-color: #f9f9f9; padding: 15px; font-size: 0.8rem; color: #555; text-align: left; }
     .pc-table-view td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
     .mobile-result-view { display: none; }
+    .product-summary-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid var(--ikea-yellow); }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #eee; padding-bottom: 8px; }
+    .schedule-item { background: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #ccc; margin-bottom:10px; }
+    .date-confirmed{ color:#27ae60; font-weight:bold; }
     
+    #loading { display: none; margin-top: 20px; color: var(--ikea-blue); text-align:center; }
+    #scanner-modal { position: fixed; inset:0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+    #reader { width: 100%; max-width: 500px; background: black; border-radius: 8px; overflow: hidden; }
+    .btn-modal { padding: 10px 20px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; background: white; }
+
     /* =========================================
        MOBILE (Max 768px)
        ========================================= */
     @media (max-width: 768px) {
       .app-container { flex-direction: column; display: block; }
       .sidebar { width: 100%; height: auto; flex-direction: row; padding-top: 0; }
-      
       .nav-item { flex: 1; text-align: center; padding: 12px 5px; border-right: 1px solid #ddd; font-size: 0.95rem; white-space: nowrap; }
       .nav-sub { font-size: 0.7rem; }
-      
       .content-area { padding: 15px 10px; }
-      
       header { height: auto; padding: 15px; flex-direction: column; gap: 10px; align-items: center; }
       .header-left { width: 100%; align-items: center; }
       .main-title { font-size: 1.1rem; width: 100%; justify-content: center; white-space: nowrap; }
       .link-group { margin-left: 0; margin-top: 8px; width: 100%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; }
       .header-right { width: 100%; align-items: center; flex-direction: row; justify-content: center; gap: 15px; margin-top: 5px; }
       
-      .pivot-container { max-height: 65vh; }
+      /* Mobile Pivot Adjustments */
+      .pivot-container { height: 60vh; padding: 0; border: 1px solid #ddd; }
       .pivot-table { min-width: auto; width: 100%; table-layout: auto; }
-      .pivot-table th { position: sticky; top: 0; z-index: 100; }
-
+      
       .info-card { flex-direction: column; padding: 20px; gap: 20px; } 
       .info-visual-area { min-height: 150px; order: 2; }
       .info-text-area { order: 1; }
@@ -185,16 +234,6 @@
       .filter-chip { padding: 4px 10px; font-size: 0.75rem; gap: 4px; }
       .chip-container { gap: 6px; }
     }
-    
-    .product-summary-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid var(--ikea-yellow); }
-    .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #eee; padding-bottom: 8px; }
-    .schedule-item { background: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #ccc; margin-bottom:10px; }
-    .date-confirmed{ color:#27ae60; font-weight:bold; }
-    
-    #loading { display: none; margin-top: 20px; color: var(--ikea-blue); text-align:center; }
-    #scanner-modal { position: fixed; inset:0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
-    #reader { width: 100%; max-width: 500px; background: black; border-radius: 8px; overflow: hidden; }
-    .btn-modal { padding: 10px 20px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; background: white; }
   </style>
 </head>
 <body>
@@ -222,7 +261,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 7.3 Date Toggle Fix</span>
+      <span>Ver 7.4 Perfect Sticky</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -273,7 +312,7 @@
                 <div class="info-text-area">
                     <div class="info-title"><i class="fas fa-calendar-alt"></i> 2. Goods Arrival</div>
                     <div class="info-desc">
-                        <p><strong>필터링 기능</strong><br>날짜, HFB, PA, 제품번호, 제품이름, 특정 activity 에 따라서 필터링 가능합니다.<br><span class="bi-en">Filter by Date, HFB, PA, Item No, Item Name, and Activity.</span></p>
+                        <p><strong>필터링 기능</strong><br>날짜, HFB, PA, 제품번호, 제품이름, 특정 activity 에 따라서 필터링 가능합니다.<br><span class="bi-en">Filter by Date, HFB, PA, Item No, Item Name, and specific Activity.</span></p>
                         <p><strong>엑셀 다운로드</strong><br>엑셀 파일로 추출이 가능하며, csv 형태로 export 할 수 있습니다.<br><span class="bi-en">Data can be exported to Excel/CSV.</span></p>
                     </div>
                 </div>
@@ -336,22 +375,24 @@
           <div class="tray-header"><div class="tray-title"><i class="fas fa-filter"></i> Date Filter (Click to Toggle)</div><button class="btn-clear-filter" onclick="clearDateFilters()"><i class="fas fa-sync-alt"></i> Show All</button></div>
           <div class="chip-container" id="dateFilterChips"></div>
         </div>
-        <div class="pivot-container">
-          <div class="pivot-header-area">
-            <h2 style="color:var(--ikea-blue); margin:0;"><i class="fas fa-calendar-alt"></i> Goods Arrival<span class="en-sub" style="font-size:.6em; display:block; margin-left:0; margin-top:5px;">오늘부터 미래의 도착 예정 물량을 보여줍니다.</span></h2>
+        
+        <div class="pivot-header-wrapper">
+            <div class="pivot-header-area" style="margin-bottom:0;">
+                <h2 style="color:var(--ikea-blue); margin:0;"><i class="fas fa-calendar-alt"></i> Goods Arrival<span class="en-sub" style="font-size:.6em; display:block; margin-left:0; margin-top:5px;">오늘부터 미래의 도착 예정 물량을 보여줍니다.</span></h2>
+            </div>
             <div class="pivot-controls-right">
                 <div class="status-badge" id="statusBadge2"><i class="fas fa-spinner fa-spin"></i> 연결 중...</div>
                 <button class="btn-export-csv" onclick="exportToXlsx()"><i class="fas fa-file-excel"></i> Excel Download</button>
             </div>
+        </div>
+
+        <div class="pivot-container">
+          <table class="pivot-table" id="pivotTable"><thead id="pivotHead"></thead><tbody id="pivotBody"></tbody></table>
+          <div id="pivotEmptyState" class="empty-state">
+              <i class="fas fa-search" style="font-size: 2rem; color:#ddd; margin-bottom:10px;"></i><br>
+              상단의 <strong>HFB</strong>, <strong>PA</strong>를 입력하거나<br><strong>날짜</strong>를 선택하면 결과가 표시됩니다.
           </div>
-          <div style="overflow-x:auto;">
-            <table class="pivot-table" id="pivotTable"><thead id="pivotHead"></thead><tbody id="pivotBody"></tbody></table>
-            <div id="pivotEmptyState" class="empty-state">
-                <i class="fas fa-search" style="font-size: 2rem; color:#ddd; margin-bottom:10px;"></i><br>
-                상단의 <strong>HFB</strong>, <strong>PA</strong>를 입력하거나<br><strong>날짜</strong>를 선택하면 결과가 표시됩니다.
-            </div>
-            <div id="pivotLoading" style="display:none; text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
-          </div>
+          <div id="pivotLoading" style="display:none; text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
         </div>
       </div>
     </div>
@@ -681,13 +722,10 @@
           document.getElementById('pivotTable').style.display = 'table';
       }
 
-      // [FIX] Strict Date Column Hiding (Web + Mobile)
       let visibleDates;
       if (hasDateFilter) {
-          // If user selected dates, show ONLY those dates
           visibleDates = globalSortedDates.filter(d => selectedDateFilters.has(d));
       } else {
-          // If no selection, show ALL dates
           visibleDates = [...globalSortedDates];
       }
       
