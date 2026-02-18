@@ -44,6 +44,7 @@
     .app-container{ display:flex; flex:1; width:100%; overflow:hidden; }
     .sidebar{ width:var(--sidebar-width); background:#95a5a6; color:#fff; display:flex; flex-direction:column; flex-shrink:0; padding-top:20px; }
     .nav-item{ padding:15px 20px; cursor:pointer; transition:all .2s; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,.1); }
+    .nav-item:hover{ background:rgba(255,255,255,.1); }
     .nav-item.active{ background:#fff; color:var(--ikea-blue); font-weight:bold; border-left:6px solid var(--ikea-yellow); }
     .nav-sub{ font-size:.8rem; opacity:.7; display:block; font-weight:300; margin-top:2px; }
     .content-area{ flex:1; padding:40px; overflow-y:auto; background:var(--bg-color); }
@@ -85,16 +86,10 @@
     .dash-card { flex: 1; background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--ikea-blue); }
     .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; } .dash-card p { font-size: 0.8rem; color: #888; }
     
-    /* [FIX] Date Badge Colors - Strict Enforcement */
+    /* Date Badge */
     .date-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-align: center; width: 90px; }
-    
-    /* Confirmed: Green Fill, Dark Green Text */
     .date-badge.confirmed { background-color: #d4edda !important; color: #155724 !important; border: 1px solid #c3e6cb; }
-    
-    /* Estimated: Yellow Fill, Dark Yellow Text */
     .date-badge.estimated { background-color: #fff3cd !important; color: #856404 !important; border: 1px solid #ffeeba; }
-    
-    /* TBD: Light Red Fill, Dark Red Text */
     .date-badge.tbd { background-color: #f8d7da !important; color: #721c24 !important; border: 1px solid #f5c6cb; }
 
     /* Pivot & Filter */
@@ -105,7 +100,6 @@
     .pivot-container { width: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 0; box-sizing: border-box; height: 72vh; overflow: auto; position: relative; border: 1px solid #ddd; }
     .pivot-header-wrapper { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .pivot-table { min-width: 1600px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
-    
     .pivot-table th { background-color: #f1f2f6; color: #333; padding: 12px 5px; border-right: 1px solid #ddd; border-bottom: 2px solid #ccc; font-size: 0.85rem; text-align: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .pivot-table td { padding: 8px 5px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; font-size: 0.85rem; text-align: center; vertical-align: middle; }
     .pivot-table tbody tr:hover { background-color: #f9f9f9; }
@@ -214,7 +208,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 7.5 Logic Fix</span>
+      <span>Ver 7.6 Final Fix</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -371,7 +365,6 @@
       SSD: ['SSD'],
       EDS: ['EDS'],
       PlannedReceivingDate: ['Planned Receiving Date','PLANNED RECEIVING DATE','PLANNED DATE','PlannedDate'],
-      // [FIX] Added LatestRcvDate alias to fix logic error
       Port: ['Port','PORT','LatestRcvDate','LATESTRCVDATE'],
       ArrivalDate: ['Arrival Date','Arrival','ARRIVAL'],
       LatestQty: ['LatestQty','LATESTQTY','QTY','Quantity'],
@@ -526,17 +519,28 @@
     }
     
     function determinePlanned(row){
+      // 1. Confirmed Date
       const pd = excelToDate(row.plannedDate); const today = new Date(); today.setHours(0,0,0,0);
       if (pd){ 
           const dd = new Date(pd); dd.setHours(0,0,0,0); 
           if (dd >= today) return { type:'confirmed', dateObj: dd, label: `<span class="date-badge confirmed">${ymd(dd)}</span>` }; 
       }
+
+      // 2. [IMPORTANT FIX] Container "배송준비중" Check - FORCE TBD (RED)
+      const cont = String(row.container || "").trim();
+      if (cont === "배송준비중" || cont === "Not Fixed" || cont === "미정" || cont.includes("배송준비중")) {
+          return { type:'tbd', dateObj: null, label: `<span class="date-badge tbd">미정</span>` };
+      }
+
+      // 3. Estimated Date
       const port = excelToDate(row.portDate);
       if (port){ 
           const est = addDays(port, 7); 
           const wk = getWeekNumber(est); 
           return { type:'estimated', dateObj: null, label: `<span class="date-badge estimated">WK${wk} 예상</span>` }; 
       }
+
+      // 4. Default TBD
       return { type:'tbd', dateObj: null, label: `<span class="date-badge tbd">미정</span>` };
     }
 
