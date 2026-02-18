@@ -44,7 +44,6 @@
     .app-container{ display:flex; flex:1; width:100%; overflow:hidden; }
     .sidebar{ width:var(--sidebar-width); background:#95a5a6; color:#fff; display:flex; flex-direction:column; flex-shrink:0; padding-top:20px; }
     .nav-item{ padding:15px 20px; cursor:pointer; transition:all .2s; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,.1); }
-    .nav-item:hover{ background:rgba(255,255,255,.1); }
     .nav-item.active{ background:#fff; color:var(--ikea-blue); font-weight:bold; border-left:6px solid var(--ikea-yellow); }
     .nav-sub{ font-size:.8rem; opacity:.7; display:block; font-weight:300; margin-top:2px; }
     .content-area{ flex:1; padding:40px; overflow-y:auto; background:var(--bg-color); }
@@ -208,7 +207,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 7.6 Final Fix</span>
+      <span>Ver 7.7 Status Logic Fix</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -369,7 +368,9 @@
       ArrivalDate: ['Arrival Date','Arrival','ARRIVAL'],
       LatestQty: ['LatestQty','LATESTQTY','QTY','Quantity'],
       Container: ['Container','CONTAINER','ContainerNo','Container No'],
-      Activity: ['Activity & offer','Activity','Activity & Offer','ACTIVITY & OFFER']
+      Activity: ['Activity & offer','Activity','Activity & Offer','ACTIVITY & OFFER'],
+      // [FIX] Added Alias for Status Column
+      Status: ['Status', 'STATUS', 'Main Status', 'Stat']
     };
 
     const debounce = (fn, t=300) => { let tm; return (...a)=>{clearTimeout(tm); tm=setTimeout(()=>fn(...a), t);} };
@@ -458,7 +459,9 @@
           arrivalDate: r[COL.ArrivalDate],
           qty: safeNum(r[COL.LatestQty]),
           container: String(r[COL.Container] ?? '').trim(),
-          activity: r[COL.Activity] ?? ''
+          activity: r[COL.Activity] ?? '',
+          // [FIX] Map Status Column
+          status: r[COL.Status] ?? ''
         }));
         
         updateStatus('connected');
@@ -518,29 +521,30 @@
       setTimeout(() => { const results = searchData(target); displayResults(results); document.getElementById('loading').style.display = 'none'; }, 300);
     }
     
+    // [FIX] Correct Logic Implementation
     function determinePlanned(row){
-      // 1. Confirmed Date
+      // 1. Confirmed Date (M Column)
       const pd = excelToDate(row.plannedDate); const today = new Date(); today.setHours(0,0,0,0);
       if (pd){ 
           const dd = new Date(pd); dd.setHours(0,0,0,0); 
           if (dd >= today) return { type:'confirmed', dateObj: dd, label: `<span class="date-badge confirmed">${ymd(dd)}</span>` }; 
       }
 
-      // 2. [IMPORTANT FIX] Container "배송준비중" Check - FORCE TBD (RED)
-      const cont = String(row.container || "").trim();
-      if (cont === "배송준비중" || cont === "Not Fixed" || cont === "미정" || cont.includes("배송준비중")) {
-          return { type:'tbd', dateObj: null, label: `<span class="date-badge tbd">미정</span>` };
+      // Check Status & Container
+      const status = String(row.status || "").toUpperCase();
+      const container = String(row.container || "").trim();
+      const port = excelToDate(row.portDate); // U Column (LatestRcvDate)
+
+      // 2. Dispatched + Container Exists => Estimated Date (Yellow)
+      if (status.includes("DISPATCHED") && container && container.length > 0 && container !== "배송준비중") {
+          if (port) {
+              const est = addDays(port, 7); 
+              const wk = getWeekNumber(est); 
+              return { type:'estimated', dateObj: null, label: `<span class="date-badge estimated">WK${wk} 예상</span>` };
+          }
       }
 
-      // 3. Estimated Date
-      const port = excelToDate(row.portDate);
-      if (port){ 
-          const est = addDays(port, 7); 
-          const wk = getWeekNumber(est); 
-          return { type:'estimated', dateObj: null, label: `<span class="date-badge estimated">WK${wk} 예상</span>` }; 
-      }
-
-      // 4. Default TBD
+      // 3. Not Dispatched OR No Container => TBD (Red)
       return { type:'tbd', dateObj: null, label: `<span class="date-badge tbd">미정</span>` };
     }
 
@@ -724,20 +728,20 @@
         if (activityVal && String(row.activity || "").toUpperCase().indexOf(activityVal) === -1) return false;
 
         if (hasDateFilter) {
-            let matchesDate = false;
+            let hasValueInSelected = false;
             if (selectedDateFilters.has('Not Fixed') && row.notFixedQty > 0) {
-                matchesDate = true;
+                hasValueInSelected = true;
             }
-            if (!matchesDate) {
+            if (!hasValueInSelected) {
                 for (const dateKey of selectedDateFilters) {
                     if (dateKey === 'Not Fixed') continue;
                     if (row.dates[dateKey] > 0) {
-                        matchesDate = true;
+                        hasValueInSelected = true;
                         break;
                     }
                 }
             }
-            if (!matchesDate) return false;
+            if (!hasValueInSelected) return false;
         }
         return true;
       });
