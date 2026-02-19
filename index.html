@@ -44,6 +44,7 @@
     .app-container{ display:flex; flex:1; width:100%; overflow:hidden; }
     .sidebar{ width:var(--sidebar-width); background:#95a5a6; color:#fff; display:flex; flex-direction:column; flex-shrink:0; padding-top:20px; }
     .nav-item{ padding:15px 20px; cursor:pointer; transition:all .2s; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,.1); }
+    .nav-item:hover{ background:rgba(255,255,255,.1); }
     .nav-item.active{ background:#fff; color:var(--ikea-blue); font-weight:bold; border-left:6px solid var(--ikea-yellow); }
     .nav-sub{ font-size:.8rem; opacity:.7; display:block; font-weight:300; margin-top:2px; }
     .content-area{ flex:1; padding:40px; overflow-y:auto; background:var(--bg-color); }
@@ -90,6 +91,19 @@
     .date-badge.confirmed { background-color: #d4edda !important; color: #155724 !important; border: 1px solid #c3e6cb; }
     .date-badge.estimated { background-color: #fff3cd !important; color: #856404 !important; border: 1px solid #ffeeba; }
     .date-badge.tbd { background-color: #f8d7da !important; color: #721c24 !important; border: 1px solid #f5c6cb; }
+
+    /* [NEW] Item Link Style (PC) */
+    .item-link {
+        color: var(--ikea-blue);
+        text-decoration: none;
+        cursor: pointer;
+        font-weight: 700;
+        transition: color 0.2s;
+    }
+    .item-link:hover {
+        color: #003a6c; /* Darker blue on hover */
+        text-decoration: underline;
+    }
 
     /* Pivot & Filter */
     .mobile-only-filters { display: none; }
@@ -148,6 +162,16 @@
       .main-title { font-size: 1.1rem; width: 100%; justify-content: center; white-space: nowrap; }
       .link-group { margin-left: 0; margin-top: 8px; width: 100%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; }
       .header-right { width: 100%; align-items: center; flex-direction: row; justify-content: center; gap: 15px; margin-top: 5px; }
+      
+      /* [NEW] Disable Link Clicks on Mobile */
+      .item-link {
+          color: inherit !important;
+          text-decoration: none !important;
+          pointer-events: none !important; /* Prevents clicking */
+          cursor: default !important;
+          font-weight: bold;
+      }
+
       .pivot-container { height: 60vh; padding: 0; border: 1px solid #ddd; }
       .pivot-table { min-width: auto; width: 100%; table-layout: auto; }
       .pivot-table th { position: sticky; top: 0; z-index: 100; }
@@ -207,7 +231,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 7.7 Status Logic Fix</span>
+      <span>Ver 7.8 PIA Link</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -287,7 +311,7 @@
           </div>
           <div class="helper-text">
             <i class="fas fa-lightbulb" style="color:var(--ikea-yellow);"></i> <strong>Tip:</strong>
-            <div class="pc-only-text">8자리 숫자를 입력 후 검색을 눌러주세요.</div>
+            <div class="pc-only-text">8자리 숫자를 입력 후 검색을 눌러주세요. 제품번호 클릭 시 PIA Facts로 연결됩니다.</div>
             <div class="mobile-only-text">모바일에서는 카메라 아이콘을 눌러 바코드를 자동으로 입력할 수 있습니다.</div>
           </div>
           <div id="loading"><i class="fas fa-spinner fa-spin fa-2x"></i><br/>데이터 검색 중...</div>
@@ -369,7 +393,6 @@
       LatestQty: ['LatestQty','LATESTQTY','QTY','Quantity'],
       Container: ['Container','CONTAINER','ContainerNo','Container No'],
       Activity: ['Activity & offer','Activity','Activity & Offer','ACTIVITY & OFFER'],
-      // [FIX] Added Alias for Status Column
       Status: ['Status', 'STATUS', 'Main Status', 'Stat']
     };
 
@@ -403,6 +426,17 @@
       if (typeof v === 'string'){ const s = v.trim(); if (/^\d{8}$/.test(s)){ return new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}T00:00:00`); } return new Date(s); }
       if (v instanceof Date) return v;
       return null;
+    }
+
+    // [NEW] Helper to Generate PIA Facts Link
+    function formatItemLink(itemNo) {
+        const raw = String(itemNo).trim();
+        const cleanNo = raw.replace(/[^0-9]/g, ''); // 숫자만 추출
+        if(cleanNo.length > 0) {
+            const paddedNo = cleanNo.padStart(8, '0');
+            return `<a href="https://piafacts.ikea.net/kr/en/${paddedNo}" target="_blank" class="item-link">${raw}</a>`;
+        }
+        return `<b>${raw}</b>`;
     }
 
     window.onload = async function(){
@@ -460,7 +494,6 @@
           qty: safeNum(r[COL.LatestQty]),
           container: String(r[COL.Container] ?? '').trim(),
           activity: r[COL.Activity] ?? '',
-          // [FIX] Map Status Column
           status: r[COL.Status] ?? ''
         }));
         
@@ -521,21 +554,17 @@
       setTimeout(() => { const results = searchData(target); displayResults(results); document.getElementById('loading').style.display = 'none'; }, 300);
     }
     
-    // [FIX] Correct Logic Implementation
     function determinePlanned(row){
-      // 1. Confirmed Date (M Column)
       const pd = excelToDate(row.plannedDate); const today = new Date(); today.setHours(0,0,0,0);
       if (pd){ 
           const dd = new Date(pd); dd.setHours(0,0,0,0); 
           if (dd >= today) return { type:'confirmed', dateObj: dd, label: `<span class="date-badge confirmed">${ymd(dd)}</span>` }; 
       }
 
-      // Check Status & Container
       const status = String(row.status || "").toUpperCase();
       const container = String(row.container || "").trim();
-      const port = excelToDate(row.portDate); // U Column (LatestRcvDate)
+      const port = excelToDate(row.portDate); 
 
-      // 2. Dispatched + Container Exists => Estimated Date (Yellow)
       if (status.includes("DISPATCHED") && container && container.length > 0 && container !== "배송준비중") {
           if (port) {
               const est = addDays(port, 7); 
@@ -543,8 +572,6 @@
               return { type:'estimated', dateObj: null, label: `<span class="date-badge estimated">WK${wk} 예상</span>` };
           }
       }
-
-      // 3. Not Dispatched OR No Container => TBD (Red)
       return { type:'tbd', dateObj: null, label: `<span class="date-badge tbd">미정</span>` };
     }
 
@@ -597,7 +624,8 @@
           document.getElementById('futureDeliveryQty').innerText = "0"; document.getElementById('nextDeliveryDate').innerText = "-"; 
       }
       results.forEach(row => {
-        pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td><strong>${row.itemNo}</strong></td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${row.plannedDateStr}</td><td class="qty-cell">${row.quantity}</td><td>${row.container}</td></tr>`;
+        // [FIX] Apply formatItemLink here
+        pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td>${formatItemLink(row.itemNo)}</td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${row.plannedDateStr}</td><td class="qty-cell">${row.quantity}</td><td>${row.container}</td></tr>`;
       });
       if(results.length > 0) {
         const c = results[0];
@@ -753,7 +781,8 @@
       for(let i=0; i<count; i++) {
         const r = filteredRows[i];
         const nfVal = (showNotFixed && r.notFixedQty > 0) ? r.notFixedQty : "";
-        tbodyHtml += `<tr><td class="col-hfb">${r.hfb}</td><td class="col-pa">${r.pa}</td><td class="col-itemno"><b>${r.itemNo}</b></td><td class="col-itemname">${r.itemName}</td><td class="col-activity mobile-hidden">${r.activity}</td>`;
+        // [FIX] Apply formatItemLink here
+        tbodyHtml += `<tr><td class="col-hfb">${r.hfb}</td><td class="col-pa">${r.pa}</td><td class="col-itemno">${formatItemLink(r.itemNo)}</td><td class="col-itemname">${r.itemName}</td><td class="col-activity mobile-hidden">${r.activity}</td>`;
         if(showNotFixed) tbodyHtml += `<td class="not-fixed-col">${nfVal}</td>`;
         visibleDates.forEach(d => { tbodyHtml += `<td class="qty-cell">${r.dates[d] || ""}</td>`; });
         tbodyHtml += `</tr>`;
