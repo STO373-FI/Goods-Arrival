@@ -101,12 +101,11 @@
     .item-link { color: var(--ikea-blue); text-decoration: none; cursor: pointer; font-weight: 700; transition: color 0.2s; }
     .item-link:hover { color: #003a6c; text-decoration: underline; }
 
-    /* [NEW] Image Hover Tooltip Styles */
+    /* [UPGRADE] Image Hover Tooltip Styles for Ver 8.2.0 */
     #image-tooltip {
         position: fixed;
         display: none;
         width: 150px;
-        height: 150px;
         background: #fff;
         border: 1px solid #ccc;
         border-radius: 8px;
@@ -115,15 +114,28 @@
         pointer-events: none; /* 방해 방지 */
         overflow: hidden;
         text-align: center;
-        line-height: 150px;
-        font-size: 0.85rem;
-        color: var(--ikea-blue);
-        font-weight: bold;
     }
-    #image-tooltip img {
+    #image-tooltip .img-wrapper {
+        width: 150px;
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+    }
+    #image-tooltip .img-wrapper img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+    #image-tooltip .info-wrapper {
+        border-top: 2px solid var(--ikea-blue);
+        background: #f0f8ff;
+        padding: 8px;
+        text-align: left;
+        font-size: 0.75rem;
+        line-height: 1.4;
+        color: #555;
     }
 
     /* Pivot & Filter */
@@ -264,7 +276,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 8.1.1 Pro Edition</span>
+      <span>Ver 8.2.0 Pro Edition</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -317,7 +329,7 @@
                     <div class="info-title"><i class="fas fa-calendar-alt"></i> 2. Goods Arrival</div>
                     <div class="info-desc">
                         <p><strong>필터 및 정렬 기능</strong><br>날짜, HFB, PA 등으로 필터링이 가능하며, 표의 제목(Header)을 클릭하면 <strong>오름차순/내림차순 정렬</strong>이 가능합니다.<br><span class="bi-en">Filter and sort data by clicking table headers.</span></p>
-                        <p><strong>이미지 툴팁 (PC 전용)</strong><br>결과 표에서 제품 번호에 마우스를 0.4초간 올려두면 제품 이미지를 미리 볼 수 있습니다.<br><span class="bi-en">Hover over item numbers on PC to preview product images.</span></p>
+                        <p><strong>이미지 및 정보 툴팁 (PC 전용)</strong><br>결과 표에서 제품 번호에 마우스를 0.4초간 올려두면 제품의 <strong>이미지와 SSD, EDS 정보</strong>를 미리 볼 수 있습니다.<br><span class="bi-en">Hover over item numbers on PC to preview images, SSD, and EDS.</span></p>
                         <p><strong>복사 및 엑셀 다운로드 (WYSIWYG)</strong><br>오른쪽 위 버튼을 통해 <strong>현재 화면에 필터링된 결과만</strong> 깔끔하게 복사하거나 엑셀로 다운받을 수 있습니다.<br><span class="bi-en">Copy or export currently filtered data only.</span></p>
                         <p><strong>인쇄 최적화 모드 지원</strong><br>Ctrl + P 를 누르시면 불필요한 메뉴 없이 표만 깔끔하게 인쇄됩니다.<br><span class="bi-en">Press Ctrl+P to print a clean table view.</span></p>
                     </div>
@@ -475,6 +487,8 @@
       return -1;
     }
     function buildColumnMap(header){ const map = {}; for (const k of Object.keys(ALIASES)){ map[k] = findColIndex(header, ALIASES[k]); } return map; }
+    
+    // Date Parser (Returns formatted YYYY-MM-DD or '-')
     function excelToDate(v){
       if(!v && v!==0) return null;
       if (typeof v === 'number'){
@@ -485,13 +499,16 @@
       if (v instanceof Date) return v;
       return null;
     }
+    function parseExcelDate(value) {
+        const d = excelToDate(value);
+        return d ? ymd(d) : '-';
+    }
 
     // Setup Image Tooltip Element
     const tooltipEl = document.createElement('div');
     tooltipEl.id = 'image-tooltip';
     document.body.appendChild(tooltipEl);
 
-    // Mouse tracking for Tooltip
     document.addEventListener('mousemove', (e) => {
         if (tooltipEl.style.display === 'block') {
             tooltipEl.style.left = `${e.clientX + 15}px`;
@@ -499,8 +516,8 @@
         }
     });
 
-    // [FIX: 8.1.1] Upgraded JSON parsing logic for images
-    function showImageTooltip(e, itemNo) {
+    // [FIX: 8.2.0] Include SSD and EDS in tooltip parameters
+    function showImageTooltip(e, itemNo, ssd, eds) {
         if (window.innerWidth <= 768) return; 
         
         clearTimeout(hoverTimeout);
@@ -509,7 +526,7 @@
         tooltipEl.style.left = `${e.clientX + 15}px`;
         tooltipEl.style.top = `${e.clientY + 15}px`;
         tooltipEl.style.display = 'block';
-        tooltipEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Load...';
+        tooltipEl.innerHTML = `<div class="img-wrapper"><i class="fas fa-spinner fa-spin"></i></div>`;
 
         hoverTimeout = setTimeout(async () => {
             if (currentHoverItem !== itemNo) return;
@@ -519,7 +536,7 @@
             const paddedNo = cleanNo.padStart(8, '0');
 
             if (imageCache.has(paddedNo)) {
-                renderTooltipImage(imageCache.get(paddedNo));
+                renderTooltipImage(imageCache.get(paddedNo), ssd, eds);
                 return;
             }
 
@@ -531,66 +548,62 @@
                 let imgUrl = findBestImage(data);
 
                 if (imgUrl) {
-                    imgUrl = imgUrl.replace(/\\\//g, '/'); // Unescape slashes if any
                     imageCache.set(paddedNo, imgUrl);
-                    if (currentHoverItem === itemNo) renderTooltipImage(imgUrl);
+                    if (currentHoverItem === itemNo) renderTooltipImage(imgUrl, ssd, eds);
                 } else {
                     imageCache.set(paddedNo, 'NO_IMAGE');
-                    if (currentHoverItem === itemNo) renderTooltipImage('NO_IMAGE');
+                    if (currentHoverItem === itemNo) renderTooltipImage('NO_IMAGE', ssd, eds);
                 }
             } catch (err) {
                 console.error(err);
-                if (currentHoverItem === itemNo) tooltipEl.innerHTML = 'Image N/A';
+                if (currentHoverItem === itemNo) renderTooltipImage('ERROR', ssd, eds);
             }
         }, 400); 
     }
 
-    // [NEW: 8.1.1] Helper function to deeply find image URL in JSON
-    // [Ver 8.1.2: 극한의 이미지 탐지 헬퍼 함수]
+    // JSON 탐색 (최적화 버전)
     function findBestImage(obj) {
         let bestUrl = null;
-
         function traverse(o) {
             if (!o || typeof o !== 'object') return;
             for (let key in o) {
-                if (typeof o[k] === 'string') {
-                    let val = o[k].toLowerCase();
-                    // URL 값에 이미지 확장자가 포함되어 있다면 무조건 캐치 (SVG 제외)
+                if (typeof o[key] === 'string') {
+                    let val = o[key].toLowerCase();
                     if (val.match(/\.(jpg|jpeg|png|webp|avif)(\?.*)?$/) && !val.includes('.svg')) {
-                        let actualUrl = o[k];
+                        let actualUrl = o[key];
+                        if (actualUrl.startsWith('//')) actualUrl = 'https:' + actualUrl;
+                        else if (actualUrl.startsWith('/')) actualUrl = 'https://www.ikea.com' + actualUrl;
                         
-                        // 1. //로 시작하면 https: 붙여주기
-                        if (actualUrl.startsWith('//')) {
-                            actualUrl = 'https:' + actualUrl;
-                        } 
-                        // 2. / 로 시작하는 상대경로면 이케아 도메인 붙여주기
-                        else if (actualUrl.startsWith('/')) {
-                            actualUrl = 'https://www.ikea.com' + actualUrl;
-                        }
-
-                        // 3. 썸네일에 적합한 's5' 사이즈나 'main' 이미지가 보이면 우선순위 부여
-                        if (!bestUrl) {
-                            bestUrl = actualUrl;
-                        } else if (actualUrl.includes('s5') || actualUrl.includes('main')) {
-                            bestUrl = actualUrl;
-                        }
+                        if (!bestUrl) bestUrl = actualUrl;
+                        else if (actualUrl.includes('s5') || actualUrl.includes('main')) bestUrl = actualUrl;
                     }
-                } else if (typeof o[k] === 'object') {
-                    traverse(o[k]); // 데이터 속으로 계속 파고들기
+                } else if (typeof o[key] === 'object') {
+                    traverse(o[key]);
                 }
             }
         }
-        
         traverse(obj);
         return bestUrl;
     }
 
-    function renderTooltipImage(url) {
-        if (url === 'NO_IMAGE') {
-            tooltipEl.innerHTML = 'Image N/A';
+    // [FIX: 8.2.0] 렌더링 시 SSD, EDS 정보 포함 (하단 파란줄)
+    function renderTooltipImage(url, ssd, eds) {
+        let imgHtml = '';
+        if (url === 'NO_IMAGE' || url === 'ERROR') {
+            imgHtml = `<div style="font-weight:bold; color:#e74c3c;">Image N/A</div>`;
         } else {
-            tooltipEl.innerHTML = `<img src="${url}" alt="Product Preview" onerror="this.parentElement.innerHTML='Image N/A'">`;
+            imgHtml = `<img src="${url}" alt="Preview" onerror="this.parentElement.innerHTML='<div style=\\'font-weight:bold; color:#e74c3c;\\'>Image N/A</div>'">`;
         }
+        
+        tooltipEl.innerHTML = `
+            <div class="img-wrapper">
+                ${imgHtml}
+            </div>
+            <div class="info-wrapper">
+                <div style="margin-bottom:2px;"><b>SSD :</b> <span style="color:var(--ikea-blue); font-weight:600;">${ssd}</span></div>
+                <div><b>EDS :</b> <span style="color:var(--ikea-blue); font-weight:600;">${eds}</span></div>
+            </div>
+        `;
     }
 
     function hideImageTooltip() {
@@ -599,12 +612,15 @@
         tooltipEl.style.display = 'none';
     }
 
-    function formatItemLink(itemNo) {
+    // [FIX: 8.2.0] 포맷팅 시 메모리의 ssd, eds 값을 전달
+    function formatItemLink(itemNo, ssdRaw, edsRaw) {
         const raw = String(itemNo).trim();
         const cleanNo = raw.replace(/[^0-9]/g, '');
         if(cleanNo.length > 0) {
             const paddedNo = cleanNo.padStart(8, '0');
-            return `<a href="https://piafacts.ikea.net/kr/en/${paddedNo}" target="_blank" class="item-link" onclick="event.stopPropagation();" onmouseenter="showImageTooltip(event, '${paddedNo}')" onmouseleave="hideImageTooltip()">${raw}</a>`;
+            const fSsd = parseExcelDate(ssdRaw);
+            const fEds = parseExcelDate(edsRaw);
+            return `<a href="https://piafacts.ikea.net/kr/en/${paddedNo}" target="_blank" class="item-link" onclick="event.stopPropagation();" onmouseenter="showImageTooltip(event, '${paddedNo}', '${fSsd}', '${fEds}')" onmouseleave="hideImageTooltip()">${raw}</a>`;
         }
         return `<b>${raw}</b>`;
     }
@@ -804,7 +820,8 @@
       }
       
       results.forEach(row => {
-        pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td>${formatItemLink(row.itemNo)}</td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${row.plannedDateStr}</td><td class="qty-cell">${row.quantity}</td><td>${row.container}</td></tr>`;
+        // [FIX: 8.2.0] Search tab formatItemLink includes ssd and eds
+        pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td>${formatItemLink(row.itemNo, row.ssdRaw, row.edsRaw)}</td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${row.plannedDateStr}</td><td class="qty-cell">${row.quantity}</td><td>${row.container}</td></tr>`;
       });
       if(results.length > 0) {
         mobileProductSummary.innerHTML = `<div class="summary-row"><span class="label">결과</span> <span class="value" style="font-size:1.2rem; color:var(--ikea-blue);">${results.length} 건</span></div>`;
@@ -819,7 +836,16 @@
       list.forEach(row => {
         if (!row.itemNo) return;
         const pd = excelToDate(row.plannedDate); const qty = safeNum(row.qty);
-        if (!pivotMap[row.itemNo]) { pivotMap[row.itemNo] = { hfb: row.hfb||"", pa: row.pa||"", itemNo: row.itemNo, itemName: row.itemName||"", activity: row.activity||"", dates: {}, notFixedQty: 0 }; }
+        
+        // [FIX: 8.2.0] Store ssdRaw and edsRaw in Pivot Map
+        if (!pivotMap[row.itemNo]) { 
+            pivotMap[row.itemNo] = { 
+                hfb: row.hfb||"", pa: row.pa||"", itemNo: row.itemNo, itemName: row.itemName||"", 
+                activity: row.activity||"", ssdRaw: row.ssd||"", edsRaw: row.eds||"",
+                dates: {}, notFixedQty: 0 
+            }; 
+        }
+        
         if (pd) {
           const dd = new Date(pd); dd.setHours(0,0,0,0);
           if (dd >= today) { const pStr = ymd(dd); pivotMap[row.itemNo].dates[pStr] = (pivotMap[row.itemNo].dates[pStr]||0) + qty; uniqueDates.add(pStr); }
@@ -1001,7 +1027,8 @@
       for(let i=0; i<count; i++) {
         const r = filteredRows[i];
         const nfVal = (showNotFixed && r.notFixedQty > 0) ? r.notFixedQty : "";
-        tbodyHtml += `<tr><td class="col-hfb">${r.hfb}</td><td class="col-pa">${r.pa}</td><td class="col-itemno">${formatItemLink(r.itemNo)}</td><td class="col-itemname">${r.itemName}</td><td class="col-activity mobile-hidden">${r.activity}</td>`;
+        // [FIX: 8.2.0] Pass ssdRaw and edsRaw
+        tbodyHtml += `<tr><td class="col-hfb">${r.hfb}</td><td class="col-pa">${r.pa}</td><td class="col-itemno">${formatItemLink(r.itemNo, r.ssdRaw, r.edsRaw)}</td><td class="col-itemname">${r.itemName}</td><td class="col-activity mobile-hidden">${r.activity}</td>`;
         if(showNotFixed) tbodyHtml += `<td class="not-fixed-col">${nfVal}</td>`;
         visibleDates.forEach(d => { tbodyHtml += `<td class="qty-cell">${r.dates[d] || ""}</td>`; });
         tbodyHtml += `</tr>`;
@@ -1052,15 +1079,9 @@
         });
     }
 
-    function parseExcelDate(value) {
-        const d = excelToDate(value);
-        return d ? ymd(d) : '-';
-    }
-
     function startScanner() { document.getElementById('scanner-modal').style.display = 'flex'; if(!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("reader"); html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 300, height: 150 }, aspectRatio: 1.0 }, onScanSuccess).catch(e=>alert("Camera Error")); }
     function onScanSuccess(t) { document.getElementById('itemInput').value = t.replace(/[^0-9]/g, ''); stopScanner(); performSearch(); }
     function stopScanner() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(()=>document.getElementById('scanner-modal').style.display='none'); else document.getElementById('scanner-modal').style.display='none'; }
   </script>
 </body>
 </html>
-
