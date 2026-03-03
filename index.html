@@ -264,7 +264,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 8.1.0 Pro Edition</span>
+      <span>Ver 8.1.1 Pro Edition</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -433,7 +433,7 @@
     let exportVisibleDates = [];
     let exportShowNotFixed = true;
 
-    // [NEW] Tooltip & Cache Variables
+    // Tooltip & Cache Variables
     const imageCache = new Map();
     let hoverTimeout = null;
     let currentHoverItem = null;
@@ -486,12 +486,12 @@
       return null;
     }
 
-    // [NEW] Setup Image Tooltip Element
+    // Setup Image Tooltip Element
     const tooltipEl = document.createElement('div');
     tooltipEl.id = 'image-tooltip';
     document.body.appendChild(tooltipEl);
 
-    // [NEW] Mouse tracking for Tooltip
+    // Mouse tracking for Tooltip
     document.addEventListener('mousemove', (e) => {
         if (tooltipEl.style.display === 'block') {
             tooltipEl.style.left = `${e.clientX + 15}px`;
@@ -499,9 +499,9 @@
         }
     });
 
-    // [NEW] Show Image Function with API Fetch
+    // [FIX: 8.1.1] Upgraded JSON parsing logic for images
     function showImageTooltip(e, itemNo) {
-        if (window.innerWidth <= 768) return; // 모바일 차단
+        if (window.innerWidth <= 768) return; 
         
         clearTimeout(hoverTimeout);
         currentHoverItem = itemNo;
@@ -526,13 +526,12 @@
             try {
                 const res = await fetch(`https://sik.search.blue.cdtapps.com/kr/ko/search-box?q=${paddedNo}`);
                 if (!res.ok) throw new Error('API Error');
-                const text = await res.text();
                 
-                // 정규식을 사용해 JSON 내의 첫 번째 이미지 URL 추출
-                const match = text.match(/"(https:\/\/[^"]+?\.(?:jpg|jpeg|png|webp))/i);
-                
-                if (match && match[1]) {
-                    let imgUrl = match[1].replace(/\\\//g, '/'); // 이스케이프 슬래시 복구
+                const data = await res.json(); 
+                let imgUrl = findBestImage(data);
+
+                if (imgUrl) {
+                    imgUrl = imgUrl.replace(/\\\//g, '/'); // Unescape slashes if any
                     imageCache.set(paddedNo, imgUrl);
                     if (currentHoverItem === itemNo) renderTooltipImage(imgUrl);
                 } else {
@@ -543,10 +542,30 @@
                 console.error(err);
                 if (currentHoverItem === itemNo) tooltipEl.innerHTML = 'Image N/A';
             }
-        }, 400); // 0.4초 딜레이 (Debounce)
+        }, 400); 
     }
 
-    // [NEW] Render Image in Tooltip
+    // [NEW: 8.1.1] Helper function to deeply find image URL in JSON
+    function findBestImage(obj) {
+        if (!obj || typeof obj !== 'object') return null;
+        for (let key in obj) {
+            if (typeof obj[key] === 'string') {
+                const val = obj[key].toLowerCase();
+                const keyName = key.toLowerCase();
+                if ((keyName.includes('image') || keyName.includes('url')) && val.startsWith('http') && !val.includes('.svg')) {
+                    return obj[key];
+                }
+            }
+        }
+        for (let key in obj) {
+            if (typeof obj[key] === 'object') {
+                let found = findBestImage(obj[key]);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
     function renderTooltipImage(url) {
         if (url === 'NO_IMAGE') {
             tooltipEl.innerHTML = 'Image N/A';
@@ -555,14 +574,12 @@
         }
     }
 
-    // [NEW] Hide Image Function
     function hideImageTooltip() {
         clearTimeout(hoverTimeout);
         currentHoverItem = null;
         tooltipEl.style.display = 'none';
     }
 
-    // [FIX] Attached hover events to the link
     function formatItemLink(itemNo) {
         const raw = String(itemNo).trim();
         const cleanNo = raw.replace(/[^0-9]/g, '');
