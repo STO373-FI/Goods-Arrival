@@ -546,24 +546,43 @@
     }
 
     // [NEW: 8.1.1] Helper function to deeply find image URL in JSON
+    // [Ver 8.1.2: 극한의 이미지 탐지 헬퍼 함수]
     function findBestImage(obj) {
-        if (!obj || typeof obj !== 'object') return null;
-        for (let key in obj) {
-            if (typeof obj[key] === 'string') {
-                const val = obj[key].toLowerCase();
-                const keyName = key.toLowerCase();
-                if ((keyName.includes('image') || keyName.includes('url')) && val.startsWith('http') && !val.includes('.svg')) {
-                    return obj[key];
+        let bestUrl = null;
+
+        function traverse(o) {
+            if (!o || typeof o !== 'object') return;
+            for (let key in o) {
+                if (typeof o[k] === 'string') {
+                    let val = o[k].toLowerCase();
+                    // URL 값에 이미지 확장자가 포함되어 있다면 무조건 캐치 (SVG 제외)
+                    if (val.match(/\.(jpg|jpeg|png|webp|avif)(\?.*)?$/) && !val.includes('.svg')) {
+                        let actualUrl = o[k];
+                        
+                        // 1. //로 시작하면 https: 붙여주기
+                        if (actualUrl.startsWith('//')) {
+                            actualUrl = 'https:' + actualUrl;
+                        } 
+                        // 2. / 로 시작하는 상대경로면 이케아 도메인 붙여주기
+                        else if (actualUrl.startsWith('/')) {
+                            actualUrl = 'https://www.ikea.com' + actualUrl;
+                        }
+
+                        // 3. 썸네일에 적합한 's5' 사이즈나 'main' 이미지가 보이면 우선순위 부여
+                        if (!bestUrl) {
+                            bestUrl = actualUrl;
+                        } else if (actualUrl.includes('s5') || actualUrl.includes('main')) {
+                            bestUrl = actualUrl;
+                        }
+                    }
+                } else if (typeof o[k] === 'object') {
+                    traverse(o[k]); // 데이터 속으로 계속 파고들기
                 }
             }
         }
-        for (let key in obj) {
-            if (typeof obj[key] === 'object') {
-                let found = findBestImage(obj[key]);
-                if (found) return found;
-            }
-        }
-        return null;
+        
+        traverse(obj);
+        return bestUrl;
     }
 
     function renderTooltipImage(url) {
@@ -1044,3 +1063,4 @@
   </script>
 </body>
 </html>
+
