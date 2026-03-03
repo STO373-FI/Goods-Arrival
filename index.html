@@ -70,7 +70,6 @@
     .status-badge.connected{ background:#d4edda; color:#155724; }
     .status-badge.error{ background:#f8d7da; color:#721c24; }
     
-    /* Buttons */
     .btn-export-csv { background-color: #217346; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: background 0.2s; }
     .btn-export-csv:hover { background-color: #1e6b3e; }
     .btn-copy { background-color: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: background 0.2s; }
@@ -101,6 +100,31 @@
 
     .item-link { color: var(--ikea-blue); text-decoration: none; cursor: pointer; font-weight: 700; transition: color 0.2s; }
     .item-link:hover { color: #003a6c; text-decoration: underline; }
+
+    /* [NEW] Image Hover Tooltip Styles */
+    #image-tooltip {
+        position: fixed;
+        display: none;
+        width: 150px;
+        height: 150px;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        pointer-events: none; /* 방해 방지 */
+        overflow: hidden;
+        text-align: center;
+        line-height: 150px;
+        font-size: 0.85rem;
+        color: var(--ikea-blue);
+        font-weight: bold;
+    }
+    #image-tooltip img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
     /* Pivot & Filter */
     .mobile-only-filters { display: none; }
@@ -164,6 +188,7 @@
         .pivot-table input { display: none !important; } 
         a.item-link { text-decoration: none !important; color: black !important; }
         .pivot-header-area h2 { font-size: 1.5rem !important; color: black !important; text-align: center; margin-bottom: 20px !important; }
+        #image-tooltip { display: none !important; }
     }
 
     @media (max-width: 768px) {
@@ -239,7 +264,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 8.0 Pro Edition</span>
+      <span>Ver 8.1.0 Pro Edition</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -292,6 +317,7 @@
                     <div class="info-title"><i class="fas fa-calendar-alt"></i> 2. Goods Arrival</div>
                     <div class="info-desc">
                         <p><strong>필터 및 정렬 기능</strong><br>날짜, HFB, PA 등으로 필터링이 가능하며, 표의 제목(Header)을 클릭하면 <strong>오름차순/내림차순 정렬</strong>이 가능합니다.<br><span class="bi-en">Filter and sort data by clicking table headers.</span></p>
+                        <p><strong>이미지 툴팁 (PC 전용)</strong><br>결과 표에서 제품 번호에 마우스를 0.4초간 올려두면 제품 이미지를 미리 볼 수 있습니다.<br><span class="bi-en">Hover over item numbers on PC to preview product images.</span></p>
                         <p><strong>복사 및 엑셀 다운로드 (WYSIWYG)</strong><br>오른쪽 위 버튼을 통해 <strong>현재 화면에 필터링된 결과만</strong> 깔끔하게 복사하거나 엑셀로 다운받을 수 있습니다.<br><span class="bi-en">Copy or export currently filtered data only.</span></p>
                         <p><strong>인쇄 최적화 모드 지원</strong><br>Ctrl + P 를 누르시면 불필요한 메뉴 없이 표만 깔끔하게 인쇄됩니다.<br><span class="bi-en">Press Ctrl+P to print a clean table view.</span></p>
                     </div>
@@ -407,6 +433,11 @@
     let exportVisibleDates = [];
     let exportShowNotFixed = true;
 
+    // [NEW] Tooltip & Cache Variables
+    const imageCache = new Map();
+    let hoverTimeout = null;
+    let currentHoverItem = null;
+
     const ALIASES = {
       ItemNo: ['ItemNo','ITEM NO','ARTNO','ITEMNO'],
       ItemName: ['ItemName','ITEM NAME','ARTNAME','ARTNAME_UNICODE','ITEMNAME'],
@@ -455,12 +486,89 @@
       return null;
     }
 
+    // [NEW] Setup Image Tooltip Element
+    const tooltipEl = document.createElement('div');
+    tooltipEl.id = 'image-tooltip';
+    document.body.appendChild(tooltipEl);
+
+    // [NEW] Mouse tracking for Tooltip
+    document.addEventListener('mousemove', (e) => {
+        if (tooltipEl.style.display === 'block') {
+            tooltipEl.style.left = `${e.clientX + 15}px`;
+            tooltipEl.style.top = `${e.clientY + 15}px`;
+        }
+    });
+
+    // [NEW] Show Image Function with API Fetch
+    function showImageTooltip(e, itemNo) {
+        if (window.innerWidth <= 768) return; // 모바일 차단
+        
+        clearTimeout(hoverTimeout);
+        currentHoverItem = itemNo;
+        
+        tooltipEl.style.left = `${e.clientX + 15}px`;
+        tooltipEl.style.top = `${e.clientY + 15}px`;
+        tooltipEl.style.display = 'block';
+        tooltipEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Load...';
+
+        hoverTimeout = setTimeout(async () => {
+            if (currentHoverItem !== itemNo) return;
+            
+            const cleanNo = String(itemNo).replace(/[^0-9]/g, '');
+            if(cleanNo.length === 0) { tooltipEl.style.display = 'none'; return; }
+            const paddedNo = cleanNo.padStart(8, '0');
+
+            if (imageCache.has(paddedNo)) {
+                renderTooltipImage(imageCache.get(paddedNo));
+                return;
+            }
+
+            try {
+                const res = await fetch(`https://sik.search.blue.cdtapps.com/kr/ko/search-box?q=${paddedNo}`);
+                if (!res.ok) throw new Error('API Error');
+                const text = await res.text();
+                
+                // 정규식을 사용해 JSON 내의 첫 번째 이미지 URL 추출
+                const match = text.match(/"(https:\/\/[^"]+?\.(?:jpg|jpeg|png|webp))/i);
+                
+                if (match && match[1]) {
+                    let imgUrl = match[1].replace(/\\\//g, '/'); // 이스케이프 슬래시 복구
+                    imageCache.set(paddedNo, imgUrl);
+                    if (currentHoverItem === itemNo) renderTooltipImage(imgUrl);
+                } else {
+                    imageCache.set(paddedNo, 'NO_IMAGE');
+                    if (currentHoverItem === itemNo) renderTooltipImage('NO_IMAGE');
+                }
+            } catch (err) {
+                console.error(err);
+                if (currentHoverItem === itemNo) tooltipEl.innerHTML = 'Image N/A';
+            }
+        }, 400); // 0.4초 딜레이 (Debounce)
+    }
+
+    // [NEW] Render Image in Tooltip
+    function renderTooltipImage(url) {
+        if (url === 'NO_IMAGE') {
+            tooltipEl.innerHTML = 'Image N/A';
+        } else {
+            tooltipEl.innerHTML = `<img src="${url}" alt="Product Preview" onerror="this.parentElement.innerHTML='Image N/A'">`;
+        }
+    }
+
+    // [NEW] Hide Image Function
+    function hideImageTooltip() {
+        clearTimeout(hoverTimeout);
+        currentHoverItem = null;
+        tooltipEl.style.display = 'none';
+    }
+
+    // [FIX] Attached hover events to the link
     function formatItemLink(itemNo) {
         const raw = String(itemNo).trim();
         const cleanNo = raw.replace(/[^0-9]/g, '');
         if(cleanNo.length > 0) {
             const paddedNo = cleanNo.padStart(8, '0');
-            return `<a href="https://piafacts.ikea.net/kr/en/${paddedNo}" target="_blank" class="item-link" onclick="event.stopPropagation();">${raw}</a>`;
+            return `<a href="https://piafacts.ikea.net/kr/en/${paddedNo}" target="_blank" class="item-link" onclick="event.stopPropagation();" onmouseenter="showImageTooltip(event, '${paddedNo}')" onmouseleave="hideImageTooltip()">${raw}</a>`;
         }
         return `<b>${raw}</b>`;
     }
