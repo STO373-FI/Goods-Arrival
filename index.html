@@ -101,7 +101,7 @@
     .item-link { color: var(--ikea-blue); text-decoration: none; cursor: pointer; font-weight: 700; transition: color 0.2s; }
     .item-link:hover { color: #003a6c; text-decoration: underline; }
 
-    /* [UPGRADE] Image Hover Tooltip Styles for Ver 8.2.0 */
+    /* Image Hover Tooltip Styles */
     #image-tooltip {
         position: fixed;
         display: none;
@@ -111,7 +111,7 @@
         border-radius: 8px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         z-index: 9999;
-        pointer-events: none; /* 방해 방지 */
+        pointer-events: none;
         overflow: hidden;
         text-align: center;
     }
@@ -276,7 +276,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 8.2.0 Pro Edition</span>
+      <span>Ver 8.2.1 Pro Edition</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -516,7 +516,6 @@
         }
     });
 
-    // [FIX: 8.2.0] Include SSD and EDS in tooltip parameters
     function showImageTooltip(e, itemNo, ssd, eds) {
         if (window.innerWidth <= 768) return; 
         
@@ -586,7 +585,6 @@
         return bestUrl;
     }
 
-    // [FIX: 8.2.0] 렌더링 시 SSD, EDS 정보 포함 (하단 파란줄)
     function renderTooltipImage(url, ssd, eds) {
         let imgHtml = '';
         if (url === 'NO_IMAGE' || url === 'ERROR') {
@@ -612,7 +610,6 @@
         tooltipEl.style.display = 'none';
     }
 
-    // [FIX: 8.2.0] 포맷팅 시 메모리의 ssd, eds 값을 전달
     function formatItemLink(itemNo, ssdRaw, edsRaw) {
         const raw = String(itemNo).trim();
         const cleanNo = raw.replace(/[^0-9]/g, '');
@@ -820,7 +817,6 @@
       }
       
       results.forEach(row => {
-        // [FIX: 8.2.0] Search tab formatItemLink includes ssd and eds
         pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td>${formatItemLink(row.itemNo, row.ssdRaw, row.edsRaw)}</td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${row.plannedDateStr}</td><td class="qty-cell">${row.quantity}</td><td>${row.container}</td></tr>`;
       });
       if(results.length > 0) {
@@ -837,7 +833,6 @@
         if (!row.itemNo) return;
         const pd = excelToDate(row.plannedDate); const qty = safeNum(row.qty);
         
-        // [FIX: 8.2.0] Store ssdRaw and edsRaw in Pivot Map
         if (!pivotMap[row.itemNo]) { 
             pivotMap[row.itemNo] = { 
                 hfb: row.hfb||"", pa: row.pa||"", itemNo: row.itemNo, itemName: row.itemName||"", 
@@ -1079,9 +1074,27 @@
         });
     }
 
-    function startScanner() { document.getElementById('scanner-modal').style.display = 'flex'; if(!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("reader"); html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 300, height: 150 }, aspectRatio: 1.0 }, onScanSuccess).catch(e=>alert("Camera Error")); }
-    function onScanSuccess(t) { document.getElementById('itemInput').value = t.replace(/[^0-9]/g, ''); stopScanner(); performSearch(); }
-    function stopScanner() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(()=>document.getElementById('scanner-modal').style.display='none'); else document.getElementById('scanner-modal').style.display='none'; }
+    // [FIX: 8.2.1] Mobile Barcode Scanner - Keep only first 8 digits
+    function startScanner() { 
+        document.getElementById('scanner-modal').style.display = 'flex'; 
+        if(!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("reader"); 
+        html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 300, height: 150 }, aspectRatio: 1.0 }, onScanSuccess).catch(e=>alert("Camera Error")); 
+    }
+    
+    function onScanSuccess(t) { 
+        let scannedNum = t.replace(/[^0-9]/g, '');
+        if(scannedNum.length >= 8) {
+            scannedNum = scannedNum.substring(0, 8);
+        }
+        document.getElementById('itemInput').value = scannedNum; 
+        stopScanner(); 
+        performSearch(); 
+    }
+    
+    function stopScanner() { 
+        if(html5QrcodeScanner) html5QrcodeScanner.stop().then(()=>document.getElementById('scanner-modal').style.display='none'); 
+        else document.getElementById('scanner-modal').style.display='none'; 
+    }
   </script>
 </body>
 </html>
