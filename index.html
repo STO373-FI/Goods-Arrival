@@ -203,16 +203,42 @@
         #image-tooltip { display: none !important; }
     }
 
+    /* =========================================
+       MOBILE (Max 768px)
+       ========================================= */
     @media (max-width: 768px) {
       .app-container { flex-direction: column; display: block; }
       .sidebar { width: 100%; height: auto; flex-direction: row; padding-top: 0; }
       .nav-item { flex: 1; text-align: center; padding: 12px 5px; border-right: 1px solid #ddd; font-size: 0.95rem; white-space: nowrap; }
       .nav-sub { font-size: 0.7rem; }
       .content-area { padding: 15px 10px; }
-      header { height: auto; padding: 15px; flex-direction: column; gap: 10px; align-items: center; }
+      
+      /* [FIX 8.2.2] Mobile Header Top UI Refined */
+      header { height: auto; padding: 12px 10px; flex-direction: column; gap: 8px; align-items: center; }
       .header-left { width: 100%; align-items: center; }
       .main-title { font-size: 1.1rem; width: 100%; justify-content: center; white-space: nowrap; }
-      .link-group { margin-left: 0; margin-top: 8px; width: 100%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; }
+      
+      /* Force 1 line, tighter gap, smaller fonts, no wrapping */
+      .link-group { 
+          margin-left: 0; 
+          margin-top: 5px; 
+          width: 100%; 
+          display: flex; 
+          justify-content: center; 
+          gap: 12px; 
+          flex-wrap: nowrap; 
+          overflow-x: auto; 
+          padding-bottom: 2px; 
+      }
+      .header-sub-link { 
+          font-size: 0.75rem; 
+          white-space: nowrap; /* Prevent double lines */
+          gap: 4px; 
+      }
+      .header-sub-link i { 
+          font-size: 0.8rem; 
+      }
+      
       .header-right { width: 100%; align-items: center; flex-direction: row; justify-content: center; gap: 15px; margin-top: 5px; }
       
       .item-link { color: inherit !important; text-decoration: none !important; pointer-events: none !important; cursor: default !important; font-weight: bold; }
@@ -276,7 +302,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 8.2.1 Pro Edition</span>
+      <span>Ver 8.2.2 Pro Edition</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -488,7 +514,6 @@
     }
     function buildColumnMap(header){ const map = {}; for (const k of Object.keys(ALIASES)){ map[k] = findColIndex(header, ALIASES[k]); } return map; }
     
-    // Date Parser (Returns formatted YYYY-MM-DD or '-')
     function excelToDate(v){
       if(!v && v!==0) return null;
       if (typeof v === 'number'){
@@ -504,7 +529,6 @@
         return d ? ymd(d) : '-';
     }
 
-    // Setup Image Tooltip Element
     const tooltipEl = document.createElement('div');
     tooltipEl.id = 'image-tooltip';
     document.body.appendChild(tooltipEl);
@@ -560,7 +584,6 @@
         }, 400); 
     }
 
-    // JSON 탐색 (최적화 버전)
     function findBestImage(obj) {
         let bestUrl = null;
         function traverse(o) {
@@ -1022,7 +1045,6 @@
       for(let i=0; i<count; i++) {
         const r = filteredRows[i];
         const nfVal = (showNotFixed && r.notFixedQty > 0) ? r.notFixedQty : "";
-        // [FIX: 8.2.0] Pass ssdRaw and edsRaw
         tbodyHtml += `<tr><td class="col-hfb">${r.hfb}</td><td class="col-pa">${r.pa}</td><td class="col-itemno">${formatItemLink(r.itemNo, r.ssdRaw, r.edsRaw)}</td><td class="col-itemname">${r.itemName}</td><td class="col-activity mobile-hidden">${r.activity}</td>`;
         if(showNotFixed) tbodyHtml += `<td class="not-fixed-col">${nfVal}</td>`;
         visibleDates.forEach(d => { tbodyHtml += `<td class="qty-cell">${r.dates[d] || ""}</td>`; });
@@ -1074,7 +1096,6 @@
         });
     }
 
-    // [FIX: 8.2.1] Mobile Barcode Scanner - Keep only first 8 digits
     function startScanner() { 
         document.getElementById('scanner-modal').style.display = 'flex'; 
         if(!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("reader"); 
