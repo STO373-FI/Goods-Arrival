@@ -94,7 +94,6 @@
     .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; color:#333; } 
     .dash-card p { font-size: 0.8rem; color: #888; font-weight: bold; margin:0; }
     
-    /* [FIX 8.2.3] UI Restored */
     .status-msg { padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 1.1rem; line-height:1.4; display: none; }
     .status-success { background-color: #0b5f38; color: white; }
     .status-fail { background-color: #e74c3c; color: white; }
@@ -186,7 +185,6 @@
     .pc-table-view td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
     .mobile-result-view { display: none; }
     
-    /* [FIX 8.2.3] Re-styling product card for mobile */
     .product-summary-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; border-left: 5px solid var(--ikea-yellow); }
     .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #eee; padding-bottom: 8px; }
     .schedule-item { background: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #ccc; margin-bottom:10px; }
@@ -225,10 +223,7 @@
       .header-left { width: 100%; align-items: center; }
       .main-title { font-size: 1.1rem; width: 100%; justify-content: center; white-space: nowrap; }
       
-      .link-group { 
-          margin-left: 0; margin-top: 5px; width: 100%; display: flex; 
-          justify-content: center; gap: 12px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; 
-      }
+      .link-group { margin-left: 0; margin-top: 5px; width: 100%; display: flex; justify-content: center; gap: 12px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
       .header-sub-link { font-size: 0.75rem; white-space: nowrap; gap: 4px; }
       .header-sub-link i { font-size: 0.8rem; }
       
@@ -249,7 +244,6 @@
       .btn-scan-trigger { display: flex; }
       .pc-table-view { display: none !important; } .mobile-result-view { display: block; }
       
-      /* [FIX 8.2.3] Mobile Dashboard Styling Adjusted */
       .dashboard { gap: 8px; margin-bottom: 20px; } 
       .dash-card { padding: 12px 5px; } 
       .dash-card h3 { font-size: 1.4rem; margin: 0 0 5px 0; }
@@ -301,7 +295,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 8.2.3 Pro Edition</span>
+      <span>Ver 8.2.4 Pro Edition</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -782,13 +776,30 @@
       return { type:'tbd', dateObj: null, label: `<span class="date-badge tbd">미정</span>` };
     }
 
+    // [FIX 8.2.4] Zero-stripping logic applied for flexible matching
     function searchData(targets){
       const grouped = new Map(); const today = new Date(); today.setHours(0,0,0,0);
+      
+      // 검색어에서 의미없는 앞자리 0 제거 (ex: "00602671" -> "602671", "000" -> "0")
+      const cleanTargets = targets.map(t => ({
+          raw: t,
+          cleaned: t.replace(/^0+(?=\d)/, '') 
+      }));
+
       data.forEach(row => {
         const itemNo = String(row.itemNo||'').replace(/\s+/g,'').toLowerCase();
+        // 엑셀 데이터에서도 의미없는 앞자리 0 제거
+        const cleanItemNo = itemNo.replace(/^0+(?=\d)/, '');
         const cont = String(row.container||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
         
-        if (targets.some(t => (itemNo && itemNo.includes(t)) || (cont && cont.includes(t)))) {
+        // 검색 매칭 조건 (0을 제거한 상태로 매칭하거나, 원본끼리 매칭)
+        const isMatch = cleanTargets.some(tObj => {
+            return (cleanItemNo && cleanItemNo.includes(tObj.cleaned)) || 
+                   (itemNo && itemNo.includes(tObj.raw)) || 
+                   (cont && cont.includes(tObj.raw));
+        });
+
+        if (isMatch) {
             const plan = determinePlanned(row);
             if (plan.type === 'confirmed') {
                 const d = excelToDate(row.plannedDate);
@@ -813,7 +824,6 @@
       return Array.from(grouped.values());
     }
 
-    // [FIX 8.2.3] Complete Mobile Layout Restoration for Search Results
     function displayResults(results) {
       const resultSection = document.getElementById('resultSection'); 
       const statusBar = document.getElementById('statusBar'); 
@@ -832,7 +842,6 @@
           return; 
       }
       
-      // Update Status Bar
       statusBar.innerHTML = `${results.length}개의 배송 계획을 찾았습니다!<br><span style="font-size:0.75em; font-weight:normal; opacity:0.9;">Found ${results.length} arrival plans!</span>`; 
       statusBar.className = 'status-msg status-success'; 
       statusBar.style.display = 'block';
@@ -856,14 +865,11 @@
           document.getElementById('nextDeliveryDate').innerText = "-"; 
       }
       
-      // Render PC view
       results.forEach(row => {
         pcTbody.innerHTML += `<tr><td>${row.hfb}</td><td>${formatItemLink(row.itemNo, row.ssdRaw, row.edsRaw)}</td><td>${row.itemName}</td><td>${parseExcelDate(row.ssdRaw)}</td><td>${parseExcelDate(row.edsRaw)}</td><td>${row.plannedDateStr}</td><td class="qty-cell">${row.quantity}</td><td>${row.container}</td></tr>`;
       });
       
-      // Render Mobile view with Grouping
       if(results.length > 0) {
-        // Group by itemNo to show one info card per product
         const grouped = {};
         results.forEach(r => {
             if(!grouped[r.itemNo]) grouped[r.itemNo] = { info: r, schedules: [] };
@@ -875,7 +881,6 @@
             const g = grouped[itemNo];
             const i = g.info;
             
-            // Product Summary Card (matches screenshot)
             mobileHtml += `
             <div class="product-summary-card">
                 <div class="summary-row">
@@ -901,7 +906,6 @@
             </div>
             `;
 
-            // Schedule list for this product
             g.schedules.forEach(sc => {
                 mobileHtml += `
                 <div class="schedule-item">
