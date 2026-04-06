@@ -94,6 +94,9 @@
     .dash-card h3 { font-size: 2rem; margin: 10px 0 5px; color:#333; } 
     .dash-card p { font-size: 0.8rem; color: #888; font-weight: bold; margin:0; }
     
+    /* [UPGRADE] PC Dashboard Image Card Style */
+    .dash-card.image-card { display: flex; align-items: center; justify-content: center; padding: 10px; min-height: 90px; }
+    
     .status-msg { padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 1.1rem; line-height:1.4; display: none; }
     .status-success { background-color: #0b5f38; color: white; }
     .status-fail { background-color: #e74c3c; color: white; }
@@ -107,41 +110,10 @@
     .item-link:hover { color: #003a6c; text-decoration: underline; }
 
     /* Image Hover Tooltip Styles */
-    #image-tooltip {
-        position: fixed;
-        display: none;
-        width: 150px;
-        background: #fff;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        z-index: 9999;
-        pointer-events: none;
-        overflow: hidden;
-        text-align: center;
-    }
-    #image-tooltip .img-wrapper {
-        width: 150px;
-        height: 150px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #fff;
-    }
-    #image-tooltip .img-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    #image-tooltip .info-wrapper {
-        border-top: 2px solid var(--ikea-blue);
-        background: #f0f8ff;
-        padding: 8px;
-        text-align: left;
-        font-size: 0.75rem;
-        line-height: 1.4;
-        color: #555;
-    }
+    #image-tooltip { position: fixed; display: none; width: 150px; background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 9999; pointer-events: none; overflow: hidden; text-align: center; }
+    #image-tooltip .img-wrapper { width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; background: #fff; }
+    #image-tooltip .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    #image-tooltip .info-wrapper { border-top: 2px solid var(--ikea-blue); background: #f0f8ff; padding: 8px; text-align: left; font-size: 0.75rem; line-height: 1.4; color: #555; }
 
     /* Pivot & Filter */
     .mobile-only-filters { display: none; }
@@ -248,6 +220,7 @@
       .dash-card { padding: 12px 5px; } 
       .dash-card h3 { font-size: 1.4rem; margin: 0 0 5px 0; }
       .dash-card p { font-size: 0.65rem; letter-spacing: -0.3px; }
+      .dash-card.image-card { display: none !important; } /* 모바일 대시보드에선 숨김 (개별 카드에 띄움) */
       
       .pivot-header-area { flex-direction: row; justify-content: space-between; align-items: center; }
       .pivot-header-area h2 { font-size: 1.1rem; margin: 0; white-space: nowrap; }
@@ -295,7 +268,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 8.2.4 Pro Edition</span>
+      <span>Ver 8.3.0 Pro Edition</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -326,7 +299,7 @@
                     <div class="info-title"><i class="fas fa-search"></i> 1. Article Search</div>
                     <div class="info-desc">
                         <p><strong>제품번호를 검색합니다. (쉼표나 띄어쓰기로 여러 개 동시 검색 가능)</strong><br><span class="bi-en">Search multiple item numbers by separating them with spaces or commas.</span></p>
-                        <p style="color:#e74c3c;">만약 제품번호가 잘못됐거나, OIP가 없다면 결과가 나오지 않습니다.<br><span class="bi-en">No results if incorrect item no or no OIP.</span></p>
+                        <p><strong>제품 이미지 다이렉트 확인 (Ver 8.3.0 신규)</strong><br>검색 결과창에서 제품의 이미지가 즉시 표시됩니다. (내부 부품 등 이미지가 없는 경우 화면에서 자동 숨김 처리됩니다.)<br><span class="bi-en">Product images are displayed directly in the search results.</span></p>
                         <hr style="border:0; border-top:1px dashed #ddd; margin:15px 0;">
                         <p><strong>Total</strong> : 총 배송될 계획 (예: 5 = 5개의 배송 계획)<br><span class="bi-en">Means the total number of delivery plans.</span></p>
                         <p><strong>Future Qty</strong> : 가장 가까운 미래에 입고될 수량<br><span class="bi-en">Means the quantity arriving in the nearest future.</span></p>
@@ -396,6 +369,7 @@
         <div id="resultSection" class="result-section">
           <div id="statusBar" class="status-msg"></div>
           <div class="dashboard">
+            <div class="dash-card image-card" id="dashImageCard" style="display:none;"></div>
             <div class="dash-card"><h3 id="totalResults">-</h3><p>TOTAL RESULTS</p></div>
             <div class="dash-card"><h3 id="futureDeliveryQty">0</h3><p>FUTURE QTY</p></div>
             <div class="dash-card"><h3 id="nextDeliveryDate">-</h3><p>NEXT DELIVERY</p></div>
@@ -776,11 +750,9 @@
       return { type:'tbd', dateObj: null, label: `<span class="date-badge tbd">미정</span>` };
     }
 
-    // [FIX 8.2.4] Zero-stripping logic applied for flexible matching
     function searchData(targets){
       const grouped = new Map(); const today = new Date(); today.setHours(0,0,0,0);
       
-      // 검색어에서 의미없는 앞자리 0 제거 (ex: "00602671" -> "602671", "000" -> "0")
       const cleanTargets = targets.map(t => ({
           raw: t,
           cleaned: t.replace(/^0+(?=\d)/, '') 
@@ -788,11 +760,9 @@
 
       data.forEach(row => {
         const itemNo = String(row.itemNo||'').replace(/\s+/g,'').toLowerCase();
-        // 엑셀 데이터에서도 의미없는 앞자리 0 제거
         const cleanItemNo = itemNo.replace(/^0+(?=\d)/, '');
         const cont = String(row.container||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
         
-        // 검색 매칭 조건 (0을 제거한 상태로 매칭하거나, 원본끼리 매칭)
         const isMatch = cleanTargets.some(tObj => {
             return (cleanItemNo && cleanItemNo.includes(tObj.cleaned)) || 
                    (itemNo && itemNo.includes(tObj.raw)) || 
@@ -881,8 +851,11 @@
             const g = grouped[itemNo];
             const i = g.info;
             
+            // [UPGRADE] Mobile Image Container Added
+            const safeId = String(i.itemNo).replace(/[^a-zA-Z0-9]/g, '');
             mobileHtml += `
             <div class="product-summary-card">
+                <div id="mobile-img-${safeId}" style="display:none; text-align:center; margin-bottom:15px; padding-bottom:15px; border-bottom:1px dashed #eee;"></div>
                 <div class="summary-row">
                     <span style="color:#555; font-weight:bold;">Item No</span>
                     <span style="color:var(--ikea-blue); font-weight:bold; font-size:1.1rem;">${i.itemNo}</span>
@@ -920,6 +893,65 @@
         }
         mobileScheduleList.innerHTML = mobileHtml;
       }
+
+      // [UPGRADE] Fetch and Display Images for Search Results
+      const uniqueItems = [...new Set(results.map(r => r.itemNo))];
+      fetchAndDisplaySearchImages(uniqueItems);
+    }
+
+    // [UPGRADE] Function to fetch images silently after search
+    async function fetchAndDisplaySearchImages(itemNos) {
+        const dashImageCard = document.getElementById('dashImageCard');
+        if(dashImageCard) {
+            dashImageCard.style.display = 'none'; // Hide initially
+            dashImageCard.innerHTML = '';
+        }
+        
+        let isFirstImageSet = false;
+
+        for (const itemNo of itemNos) {
+            const safeId = String(itemNo).replace(/[^a-zA-Z0-9]/g, '');
+            const cleanNo = String(itemNo).replace(/[^0-9]/g, '');
+            if(cleanNo.length === 0) continue;
+            const paddedNo = cleanNo.padStart(8, '0');
+
+            let imgUrl = imageCache.get(paddedNo);
+
+            if (!imgUrl) {
+                try {
+                    const res = await fetch(`https://sik.search.blue.cdtapps.com/kr/ko/search-box?q=${paddedNo}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        imgUrl = findBestImage(data) || 'NO_IMAGE';
+                        if(imgUrl !== 'NO_IMAGE') imgUrl = imgUrl.replace(/\\\//g, '/');
+                        imageCache.set(paddedNo, imgUrl);
+                    } else {
+                        imgUrl = 'NO_IMAGE';
+                        imageCache.set(paddedNo, imgUrl);
+                    }
+                } catch (e) {
+                    imgUrl = 'NO_IMAGE';
+                    imageCache.set(paddedNo, imgUrl);
+                }
+            }
+
+            // If a valid image is found, display it!
+            if (imgUrl && imgUrl !== 'NO_IMAGE') {
+                // 1. Update Mobile Card (Always displays if image exists)
+                const mobContainer = document.getElementById(`mobile-img-${safeId}`);
+                if (mobContainer) {
+                    mobContainer.innerHTML = `<img src="${imgUrl}" style="max-width:100%; max-height:180px; object-fit:contain; border-radius:8px;">`;
+                    mobContainer.style.display = 'block';
+                }
+                
+                // 2. Update PC Dashboard (Only displays the FIRST found image to maintain layout if multiple items searched)
+                if (!isFirstImageSet && dashImageCard) {
+                    dashImageCard.innerHTML = `<img src="${imgUrl}" style="max-width:100%; max-height:80px; object-fit:contain;">`;
+                    dashImageCard.style.display = 'flex';
+                    isFirstImageSet = true;
+                }
+            }
+        }
     }
 
     function processPivotData(list, shouldRender = true) {
