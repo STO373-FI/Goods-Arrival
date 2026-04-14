@@ -174,7 +174,7 @@
     #reader { width: 100%; max-width: 500px; background: black; border-radius: 8px; overflow: hidden; }
     .btn-modal { padding: 10px 20px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; background: white; }
 
-    /* [Ver 8.5.0] Market Definition Styles */
+    /* Market Definition Styles */
     .md-loader {
         border: 3px solid #f3f3f3;
         border-radius: 50%;
@@ -291,7 +291,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 8.5.0 Pro Edition</span>
+      <span>Ver 8.5.1 Pro Edition</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -360,8 +360,7 @@
                 <div class="info-text-area">
                     <div class="info-title"><i class="fas fa-book"></i> 3. Market Definition</div>
                     <div class="info-desc">
-                        <p><strong>통합 마켓 정의 검색 (Ver 8.5.0 신규)</strong><br>별도의 사이트 접속 없이 이 툴 내에서 즉시 우편번호 및 주소로 Market Definition(PMA/SMA)을 검색할 수 있습니다.</p>
-                        <p style="font-size: 0.9em; color:#666;">※ 해당 기능은 Github 서버에 'FY26 Market Definition.csv' 파일이 업로드되어 있어야 작동합니다.</p>
+                        <p><strong>통합 마켓 정의 검색 (Ver 8.5.0 신규)</strong><br>별도의 사이트 접속 없이 이 툴 내에서 즉시 우편번호 및 주소로 Market Definition(PMA/SMA)을 검색할 수 있습니다.<br><span class="bi-en">You can instantly search for Market Definitions (PMA/SMA) by zip code or address directly within this tool.</span></p>
                     </div>
                 </div>
             </div>
@@ -582,7 +581,6 @@
   <footer><strong>STO373 Tool</strong> — Automated FI</footer>
 
   <script>
-    // Initialize Lucide Icons for Market Def UI
     if(typeof lucide !== 'undefined') lucide.createIcons();
 
     const GITHUB_OWNER = 'STO373-FI'; 
@@ -604,7 +602,6 @@
     let hoverTimeout = null;
     let currentHoverItem = null;
 
-    // --- Market Def Variables ---
     let mdData = []; 
     let isMdLoaded = false;
     const TARGET_CSV_FILENAME = 'FY26 Market Definition.csv';
@@ -1395,7 +1392,7 @@
 
 
     /* ========================================================
-       [Ver 8.5.0] Market Definition Search Logic (PapaParse, Daum)
+       Market Definition Search Logic (PapaParse, Daum)
        ======================================================== */
 
     const mdLoadingStatus = document.getElementById('md-loading-status');
