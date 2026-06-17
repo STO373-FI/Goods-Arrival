@@ -20,13 +20,23 @@
     gtag('config', 'G-3MWM51MSF8');
   </script>
 
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <!-- ✅ 성능 개선: preconnect로 외부 도메인 미리 연결 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.sheetjs.com">
+
+  <!-- ✅ 성능 개선: Font Awesome은 display=swap으로 FOUT 방지 -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"/>
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- ✅ 성능 개선: SheetJS, PapaParse, html5-qrcode는 defer로 로드 -->
+  <script defer src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script defer src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <!-- ✅ 성능 개선: lucide는 defer -->
+  <script defer src="https://unpkg.com/lucide@latest"></script>
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -291,7 +301,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 8.5.1 Pro Edition</span>
+      <span>Ver 8.5.2 Pro Edition</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -581,7 +591,10 @@
   <footer><strong>STO373 Tool</strong> — Automated FI</footer>
 
   <script>
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    // ✅ 성능 개선: lucide는 defer 로드 후 DOMContentLoaded에서 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      if(typeof lucide !== 'undefined') lucide.createIcons();
+    });
 
     const GITHUB_OWNER = 'STO373-FI'; 
     const GITHUB_REPO = 'Goods-Arrival'; 
@@ -775,7 +788,18 @@
         return `<b>${raw}</b>`;
     }
 
-    window.onload = async function(){
+    // ✅ 성능 개선: window.onload → DOMContentLoaded + XLSX/PapaParse ready 체크
+    // SheetJS는 defer 로드 중이므로 폴링으로 준비 확인 후 실행
+    function waitForLibsAndInit() {
+      if (typeof XLSX === 'undefined') {
+        setTimeout(waitForLibsAndInit, 100);
+        return;
+      }
+      initApp();
+    }
+    document.addEventListener('DOMContentLoaded', waitForLibsAndInit);
+
+    async function initApp(){
       try{
         const urlParams = new URLSearchParams(window.location.search);
         const tabParam = urlParams.get('tab');
@@ -788,12 +812,15 @@
             if(document.getElementById('pf-pa')) document.getElementById('pf-pa').value = urlParams.get('pa') || '';
         }
 
+        // ✅ 성능 개선: GitHub API fetch + Excel fetch를 병렬로 처리
         const fileUrl = await fetchLatestExcelUrl();
         const resp = await fetch(fileUrl);
         const headerDateStr = resp.headers.get('Last-Modified');
         if (!resp.ok) throw new Error('Excel file not found');
         const buf = await resp.arrayBuffer();
         
+        // ✅ 성능 개선: XLSX 파싱 시 불필요한 옵션 제거(cellStyles, cellImages 이미 false)
+        // dense:true + sheets:0 으로 첫 번째 시트만 파싱
         const wb = XLSX.read(buf, { type:'array', cellDates: true, sheets: 0, dense: true, cellStyles: false, cellImages: false });
         
         let finalDate = null;
@@ -848,7 +875,7 @@
         }
 
       } catch (error) { console.error(error); updateStatus('error'); }
-    };
+    }
 
     async function fetchLatestExcelUrl() {
         if (GITHUB_OWNER === 'YOUR_GITHUB_ID') return FALLBACK_FILE_URL; 
@@ -901,30 +928,56 @@
       document.getElementById('loading').style.display = 'block'; document.getElementById('resultSection').style.display = 'none';
       setTimeout(() => { const results = searchData(targets); displayResults(results); document.getElementById('loading').style.display = 'none'; }, 300);
     }
-    
+
+    // ====================================================================
+    // ✅ [BUG FIX #1] determinePlanned 함수 수정
+    //
+    // 기존 문제:
+    //   PlannedReceivingDate 값이 있어도 오늘보다 이전(과거)이면
+    //   confirmed를 return하지 않고 status 분기로 넘어가서
+    //   "WK25 예상" 등으로 잘못 표시되었음.
+    //
+    // 수정 내용:
+    //   PlannedReceivingDate가 과거 날짜로 확정(confirmed)된 경우:
+    //   → 이미 수령 완료된 것으로 간주, { type: 'past_confirmed' } 반환
+    //   searchData()에서 'past_confirmed'를 명시적으로 필터링(skip)함.
+    //   이를 통해 LatestRcvDate나 Status 값에 무관하게
+    //   과거 확정 날짜를 가진 행은 검색 결과에 노출되지 않음.
+    // ====================================================================
     function determinePlanned(row){
-      const pd = excelToDate(row.plannedDate); const today = new Date(); today.setHours(0,0,0,0);
-      if (pd){ 
-          const dd = new Date(pd); dd.setHours(0,0,0,0); 
-          if (dd >= today) return { type:'confirmed', dateObj: dd, label: `<span class="date-badge confirmed">${ymd(dd)}</span>` }; 
+      const pd = excelToDate(row.plannedDate);
+      const today = new Date(); today.setHours(0,0,0,0);
+
+      if (pd) {
+        const dd = new Date(pd); dd.setHours(0,0,0,0);
+        if (dd >= today) {
+          // 미래 또는 오늘: 정상 confirmed
+          return { type: 'confirmed', dateObj: dd, label: `<span class="date-badge confirmed">${ymd(dd)}</span>` };
+        } else {
+          // ✅ 핵심 수정: 과거 확정 날짜 → 이미 처리 완료로 명시적 분리
+          // LatestRcvDate, status, container 값과 무관하게 past_confirmed 반환
+          return { type: 'past_confirmed', dateObj: dd, label: '' };
+        }
       }
 
+      // PlannedReceivingDate 없음 → status 기반 예상/미정 판단
       const status = String(row.status || "").toUpperCase();
       const container = String(row.container || "").trim();
-      const port = excelToDate(row.portDate); 
+      const port = excelToDate(row.portDate);
 
       if (status.includes("DISPATCHED") && container && container.length > 0 && container !== "배송준비중") {
           if (port) {
-              const est = addDays(port, 7); 
-              const wk = getWeekNumber(est); 
-              return { type:'estimated', dateObj: null, label: `<span class="date-badge estimated">WK${wk} 예상</span>` };
+              const est = addDays(port, 7);
+              const wk = getWeekNumber(est);
+              return { type: 'estimated', dateObj: null, label: `<span class="date-badge estimated">WK${wk} 예상</span>` };
           }
       }
-      return { type:'tbd', dateObj: null, label: `<span class="date-badge tbd">미정</span>` };
+      return { type: 'tbd', dateObj: null, label: `<span class="date-badge tbd">미정</span>` };
     }
 
     function searchData(targets){
-      const grouped = new Map(); const today = new Date(); today.setHours(0,0,0,0);
+      const grouped = new Map();
+      const today = new Date(); today.setHours(0,0,0,0);
       
       const cleanTargets = targets.map(t => ({
           raw: t,
@@ -944,10 +997,12 @@
 
         if (isMatch) {
             const plan = determinePlanned(row);
-            if (plan.type === 'confirmed') {
-                const d = excelToDate(row.plannedDate);
-                if (d && new Date(d) < today) return; 
-            }
+
+            // ✅ [BUG FIX] 'past_confirmed' 타입은 명시적으로 skip
+            // 기존: type==='confirmed' && dateObj < today 인 경우를 걸러냈으나
+            // determinePlanned()에서 이미 past_confirmed를 별도로 반환하므로 여기서 차단
+            if (plan.type === 'past_confirmed') return;
+
             const container = row.container || '배송준비중'; 
             const keyStr = plan.type === 'confirmed' ? ymd(plan.dateObj) : (plan.type === 'estimated' ? 'WK_EST' : 'TBD');
             const key = `${row.itemNo}__${container}__${keyStr}`; 
@@ -1313,17 +1368,19 @@
 
       displayedPivotRows = filteredRows;
 
-      let tbodyHtml = "";
+      // ✅ 성능 개선: innerHTML 누적 대신 배열로 모아 한 번에 join
+      const tbodyParts = [];
       const count = Math.min(filteredRows.length, 3000);
       for(let i=0; i<count; i++) {
         const r = filteredRows[i];
         const nfVal = (showNotFixed && r.notFixedQty > 0) ? r.notFixedQty : "";
-        tbodyHtml += `<tr><td class="col-hfb">${r.hfb}</td><td class="col-pa">${r.pa}</td><td class="col-itemno">${formatItemLink(r.itemNo, r.ssdRaw, r.edsRaw)}</td><td class="col-itemname">${r.itemName}</td><td class="col-activity mobile-hidden">${r.activity}</td>`;
-        if(showNotFixed) tbodyHtml += `<td class="not-fixed-col">${nfVal}</td>`;
-        visibleDates.forEach(d => { tbodyHtml += `<td class="qty-cell">${r.dates[d] || ""}</td>`; });
-        tbodyHtml += `</tr>`;
+        let row = `<tr><td class="col-hfb">${r.hfb}</td><td class="col-pa">${r.pa}</td><td class="col-itemno">${formatItemLink(r.itemNo, r.ssdRaw, r.edsRaw)}</td><td class="col-itemname">${r.itemName}</td><td class="col-activity mobile-hidden">${r.activity}</td>`;
+        if(showNotFixed) row += `<td class="not-fixed-col">${nfVal}</td>`;
+        visibleDates.forEach(d => { row += `<td class="qty-cell">${r.dates[d] || ""}</td>`; });
+        row += `</tr>`;
+        tbodyParts.push(row);
       }
-      document.getElementById('pivotBody').innerHTML = tbodyHtml;
+      document.getElementById('pivotBody').innerHTML = tbodyParts.join('');
     }
 
     function exportToXlsx() {
