@@ -291,7 +291,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span>Ver 8.5.1 Pro Edition</span>
+      <span>Ver 8.5.3 Pro Edition</span>
       <div id="data-update-date" style="color:var(--ikea-yellow); font-weight:500;">data update : -</div>
     </div>
   </header>
@@ -583,8 +583,8 @@
   <script>
     if(typeof lucide !== 'undefined') lucide.createIcons();
 
-    const GITHUB_OWNER = 'STO373-FI'; 
-    const GITHUB_REPO = 'Goods-Arrival'; 
+    const GITHUB_OWNER = 'ingka-group-digital'; 
+    const GITHUB_REPO = 'STO373_goods_arrival'; 
     const FALLBACK_FILE_URL = './STO373 Goods arrival plan.xlsx'; 
 
     let rawRows = []; let data = []; let html5QrcodeScanner = null;
@@ -902,17 +902,23 @@
       setTimeout(() => { const results = searchData(targets); displayResults(results); document.getElementById('loading').style.display = 'none'; }, 300);
     }
     
+    // [버그 수정] 날짜 판별 로직 수정 (과거 데이터 명시적 반환)
     function determinePlanned(row){
-      const pd = excelToDate(row.plannedDate); const today = new Date(); today.setHours(0,0,0,0);
+      const pd = excelToDate(row.plannedDate); 
+      const today = new Date(); today.setHours(0,0,0,0);
+      
       if (pd){ 
           const dd = new Date(pd); dd.setHours(0,0,0,0); 
-          if (dd >= today) return { type:'confirmed', dateObj: dd, label: `<span class="date-badge confirmed">${ymd(dd)}</span>` }; 
+          // Planned Date가 오늘보다 과거면 바로 'past' 반환
+          if (dd < today) return { type: 'past', dateObj: dd }; 
+          return { type:'confirmed', dateObj: dd, label: `<span class="date-badge confirmed">${ymd(dd)}</span>` }; 
       }
 
       const status = String(row.status || "").toUpperCase();
       const container = String(row.container || "").trim();
       const port = excelToDate(row.portDate); 
 
+      // 과거 데이터가 아니면서(pd없음) DISPATCHED 상태인 경우만 예상일 연산
       if (status.includes("DISPATCHED") && container && container.length > 0 && container !== "배송준비중") {
           if (port) {
               const est = addDays(port, 7); 
@@ -944,10 +950,10 @@
 
         if (isMatch) {
             const plan = determinePlanned(row);
-            if (plan.type === 'confirmed') {
-                const d = excelToDate(row.plannedDate);
-                if (d && new Date(d) < today) return; 
-            }
+            
+            // [버그 수정] Planned Date가 과거(past)면 이미 입고 완료된 것이므로 검색 결과에서 즉시 제외
+            if (plan.type === 'past') return; 
+            
             const container = row.container || '배송준비중'; 
             const keyStr = plan.type === 'confirmed' ? ymd(plan.dateObj) : (plan.type === 'estimated' ? 'WK_EST' : 'TBD');
             const key = `${row.itemNo}__${container}__${keyStr}`; 
